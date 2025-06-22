@@ -1,4 +1,3 @@
-```
 Copyright © 2025 Shuv1Wolf
 
 All rights reserved.
@@ -9,4 +8,3 @@ The Software is provided "AS IS", without warranty of any kind, express or impli
 
 For licensing inquiries, commercial use, or other questions, please contact:
 shuv1wolf@gmail.com
-```
