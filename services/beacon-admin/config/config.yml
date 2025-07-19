@@ -14,6 +14,12 @@
 # Performance counters that post values to log
 - descriptor: "pip-services:counters:log:default:1.0"
 
+{{#unless POSTGRES_ENABLED}}
+# Memory persistence
+- descriptor: "beacon-admin:persistence:memory:default:1.0"
+{{/unless}}
+
+{{#if POSTGRES_ENABLED}}
 # PostgreSQL persistence
 - descriptor: "beacon-admin:persistence:postgres:default:1.0"
   connection:
@@ -24,6 +30,7 @@
   credential:
     username: {{POSTGRES_USER}}{{#unless POSTGRES_USER}}"postgres"{{/unless}}
     password: {{POSTGRES_PASSWORD}}{{#unless POSTGRES_PASSWORD}}"postgres"{{/unless}}
+{{/if}}
 
 # Service
 - descriptor: "beacon-admin:service:default:default:1.0"

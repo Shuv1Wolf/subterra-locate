@@ -2,10 +2,7 @@ module github.com/Shuv1Wolf/subterra-locate/services/beacon-admin
 
 go 1.24.4
 
-replace github.com/Shuv1Wolf/subterra-locate/services/common/protos => ../common/protos
-
 require (
-	github.com/Shuv1Wolf/subterra-locate/services/common/protos v0.0.0-00010101000000-000000000000
 	github.com/pip-services4/pip-services4-go/pip-services4-commons-go v0.0.1-2
 	github.com/pip-services4/pip-services4-go/pip-services4-components-go v0.0.1-2
 	github.com/pip-services4/pip-services4-go/pip-services4-container-go v0.0.1-3

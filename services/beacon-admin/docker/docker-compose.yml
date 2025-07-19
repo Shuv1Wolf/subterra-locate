@@ -8,7 +8,6 @@ services:
       - "10010:10010"  
     depends_on:
       - postgres
-      
     environment:
       - GRPC_PORT=10010
       - POSTGRES_HOST=postgres

@@ -7,12 +7,12 @@ services:
       dockerfile: docker/Dockerfile.test
     image: ${IMAGE:-test}
     depends_on:
-      - mongo
+      - postgres
     environment:
-      - POSTGRES_SERVICE_HOST=postgres
-      - POSTGRES_SERVICE_PORT=5432
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
       - POSTGRES_USER=postgres
-      - POSTGRES_PASS=postgres
+      - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=test
 
   postgres:

@@ -37,7 +37,7 @@ func newBeaconsPostgresPersistenceTest() *BeaconsPostgresPersistenceTest {
 	}
 	postgresPassword := os.Getenv("POSTGRES_PASSWORD")
 	if postgresPassword == "" {
-		postgresPassword = "test"
+		postgresPassword = "postgres"
 	}
 
 	if postgresUri == "" && postgresHost == "" {
@@ -51,7 +51,7 @@ func newBeaconsPostgresPersistenceTest() *BeaconsPostgresPersistenceTest {
 		"connection.database", postgresDatabase,
 		"credential.username", postgresUser,
 		"credential.password", postgresPassword,
-		"schema", "test_schema",
+		"schema", "public",
 	)
 
 	persistence := persistence.NewBeaconsPostgresPersistence()
