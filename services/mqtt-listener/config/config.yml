@@ -1,0 +1,28 @@
+---
+# Container descriptor
+- descriptor: "pip-services:context-info:default:default:1.0"
+  name: "service-mqtt-listener"
+  description: "MQTT listener service"
+
+# Console logger
+- descriptor: "pip-services:logger:console:default:1.0"
+  level: "trace"
+
+# Performance log counters
+- descriptor: "pip-services:counters:log:default:1.0"
+
+# MQTT message bus
+- descriptor: "mqtt-listener:messagebus:mqtt:default:1.0"
+  connection:
+    uri:  {{MQTT_SERVICE_URI}}
+    host: {{MQTT_SERVICE_HOST}}{{#unless MQTT_SERVICE_HOST}}"localhost"{{/unless}}
+    port: {{MQTT_SERVICE_PORT}}{{#unless MQTT_SERVICE_PORT}}1883{{/unless}}
+  credential:
+    username: {{MQTT_USER}}
+    password: {{MQTT_PASS}}
+  options:
+    autosubscribe: true
+
+# Service
+- descriptor: "mqtt-listener:service:default:default:1.0"
+
