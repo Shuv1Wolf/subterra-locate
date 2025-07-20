@@ -30,7 +30,8 @@ func (c *BeaconsPostgresPersistence) DefineSchema() {
 		"\"x\" FLOAT, " +
 		"\"y\" FLOAT, " +
 		"\"z\" FLOAT, " +
-		"\"site_id\" VARCHAR(32))")
+		"\"site_id\" VARCHAR(32), " +
+		"\"enabled\" BOOLEAN)")
 	c.EnsureIndex(c.TableName+"_type", map[string]string{"type": "1"}, nil)
 	c.EnsureIndex(c.TableName+"_udi", map[string]string{"udi": "1"}, nil)
 }

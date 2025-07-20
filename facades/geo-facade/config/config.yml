@@ -1,0 +1,41 @@
+---
+# Container info
+- descriptor: "pip-services:container-info:default:default:*"
+  name: "geo-facades"
+  description: "Geo-facades microservice"
+
+# Console logger
+- descriptor: "pip-services:logger:console:default:*"
+  level: trace
+
+# Log counters
+- descriptor: "pip-services:counters:log:default:*"
+
+# Beacon-admin client
+{{^MOCK}}
+- descriptor: "beacon-admin:client:grpc:default:1.0"
+  connection:
+    protocol: "http"
+    host: {{BEACON_ADMIN_SERVICE_HOST}}{{^BEACON_ADMIN_SERVICE_HOST}}"localhost"{{/BEACON_ADMIN_SERVICE_HOST}}
+    port: {{BEACON_ADMIN_SERVICE_PORT}}{{^BEACON_ADMIN_SERVICE_PORT}}10010{{/BEACON_ADMIN_SERVICE_PORT}}
+{{/MOCK}}
+{{#if MOCK}}
+- descriptor: "beacon-admin:client:mock:default:1.0"
+{{/if}}
+
+# Main facade service
+- descriptor: "pip-services:endpoint:http:default:*"
+  root_path: ""
+  connection:
+    protocol: "http"
+    host: "0.0.0.0"
+    port: 8081
+
+# Facade API V1
+- descriptor: "geo-facade:controller:http:default:1.0"
+
+# Hearbeat service
+- descriptor: "pip-services:heartbeat-controller:http:default:1.0"
+
+# Status service
+- descriptor: "pip-services:status-controller:http:default:1.0"

@@ -44,8 +44,8 @@ func newBeaconsHttpClientV1Test() *beaconsCommandableHttpClientV1Test {
 	references := cref.NewReferencesFromTuples(ctx,
 		cref.NewDescriptor("beacon-admin", "persistence", "memory", "default", "1.0"), persistence,
 		cref.NewDescriptor("beacon-admin", "service", "default", "default", "1.0"), service,
-		cref.NewDescriptor("beacon-admin", "controller", "http", "default", "1.0"), controller,
-		cref.NewDescriptor("beacon-admin", "client", "http", "default", "1.0"), client,
+		cref.NewDescriptor("beacon-admin", "controller", "grpc", "default", "1.0"), controller,
+		cref.NewDescriptor("beacon-admin", "client", "grpc", "default", "1.0"), client,
 	)
 	service.SetReferences(ctx, references)
 	controller.SetReferences(ctx, references)
