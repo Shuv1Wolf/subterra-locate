@@ -1,6 +1,6 @@
 {
-    "name":  "beacon-admin",
-    "type": "services",
+    "name":  "geo-facade",
+    "type": "facades",
     "language": "go",
     "version": "1.0.0",
     "build": 0

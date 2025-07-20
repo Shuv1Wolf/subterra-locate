@@ -1,6 +1,6 @@
 {
     "name":  "beacon-admin",
-    "type": "services",
+    "type": "clients",
     "language": "go",
     "version": "1.0.0",
     "build": 0
