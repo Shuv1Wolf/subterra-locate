@@ -11,8 +11,9 @@
 # Performance log counters
 - descriptor: "pip-services:counters:log:default:1.0"
 
-# MQTT message bus
-- descriptor: "mqtt-listener:messagebus:mqtt:default:1.0"
+# MQTT ble-rssi listener
+- descriptor: "mqtt-listener:listener:mqtt:ble-rssi:1.0"
+  topic: "/ble/rssi"
   connection:
     uri:  {{MQTT_SERVICE_URI}}
     host: {{MQTT_SERVICE_HOST}}{{#unless MQTT_SERVICE_HOST}}"localhost"{{/unless}}

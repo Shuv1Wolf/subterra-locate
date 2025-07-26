@@ -1,4 +1,4 @@
-package messagebus
+package listener
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	cqueues "github.com/pip-services4/pip-services4-go/pip-services4-messaging-go/queues"
 )
 
-type IMessageBus interface {
+type IMqttListener interface {
 	Listen(ctx context.Context, receiver cqueues.IMessageReceiver) error
 	EndListen(ctx context.Context)
 }

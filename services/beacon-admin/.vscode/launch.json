@@ -15,7 +15,7 @@
             ],
             "env": {
                 "POSTGRES_SERVICE_PORT": "5431",
-                "POSTGRES_DB": "postgres"
+                "POSTGRES_ENABLED": "true"
             }
         }
     ]

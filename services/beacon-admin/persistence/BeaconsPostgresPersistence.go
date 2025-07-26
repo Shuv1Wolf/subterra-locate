@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	data "github.com/Shuv1Wolf/subterra-locate/services/beacon-admin/data/version1"
@@ -22,6 +23,8 @@ func NewBeaconsPostgresPersistence() *BeaconsPostgresPersistence {
 
 func (c *BeaconsPostgresPersistence) DefineSchema() {
 	c.ClearSchema()
+	c.EnsureSchema("CREATE SEQUENCE IF NOT EXISTS beacon_id_seq START 100")
+
 	c.EnsureSchema("CREATE TABLE " + c.QuotedTableName() + " (" +
 		"\"id\" VARCHAR(32) PRIMARY KEY, " +
 		"\"type\" VARCHAR(15), " +
@@ -32,6 +35,7 @@ func (c *BeaconsPostgresPersistence) DefineSchema() {
 		"\"z\" FLOAT, " +
 		"\"site_id\" VARCHAR(32), " +
 		"\"enabled\" BOOLEAN)")
+
 	c.EnsureIndex(c.TableName+"_type", map[string]string{"type": "1"}, nil)
 	c.EnsureIndex(c.TableName+"_udi", map[string]string{"udi": "1"}, nil)
 }
@@ -63,6 +67,19 @@ func (c *BeaconsPostgresPersistence) composeFilter(filter cquery.FilterParams) s
 	} else {
 		return ""
 	}
+}
+
+func (c *BeaconsPostgresPersistence) Create(ctx context.Context, item data.BeaconV1) (data.BeaconV1, error) {
+	if item.Id == "" {
+		var nextId int64
+		row := c.Client.QueryRow(ctx, "SELECT nextval('beacon_id_seq')")
+		if err := row.Scan(&nextId); err != nil {
+			return item, err
+		}
+		item.Id = fmt.Sprintf("beacon$%d", nextId)
+	}
+
+	return c.IdentifiablePostgresPersistence.Create(ctx, item)
 }
 
 func (c *BeaconsPostgresPersistence) GetPageByFilter(ctx context.Context, filter cquery.FilterParams, paging cquery.PagingParams) (cquery.DataPage[data.BeaconV1], error) {

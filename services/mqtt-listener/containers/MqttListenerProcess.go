@@ -12,6 +12,7 @@ type MqttListenerProcess struct {
 func NewMqttListenerProcess() *MqttListenerProcess {
 	c := MqttListenerProcess{}
 	c.ProcessContainer = cproc.NewProcessContainer("service-mqtt-listener", "MQTT listener service")
+	
 	c.AddFactory(build.NewMqttListenerServiceFactory())
 
 	return &c

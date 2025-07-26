@@ -40,7 +40,7 @@
   connection:
     protocol: http
     host: 0.0.0.0
-    port: {{GRPC_PORT}}{{#unless GRPC_PORT}}10010{{/unless}}
+    port: {{BEACON_ADMIN_PORT}}{{#unless BEACON_ADMIN_PORT}}10010{{/unless}}
 
 # Commandable GRPC V1
 - descriptor: "beacon-admin:controller:grpc:default:1.0"

@@ -1,0 +1,77 @@
+version: '3.7'
+
+services:
+  redis:
+    image: 'redis:7.2.3'
+    container_name: sl-redis
+    environment:
+      - REDIS_PASSWORD=admin
+    ports: 
+      - "6379:6379"
+    networks:
+      - subterra-locate  
+  
+  nats:
+    image: 'nats:2.10.16'
+    container_name: sl-nats
+    ports:
+      - "4222:4222"
+      - "8222:8222" 
+    networks:
+      - subterra-locate  
+  nats-box:
+    image: synadia/nats-box:latest
+    container_name: sl-nats-box
+    stdin_open: true
+    tty: true
+    environment:
+      - LC_ALL=C.UTF-8
+    networks:
+      - subterra-locate  
+
+  postgres:
+    image: timescale/timescaledb:2.12.2-pg15
+    container_name: sl-postgres-timescaledb
+    environment:
+      - POSTGRES_DB=subterra-locate
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5431:5432" 
+    networks:
+      - subterra-locate  
+
+  pgadmin:
+    container_name: sl-pgadmin
+    image: dpage/pgadmin4:7.2
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "postgres@postgres.postgres"
+      PGADMIN_DEFAULT_PASSWORD: "postgres"
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "5050:80"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+    networks:
+      - subterra-locate
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: sl-mqtt-server
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    ports:
+      - "1883:1883"   
+    restart: unless-stopped
+    networks:
+      - subterra-locate
+
+networks:
+  subterra-locate:
+    driver: bridge

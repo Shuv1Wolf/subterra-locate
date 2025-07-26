@@ -8,7 +8,6 @@ import (
 
 	cconf "github.com/pip-services4/pip-services4-go/pip-services4-components-go/config"
 	cref "github.com/pip-services4/pip-services4-go/pip-services4-components-go/refer"
-	cdata "github.com/pip-services4/pip-services4-go/pip-services4-data-go/keys"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
 	ccmd "github.com/pip-services4/pip-services4-go/pip-services4-rpc-go/commands"
 )
@@ -65,10 +64,6 @@ func (c *BeaconsService) GetBeaconByUdi(ctx context.Context,
 
 func (c *BeaconsService) CreateBeacon(ctx context.Context,
 	beacon data.BeaconV1) (data.BeaconV1, error) {
-
-	if beacon.Id == "" {
-		beacon.Id = cdata.IdGenerator.NextLong()
-	}
 
 	if beacon.Type == "" {
 		beacon.Type = data.Unknown
