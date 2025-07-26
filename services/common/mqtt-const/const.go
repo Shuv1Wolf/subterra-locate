@@ -1,5 +1,5 @@
 package mqttconst
 
 const (
-	MQTT_BEACON_TOPIC = "/beacons/office"
+	MQTT_BLE_RSSI_TOPIC = "ble/rssi"
 )

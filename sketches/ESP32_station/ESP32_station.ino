@@ -162,7 +162,7 @@ void loop() {
   
   payloadString.getBytes(message_char_buffer, payloadString.length()+1);
   // TODO: credentials
-  result = client.publish("/beacons/office", message_char_buffer, payloadString.length(), false);
+  result = client.publish("/ble/rssi", message_char_buffer, payloadString.length(), false);
   Serial.print("PUB Result: ");
   Serial.println(result);
   
