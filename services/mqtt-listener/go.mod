@@ -2,8 +2,10 @@ module github.com/Shuv1Wolf/subterra-locate/services/mqtt-listener
 
 go 1.24.4
 
+replace github.com/Shuv1Wolf/subterra-locate/services/common => ../common
+
 require (
-	github.com/Shuv1Wolf/subterra-locate/services/common v1.2.0
+	github.com/Shuv1Wolf/subterra-locate/services/common v0.0.0-00010101000000-000000000000
 	github.com/pip-services4/pip-services4-go/pip-services4-components-go v0.0.1-2
 	github.com/pip-services4/pip-services4-go/pip-services4-container-go v0.0.1-3
 	github.com/pip-services4/pip-services4-go/pip-services4-messaging-go v0.0.3-6

@@ -1,79 +1,106 @@
-#include <sys/time.h>
-#include "BLEDevice.h"
-#include "BLEUtils.h"
-#include "BLEAdvertising.h"
-#include "BLEBeacon.h"
-#include "esp_sleep.h"
+#include <Arduino.h>
+#include <BLEDevice.h>
+#include <BLEAdvertising.h>
+#include <BLEBeacon.h>
 
-#define GPIO_DEEP_SLEEP_DURATION 3  // sleep duration in seconds
-#define BEACON_UUID "0fe366e2-80a7-40fd-adee-89387f69a43d"
+#define BEACON_NAME        "beacon$102"
+#define BEACON_UUID        "2D7A9F0C-E0E8-4CC9-A71B-A21DB2D034A1"
+#define BEACON_MAJOR       1
+#define BEACON_MINOR       102
+#define BEACON_TXPOWER     0xC5
+#define APPLE_MANUFACTURER_ID 0x4C00
+#define SERVICE_UUID_16    0xFFF0
 
-RTC_DATA_ATTR static time_t lastBootTime = 0;         // Time of last boot (stored in RTC memory)
-RTC_DATA_ATTR static uint32_t bootCount = 0;          // Boot counter (stored in RTC memory)
+// Строковый ID
+const char* BEACON_ID_STR = "beacon$102";
 
-BLEAdvertising* pAdvertising;
-struct timeval now;
+#define ADV_INTERVAL_MS    250
+#define REFRESH_MS         3000
 
-// ────── Setup BLE Beacon ──────
-void setBeacon() {
-  BLEBeacon oBeacon;
-  oBeacon.setManufacturerId(0x4C00); // Apple iBeacon ID
-  oBeacon.setProximityUUID(BLEUUID(BEACON_UUID));
-  oBeacon.setMajor((bootCount & 0xFFFF0000) >> 16);
-  oBeacon.setMinor(bootCount & 0xFFFF);
+BLEAdvertising* adv = nullptr;
+
+static std::string buildServiceData() {
+  uint8_t ver = 1;
+  uint8_t id_len = strlen(BEACON_ID_STR);
+  uint8_t txp = (uint8_t)BEACON_TXPOWER;
+
+  std::string sd;
+  sd.reserve(1 + 1 + id_len + 1);
+
+  sd.push_back(ver);
+  sd.push_back(id_len);
+  sd.append(BEACON_ID_STR, id_len);
+  sd.push_back(txp);
+
+  return sd;
+}
+
+static void setupAdvertising() {
+  BLEDevice::init(BEACON_NAME);
+  BLEDevice::setPower(ESP_PWR_LVL_N0);
+
+  BLEServer* server = BLEDevice::createServer(); (void)server;
+
+  BLEBeacon ib;
+  ib.setManufacturerId(APPLE_MANUFACTURER_ID);
+  ib.setProximityUUID(BLEUUID(BEACON_UUID));
+  ib.setMajor(BEACON_MAJOR);
+  ib.setMinor(BEACON_MINOR);
+  ib.setSignalPower((int8_t)BEACON_TXPOWER);
 
   BLEAdvertisementData advData;
-  BLEAdvertisementData scanRespData;
-  advData.setFlags(0x04); // BR/EDR not supported
+  BLEAdvertisementData scanData;
 
-  String serviceData = "";
-  serviceData += (char)0x1A; // Length
-  serviceData += (char)0xFF; // Type
-  serviceData += oBeacon.getData().c_str();  
+  advData.setFlags(ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT);
+  advData.setManufacturerData(ib.getData());
 
-  advData.addData(std::string(serviceData.c_str()));  
-  pAdvertising = BLEDevice::getAdvertising();
-  pAdvertising->setAdvertisementData(advData);
-  pAdvertising->setScanResponseData(scanRespData);
-}
+  scanData.setName(BEACON_NAME);
+  scanData.setServiceData(BLEUUID((uint16_t)SERVICE_UUID_16), buildServiceData());
 
-// ────── Print boot/log info ──────
-void printBootInfo() {
-  gettimeofday(&now, NULL);
-  Serial.printf("Boot #%d\n", bootCount++);
-  Serial.printf("Time since last boot: %ld s\n", now.tv_sec - lastBootTime);
-  lastBootTime = now.tv_sec;
-}
+  adv = BLEDevice::getAdvertising();
+  adv->setAdvertisementData(advData);
+  adv->setScanResponseData(scanData);
+  adv->setAdvertisementType(ADV_TYPE_SCAN_IND);
 
-// ────── Enter deep sleep ──────
-void goToDeepSleep() {
-  Serial.println("Entering deep sleep...");
-  esp_sleep_enable_timer_wakeup(GPIO_DEEP_SLEEP_DURATION * 1000000ULL);
-  esp_deep_sleep_start();
+  uint16_t intervalUnits = (uint16_t)(ADV_INTERVAL_MS / 0.625);
+  adv->setMinInterval(intervalUnits);
+  adv->setMaxInterval(intervalUnits);
+
+  adv->start();
+  Serial.println("Beacon with string ID started");
 }
 
 void setup() {
   Serial.begin(115200);
   delay(100);
-
-  printBootInfo();
-
-  // Init BLE device
-  BLEDevice::init("ESP32 iBeacon");
-
-  // Set up Beacon advertisement
-  setBeacon();
-
-  if (pAdvertising) {
-    pAdvertising->start();
-    Serial.println("Advertising started...");
-    delay(100);
-    pAdvertising->stop();
-  }
-
-  goToDeepSleep(); // Will never return from here
+  setupAdvertising();
 }
 
 void loop() {
-  // Empty. All logic is in setup(), and device sleeps after advertisement.
+  static uint32_t last = 0;
+  if (millis() - last > REFRESH_MS) {
+    last = millis();
+
+    BLEAdvertisementData advData;
+    BLEAdvertisementData scanData;
+
+    BLEBeacon ib;
+    ib.setManufacturerId(APPLE_MANUFACTURER_ID);
+    ib.setProximityUUID(BLEUUID(BEACON_UUID));
+    ib.setMajor(BEACON_MAJOR);
+    ib.setMinor(BEACON_MINOR);
+    ib.setSignalPower((int8_t)BEACON_TXPOWER);
+
+    advData.setFlags(ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT);
+    advData.setManufacturerData(ib.getData());
+
+    scanData.setName(BEACON_NAME);
+    scanData.setServiceData(BLEUUID((uint16_t)SERVICE_UUID_16), buildServiceData());
+
+    adv->stop();
+    adv->setAdvertisementData(advData);
+    adv->setScanResponseData(scanData);
+    adv->start();
+  }
+  delay(10);
 }
