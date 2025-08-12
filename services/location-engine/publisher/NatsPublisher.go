@@ -1,4 +1,4 @@
-package messagebus
+package publisher
 
 import (
 	"context"
@@ -13,17 +13,17 @@ import (
 	nqueues "github.com/pip-services4/pip-services4-go/pip-services4-nats-go/queues"
 )
 
-type NatsMessageBus struct {
+type NatsPublisher struct {
 	*nqueues.NatsMessageQueue
 }
 
-func NewNatsMessageBus() *NatsMessageBus {
-	c := &NatsMessageBus{}
+func NewNatsPublisher() *NatsPublisher {
+	c := &NatsPublisher{}
 	c.NatsMessageQueue = nqueues.NewNatsMessageQueue("")
 	return c
 }
 
-func (c *NatsMessageBus) SendRawBle(ctx context.Context, event *natsEvents.BLEBeaconRawEventV1) error {
+func (c *NatsPublisher) SendHistoryBle(ctx context.Context, event *natsEvents.BLEBeaconHistoryEventV1) error {
 	bytes, err := json.Marshal(event)
 	if err != nil {
 		c.Logger.Error(ctx, err, "Failed to serialize message")
@@ -34,7 +34,7 @@ func (c *NatsMessageBus) SendRawBle(ctx context.Context, event *natsEvents.BLEBe
 		MessageId:   keys.IdGenerator.NextShort(),
 		SentTime:    time.Now(),
 		TraceId:     cctx.GetTraceId(ctx),
-		MessageType: natsConst.NATS_LOC_RAW_BLE_TOPIC,
+		MessageType: natsConst.NATS_LOC_HISTORY_BLE_TOPIC,
 		Message:     bytes,
 	}
 

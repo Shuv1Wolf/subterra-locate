@@ -13,13 +13,13 @@ import (
 	natsEvents "github.com/Shuv1Wolf/subterra-locate/services/common/nats/events"
 
 	"github.com/Shuv1Wolf/subterra-locate/services/mqtt-listener/listener"
-	"github.com/Shuv1Wolf/subterra-locate/services/mqtt-listener/messagebus"
+	"github.com/Shuv1Wolf/subterra-locate/services/mqtt-listener/publisher"
 )
 
 type MqttListenerService struct {
 	Logger          *clog.CompositeLogger
 	bleRssiListener listener.IMqttListener
-	natsPublisher   messagebus.IMessageBus
+	natsPublisher   publisher.IPublisher
 	isOpen          bool
 }
 
@@ -50,7 +50,7 @@ func (c *MqttListenerService) SetReferences(ctx context.Context, references cref
 	if err != nil {
 		panic(err)
 	}
-	c.natsPublisher = res.(messagebus.IMessageBus)
+	c.natsPublisher = res.(publisher.IPublisher)
 }
 
 func (c *MqttListenerService) Open(ctx context.Context) error {

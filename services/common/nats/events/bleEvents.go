@@ -12,3 +12,6 @@ type BLEBeaconRawV1 struct {
 	Rssi    int    `json:"r"`   // dBm
 	Txpower int    `json:"txp"` // transmit power
 }
+
+type BLEBeaconHistoryEventV1 struct {
+}

@@ -1,4 +1,4 @@
-package messagebus
+package publisher
 
 import (
 	"context"
@@ -6,6 +6,6 @@ import (
 	nats "github.com/Shuv1Wolf/subterra-locate/services/common/nats/events"
 )
 
-type IMessageBus interface {
+type IPublisher interface {
 	SendRawBle(ctx context.Context, event *nats.BLEBeaconRawEventV1) error
 }

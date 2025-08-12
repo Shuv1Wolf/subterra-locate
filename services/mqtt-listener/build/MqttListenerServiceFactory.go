@@ -2,7 +2,7 @@ package build
 
 import (
 	"github.com/Shuv1Wolf/subterra-locate/services/mqtt-listener/listener"
-	"github.com/Shuv1Wolf/subterra-locate/services/mqtt-listener/messagebus"
+	"github.com/Shuv1Wolf/subterra-locate/services/mqtt-listener/publisher"
 	"github.com/Shuv1Wolf/subterra-locate/services/mqtt-listener/service"
 	cbuild "github.com/pip-services4/pip-services4-go/pip-services4-components-go/build"
 	cref "github.com/pip-services4/pip-services4-go/pip-services4-components-go/refer"
@@ -22,7 +22,7 @@ func NewMqttListenerServiceFactory() *MqttListenerServiceFactory {
 
 	c.RegisterType(mqttBleRssiListenerDescriptor, listener.NewMqttListener)
 	c.RegisterType(serviceDescriptor, service.NewMqttListenerService)
-	c.RegisterType(natsBleRawPublisherDescriptor, messagebus.NewNatsMessageBus)
+	c.RegisterType(natsBleRawPublisherDescriptor, publisher.NewNatsPublisher)
 
 	return &c
 }
