@@ -2,21 +2,24 @@ package service
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 
 	cconf "github.com/pip-services4/pip-services4-go/pip-services4-components-go/config"
 	cref "github.com/pip-services4/pip-services4-go/pip-services4-components-go/refer"
 	cqueues "github.com/pip-services4/pip-services4-go/pip-services4-messaging-go/queues"
 	clog "github.com/pip-services4/pip-services4-go/pip-services4-observability-go/log"
 
-	mqttconst "github.com/Shuv1Wolf/subterra-locate/services/common/mqtt-const"
+	mqtt "github.com/Shuv1Wolf/subterra-locate/services/common/mqtt"
+	natsEvents "github.com/Shuv1Wolf/subterra-locate/services/common/nats/events"
 
 	"github.com/Shuv1Wolf/subterra-locate/services/mqtt-listener/listener"
+	"github.com/Shuv1Wolf/subterra-locate/services/mqtt-listener/messagebus"
 )
 
 type MqttListenerService struct {
 	Logger          *clog.CompositeLogger
 	bleRssiListener listener.IMqttListener
+	natsPublisher   messagebus.IMessageBus
 	isOpen          bool
 }
 
@@ -34,13 +37,20 @@ func (c *MqttListenerService) SetReferences(ctx context.Context, references cref
 	c.Logger.SetReferences(ctx, references)
 
 	res, err := references.GetOneRequired(
-		cref.NewDescriptor("mqtt-listener", "listener", "*", "ble-rssi", "1.0"),
+		cref.NewDescriptor("mqtt-listener", "listener", "mqtt", "ble-rssi", "1.0"),
 	)
 	if err != nil {
 		panic(err)
 	}
 	c.bleRssiListener = res.(listener.IMqttListener)
 
+	res, err = references.GetOneRequired(
+		cref.NewDescriptor("mqtt-listener", "publisher", "nats", "loc-raw-ble", "1.0"),
+	)
+	if err != nil {
+		panic(err)
+	}
+	c.natsPublisher = res.(messagebus.IMessageBus)
 }
 
 func (c *MqttListenerService) Open(ctx context.Context) error {
@@ -76,9 +86,19 @@ func (c *MqttListenerService) startMessageListener(ctx context.Context) {
 
 func (c *MqttListenerService) ReceiveMessage(ctx context.Context, envelope *cqueues.MessageEnvelope, queue cqueues.IMessageQueue) error {
 	switch envelope.MessageType {
-	case mqttconst.MQTT_BLE_RSSI_TOPIC:
-		// TODO: Handle beacon
-		fmt.Println(envelope.GetMessageAsString())
+	case mqtt.MQTT_BLE_RSSI_TOPIC:
+		var event natsEvents.BLEBeaconRawEventV1
+		err := json.Unmarshal([]byte(envelope.GetMessageAsString()), &event)
+		if err != nil {
+			c.Logger.Error(ctx, err, "Failed to deserialize message")
+		}
+
+		err = c.natsPublisher.SendRawBle(ctx, &event)
+		if err != nil {
+			c.Logger.Error(ctx, err, "Failed to send message")
+		}
+		c.Logger.Debug(ctx, "Message sent: "+envelope.MessageType)
+
 	default:
 		c.Logger.Debug(ctx, "Unknown message type: "+envelope.MessageType)
 	}
