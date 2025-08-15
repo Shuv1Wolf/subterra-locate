@@ -19,6 +19,7 @@ services:
       - "8222:8222" 
     networks:
       - subterra-locate  
+
   nats-box:
     image: synadia/nats-box:latest
     container_name: sl-nats-box
@@ -65,7 +66,6 @@ services:
     volumes:
       - ./mosquitto/config:/mosquitto/config
       - ./mosquitto/data:/mosquitto/data
-      - ./mosquitto/log:/mosquitto/log
     ports:
       - "1883:1883"   
     restart: unless-stopped

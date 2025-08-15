@@ -5,22 +5,23 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/nats-io/nats.go"
 	cconf "github.com/pip-services4/pip-services4-go/pip-services4-components-go/config"
 	cref "github.com/pip-services4/pip-services4-go/pip-services4-components-go/refer"
 	cqueues "github.com/pip-services4/pip-services4-go/pip-services4-messaging-go/queues"
 	clog "github.com/pip-services4/pip-services4-go/pip-services4-observability-go/log"
 
-	natsConst "github.com/Shuv1Wolf/subterra-locate/services/common/nats"
+	natsConst "github.com/Shuv1Wolf/subterra-locate/services/common/nats/const"
 	natsEvents "github.com/Shuv1Wolf/subterra-locate/services/common/nats/events"
 	"github.com/Shuv1Wolf/subterra-locate/services/location-engine/listener"
 	"github.com/Shuv1Wolf/subterra-locate/services/location-engine/publisher"
 )
 
 type LocationEngineService struct {
-	Logger             *clog.CompositeLogger
-	rawBleListener     listener.IListener
-	hisoryBlePublisher publisher.IPublisher
-	isOpen             bool
+	Logger         *clog.CompositeLogger
+	rawBleListener listener.IListener
+	publisher      publisher.IPublisher
+	isOpen         bool
 	// TODO: beacon cache
 }
 
@@ -38,7 +39,7 @@ func (c *LocationEngineService) SetReferences(ctx context.Context, references cr
 	c.Logger.SetReferences(ctx, references)
 
 	res, err := references.GetOneRequired(
-		cref.NewDescriptor("location-engine", "listener", "nats", "loc-raw-ble", "1.0"),
+		cref.NewDescriptor("location-engine", "listener", "nats", "ble-raw-rssi", "1.0"),
 	)
 	if err != nil {
 		panic(err)
@@ -46,12 +47,12 @@ func (c *LocationEngineService) SetReferences(ctx context.Context, references cr
 	c.rawBleListener = res.(listener.IListener)
 
 	res, err = references.GetOneRequired(
-		cref.NewDescriptor("location-engine", "publisher", "nats", "loc-hist-ble", "1.0"),
+		cref.NewDescriptor("location-engine", "publisher", "nats", "device-position", "1.0"),
 	)
 	if err != nil {
 		panic(err)
 	}
-	c.hisoryBlePublisher = res.(publisher.IPublisher)
+	c.publisher = res.(publisher.IPublisher)
 }
 
 func (c *LocationEngineService) Open(ctx context.Context) error {
@@ -86,9 +87,15 @@ func (c *LocationEngineService) startMessageListener(ctx context.Context) {
 }
 
 func (c *LocationEngineService) ReceiveMessage(ctx context.Context, envelope *cqueues.MessageEnvelope, queue cqueues.IMessageQueue) error {
-	switch envelope.MessageType {
-	case natsConst.NATS_LOC_RAW_BLE_TOPIC:
-		var event natsEvents.BLEBeaconRawEventV1
+	var subject string
+
+	if msg, ok := envelope.GetReference().(*nats.Msg); ok {
+		subject = msg.Subject
+	}
+
+	switch subject {
+	case natsConst.NATS_EVENTS_BLE_RSSI_TOPIC:
+		var event natsEvents.DeviceDetectedBLERawEventV1
 		err := json.Unmarshal([]byte(envelope.GetMessageAsString()), &event)
 		if err != nil {
 			c.Logger.Error(ctx, err, "Failed to deserialize message")
@@ -96,8 +103,13 @@ func (c *LocationEngineService) ReceiveMessage(ctx context.Context, envelope *cq
 		fmt.Println(event)
 		// TODO: process
 
+		err = c.publisher.SendDevicePosition(ctx, &natsEvents.DevicePositioningEventV1{Test: "test"})
+		if err != nil {
+			c.Logger.Error(ctx, err, "Failed to send message")
+		}
+
 	default:
-		c.Logger.Debug(ctx, "Unknown message type: "+envelope.MessageType)
+		c.Logger.Debug(ctx, "Unknown subject: "+subject)
 	}
 	return nil
 }

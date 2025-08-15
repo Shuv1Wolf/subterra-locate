@@ -1,1 +1,2 @@
-docker/mosquitto
+docker/mosquitto/data
+docker/mosquitto/log

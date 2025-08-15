@@ -16,8 +16,8 @@ func NewLocationEngineServiceFactory() *LocationEngineServiceFactory {
 	c := LocationEngineServiceFactory{}
 	c.Factory = cbuild.NewFactory()
 
-	natsRawBleListenerDescriptor := cref.NewDescriptor("location-engine", "listener", "nats", "loc-raw-ble", "1.0")
-	natsHistoryBlePublisherDescriptor := cref.NewDescriptor("location-engine", "publisher", "nats", "loc-hist-ble", "1.0")
+	natsRawBleListenerDescriptor := cref.NewDescriptor("location-engine", "listener", "nats", "ble-raw-rssi", "1.0")
+	natsHistoryBlePublisherDescriptor := cref.NewDescriptor("location-engine", "publisher", "nats", "device-position", "1.0")
 	serviceDescriptor := cref.NewDescriptor("location-engine", "service", "default", "*", "1.0")
 
 	c.RegisterType(natsRawBleListenerDescriptor, listener.NewNatsListener)

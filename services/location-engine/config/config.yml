@@ -12,8 +12,8 @@
 - descriptor: "pip-services:counters:log:default:1.0"
 
 # NATS raw ble listener
-- descriptor: "location-engine:listener:nats:loc-raw-ble:1.0"
-  subject: "loc.raw.ble"
+- descriptor: "location-engine:listener:nats:ble-raw-rssi:1.0"
+  subject: "events.ble.raw.rssi"
   connection:
     uri:  {{NATS_SERVICE_URI}}
     host: {{NATS_SERVICE_HOST}}{{#unless NATS_SERVICE_HOST}}"localhost"{{/unless}}
@@ -23,9 +23,11 @@
     password: {{NATS_PASS}}
   options:
     autosubscribe: true
+    jetstream: true
 
-- descriptor: "location-engine:publisher:nats:loc-hist-ble:1.0"
-  subject: "loc.history.ble"
+# NATS JetStream device position publisher
+- descriptor: "location-engine:publisher:nats:device-position:1.0"
+  subject: "events.device.position"
   connection:
     uri:  {{NATS_SERVICE_URI}}
     host: {{NATS_SERVICE_HOST}}{{#unless NATS_SERVICE_HOST}}"localhost"{{/unless}}
@@ -35,6 +37,8 @@
     password: {{NATS_PASS}}
   options:
     autosubscribe: true
+    jetstream:
+      stream: "generic"
 
 # Service
 - descriptor: "location-engine:service:default:default:1.0"

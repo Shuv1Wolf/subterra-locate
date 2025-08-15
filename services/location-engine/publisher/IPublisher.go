@@ -7,5 +7,5 @@ import (
 )
 
 type IPublisher interface {
-	SendHistoryBle(ctx context.Context, event *nats.BLEBeaconHistoryEventV1) error
+	SendDevicePosition(ctx context.Context, event *nats.DevicePositioningEventV1) error
 }

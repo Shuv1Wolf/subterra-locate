@@ -206,7 +206,7 @@ void publishNow() {
 
   if (!client.connected()) connectMQTT();
   if (client.connected()) {
-    bool ok = client.publish("/ble/rssi", msgbuf, payload.length(), false);
+    bool ok = client.publish("events/ble/raw/rssi", msgbuf, payload.length(), false);
     Serial.print("MQTT publish: ");
     Serial.println(ok ? "OK" : "FAIL");
   }
