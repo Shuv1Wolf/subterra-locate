@@ -21,36 +21,36 @@ func NewBeaconsPersistenceFixture(persistence persistence.IBeaconsPersistence) *
 	c := BeaconsPersistenceFixture{}
 
 	c.BEACON1 = &data.BeaconV1{
-		Id:     "1",
-		Udi:    "00001",
-		Type:   data.AltBeacon,
-		Label:  "TestBeacon1",
-		X:      1.0,
-		Y:      1.0,
-		Z:      1.0,
-		SiteId: "1",
+		Id:    "1",
+		Udi:   "00001",
+		Type:  data.AltBeacon,
+		Label: "TestBeacon1",
+		X:     1.0,
+		Y:     1.0,
+		Z:     1.0,
+		OrgId: "org$1001",
 	}
 
 	c.BEACON2 = &data.BeaconV1{
-		Id:     "2",
-		Udi:    "00002",
-		Type:   data.IBeacon,
-		SiteId: "1",
-		Label:  "TestBeacon2",
-		X:      1.0,
-		Y:      1.0,
-		Z:      1.0,
+		Id:    "2",
+		Udi:   "00002",
+		Type:  data.IBeacon,
+		OrgId: "org$1001",
+		Label: "TestBeacon2",
+		X:     1.0,
+		Y:     1.0,
+		Z:     1.0,
 	}
 
 	c.BEACON3 = &data.BeaconV1{
-		Id:     "3",
-		Udi:    "00003",
-		Type:   data.AltBeacon,
-		SiteId: "2",
-		Label:  "TestBeacon3",
-		X:      1.0,
-		Y:      1.0,
-		Z:      1.0,
+		Id:    "3",
+		Udi:   "00003",
+		Type:  data.AltBeacon,
+		OrgId: "org$1001",
+		Label: "TestBeacon3",
+		X:     1.0,
+		Y:     1.0,
+		Z:     1.0,
 	}
 
 	c.persistence = persistence
@@ -63,7 +63,7 @@ func (c *BeaconsPersistenceFixture) testCreateBeacons(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.BeaconV1{}, beacon)
 	assert.Equal(t, c.BEACON1.Udi, beacon.Udi)
-	assert.Equal(t, c.BEACON1.SiteId, beacon.SiteId)
+	assert.Equal(t, c.BEACON1.OrgId, beacon.OrgId)
 	assert.Equal(t, c.BEACON1.Type, beacon.Type)
 	assert.Equal(t, c.BEACON1.Label, beacon.Label)
 
@@ -72,7 +72,7 @@ func (c *BeaconsPersistenceFixture) testCreateBeacons(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.BeaconV1{}, beacon)
 	assert.Equal(t, c.BEACON2.Udi, beacon.Udi)
-	assert.Equal(t, c.BEACON2.SiteId, beacon.SiteId)
+	assert.Equal(t, c.BEACON2.OrgId, beacon.OrgId)
 	assert.Equal(t, c.BEACON2.Type, beacon.Type)
 	assert.Equal(t, c.BEACON2.Label, beacon.Label)
 
@@ -81,7 +81,7 @@ func (c *BeaconsPersistenceFixture) testCreateBeacons(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.BeaconV1{}, beacon)
 	assert.Equal(t, c.BEACON3.Udi, beacon.Udi)
-	assert.Equal(t, c.BEACON3.SiteId, beacon.SiteId)
+	assert.Equal(t, c.BEACON3.OrgId, beacon.OrgId)
 	assert.Equal(t, c.BEACON3.Type, beacon.Type)
 	assert.Equal(t, c.BEACON3.Label, beacon.Label)
 }

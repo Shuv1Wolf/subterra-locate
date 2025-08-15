@@ -24,7 +24,7 @@ func NewBeaconsMemoryPersistence() *BeaconsMemoryPersistence {
 func (c *BeaconsMemoryPersistence) composeFilter(filter cquery.FilterParams) func(beacon data.BeaconV1) bool {
 
 	id := filter.GetAsString("id")
-	siteId := filter.GetAsString("site_id")
+	OrgId := filter.GetAsString("org_id")
 	label := filter.GetAsString("label")
 	udi := filter.GetAsString("udi")
 
@@ -43,7 +43,7 @@ func (c *BeaconsMemoryPersistence) composeFilter(filter cquery.FilterParams) fun
 		if id != "" && beacon.Id != id {
 			return false
 		}
-		if siteId != "" && beacon.SiteId != siteId {
+		if OrgId != "" && beacon.OrgId != OrgId {
 			return false
 		}
 		if label != "" && beacon.Label != label {

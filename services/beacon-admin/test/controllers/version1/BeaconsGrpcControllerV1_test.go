@@ -29,25 +29,25 @@ type beaconsGrpcControllerV1Test struct {
 
 func newbeaconsGrpcControllerV1Test() *beaconsGrpcControllerV1Test {
 	BEACON1 := &data1.BeaconV1{
-		Id:     "1",
-		Udi:    "00001",
-		Type:   data1.AltBeacon,
-		SiteId: "1",
-		Label:  "TestBeacon1",
-		X:      1.0,
-		Y:      1.0,
-		Z:      1.0,
+		Id:    "1",
+		Udi:   "00001",
+		Type:  data1.AltBeacon,
+		OrgId: "org$1001",
+		Label: "TestBeacon1",
+		X:     1.0,
+		Y:     1.0,
+		Z:     1.0,
 	}
 
 	BEACON2 := &data1.BeaconV1{
-		Id:     "2",
-		Udi:    "00002",
-		Type:   data1.IBeacon,
-		SiteId: "1",
-		Label:  "TestBeacon2",
-		X:      1.0,
-		Y:      1.0,
-		Z:      1.0,
+		Id:    "2",
+		Udi:   "00002",
+		Type:  data1.IBeacon,
+		OrgId: "org$1001",
+		Label: "TestBeacon2",
+		X:     1.0,
+		Y:     1.0,
+		Z:     1.0,
 	}
 
 	restConfig := cconf.NewConfigParamsFromTuples(
@@ -143,7 +143,7 @@ func (c *beaconsGrpcControllerV1Test) testCrudOperations(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEqual(t, data1.BeaconV1{}, beacon)
 	assert.Equal(t, c.BEACON1.Udi, beacon.Udi)
-	assert.Equal(t, c.BEACON1.SiteId, beacon.SiteId)
+	assert.Equal(t, c.BEACON1.OrgId, beacon.OrgId)
 	assert.Equal(t, c.BEACON1.Type, beacon.Type)
 	assert.Equal(t, c.BEACON1.Label, beacon.Label)
 
@@ -159,7 +159,7 @@ func (c *beaconsGrpcControllerV1Test) testCrudOperations(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEqual(t, data1.BeaconV1{}, beacon)
 	assert.Equal(t, c.BEACON2.Udi, beacon.Udi)
-	assert.Equal(t, c.BEACON2.SiteId, beacon.SiteId)
+	assert.Equal(t, c.BEACON2.OrgId, beacon.OrgId)
 	assert.Equal(t, c.BEACON2.Type, beacon.Type)
 	assert.Equal(t, c.BEACON2.Label, beacon.Label)
 

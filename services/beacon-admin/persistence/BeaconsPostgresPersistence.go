@@ -33,10 +33,11 @@ func (c *BeaconsPostgresPersistence) DefineSchema() {
 		"\"x\" FLOAT, " +
 		"\"y\" FLOAT, " +
 		"\"z\" FLOAT, " +
-		"\"site_id\" VARCHAR(32), " +
+		"\"org_id\" VARCHAR(32), " +
 		"\"enabled\" BOOLEAN)")
 
 	c.EnsureIndex(c.TableName+"_type", map[string]string{"type": "1"}, nil)
+	c.EnsureIndex(c.TableName+"_org_id", map[string]string{"org_id": "1"}, nil)
 	c.EnsureIndex(c.TableName+"_udi", map[string]string{"udi": "1"}, nil)
 }
 
@@ -45,8 +46,8 @@ func (c *BeaconsPostgresPersistence) composeFilter(filter cquery.FilterParams) s
 	if id, ok := filter.GetAsNullableString("id"); ok && id != "" {
 		filters = append(filters, "id='"+id+"'")
 	}
-	if siteId, ok := filter.GetAsNullableString("site_id"); ok && siteId != "" {
-		filters = append(filters, "site_id='"+siteId+"'")
+	if siteId, ok := filter.GetAsNullableString("org_id"); ok && siteId != "" {
+		filters = append(filters, "org_id='"+siteId+"'")
 	}
 	if typeId, ok := filter.GetAsNullableString("type"); ok && typeId != "" {
 		filters = append(filters, "type='"+typeId+"'")
