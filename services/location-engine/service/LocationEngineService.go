@@ -127,7 +127,7 @@ func (c *LocationEngineService) ReceiveMessage(ctx context.Context, envelope *cq
 
 	switch subject {
 	case natsConst.NATS_EVENTS_BLE_RSSI_TOPIC:
-		c.bleEventHandler(ctx, envelope.GetMessageAsString())
+		c.bleEventHandler(ctx, envelope)
 
 	case natsConst.NATS_BEACONS_EVENTS_TOPIC:
 		switch envelope.MessageType {

@@ -4,32 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	natsEvents "github.com/Shuv1Wolf/subterra-locate/services/common/nats/events"
 	"github.com/Shuv1Wolf/subterra-locate/services/location-engine/utils"
+	cqueues "github.com/pip-services4/pip-services4-go/pip-services4-messaging-go/queues"
 )
-
-func (c *LocationEngineService) bleEventHandler(ctx context.Context, msg string) error {
-	var event natsEvents.DeviceDetectedBLERawEventV1
-	err := json.Unmarshal([]byte(msg), &event)
-	if err != nil {
-		c.Logger.Error(ctx, err, "Failed to deserialize message")
-	}
-
-	x, y, z, err := c.EstimateXYZ(ctx, event, 3, -59)
-	if err != nil {
-		c.Logger.Error(ctx, err, "Failed to estimate XYZ")
-	}
-
-	err = c.devicePositionPublisher.SendDevicePosition(ctx, &natsEvents.DevicePositioningEventV1{
-		DeviceId: event.DeviceId, X: x, Y: y, Z: z,
-	})
-	if err != nil {
-		c.Logger.Error(ctx, err, "Failed to send message")
-	}
-	c.Logger.Debug(ctx, "Received message: "+msg)
-	return nil
-}
 
 // EstimateXYZ estimates the device position (x,y,z) using multilateration.
 // n - path-loss exponent (≈2.0 office, 2.2–3.5 concrete/warehouse).
@@ -81,4 +61,26 @@ func (c *LocationEngineService) EstimateXYZ(
 
 	xx, yy, zz, e := utils.GaussNewton(data, false, 0)
 	return xx, yy, zz, e
+}
+
+func (c *LocationEngineService) bleEventHandler(ctx context.Context, envelope *cqueues.MessageEnvelope) error {
+	var event natsEvents.DeviceDetectedBLERawEventV1
+	err := json.Unmarshal([]byte(envelope.GetMessageAsString()), &event)
+	if err != nil {
+		c.Logger.Error(ctx, err, "Failed to deserialize message")
+	}
+
+	x, y, z, err := c.EstimateXYZ(ctx, event, 3, -59)
+	if err != nil {
+		c.Logger.Error(ctx, err, "Failed to estimate XYZ")
+	}
+
+	err = c.devicePositionPublisher.SendDevicePosition(ctx, &natsEvents.DevicePositioningEventV1{
+		DeviceId: event.DeviceId, X: x, Y: y, Z: z, Time: time.Now(),
+	})
+	if err != nil {
+		c.Logger.Error(ctx, err, "Failed to send message")
+	}
+	c.Logger.Debug(ctx, "Received message: "+envelope.GetMessageAsString())
+	return nil
 }
