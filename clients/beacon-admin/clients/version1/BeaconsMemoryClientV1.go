@@ -29,7 +29,7 @@ func NewBeaconsMemoryClientV1(items []data1.BeaconV1) *BeaconsMemoryClientV1 {
 func (c *BeaconsMemoryClientV1) composeFilter(filter cquery.FilterParams) func(item data1.BeaconV1) bool {
 
 	id := filter.GetAsString("id")
-	siteId := filter.GetAsString("site_id")
+	orgId := filter.GetAsString("org_id")
 	label := filter.GetAsString("label")
 	udi := filter.GetAsString("udi")
 	udis := filter.GetAsString("udis")
@@ -44,7 +44,7 @@ func (c *BeaconsMemoryClientV1) composeFilter(filter cquery.FilterParams) func(i
 		if id != "" && item.Id != id {
 			return false
 		}
-		if siteId != "" && item.SiteId != siteId {
+		if orgId != "" && item.OrgId != orgId {
 			return false
 		}
 		if label != "" && item.Label != label {

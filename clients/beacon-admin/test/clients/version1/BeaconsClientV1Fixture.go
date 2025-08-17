@@ -21,25 +21,25 @@ func NewBeaconsClientV1Fixture(client clients1.IBeaconsClientV1) *BeaconsClientV
 	c := &BeaconsClientV1Fixture{}
 
 	c.BEACON1 = &data1.BeaconV1{
-		Id:     "1",
-		Udi:    "00001",
-		Type:   data1.AltBeacon,
-		SiteId: "1",
-		Label:  "TestBeacon1",
-		X:      1.0,
-		Y:      1.0,
-		Z:      1.0,
+		Id:    "1",
+		Udi:   "00001",
+		Type:  data1.AltBeacon,
+		OrgId: "1",
+		Label: "TestBeacon1",
+		X:     1.0,
+		Y:     1.0,
+		Z:     1.0,
 	}
 
 	c.BEACON2 = &data1.BeaconV1{
-		Id:     "2",
-		Udi:    "00002",
-		Type:   data1.IBeacon,
-		SiteId: "1",
-		Label:  "TestBeacon2",
-		X:      1.0,
-		Y:      1.0,
-		Z:      1.0,
+		Id:    "2",
+		Udi:   "00002",
+		Type:  data1.IBeacon,
+		OrgId: "1",
+		Label: "TestBeacon2",
+		X:     1.0,
+		Y:     1.0,
+		Z:     1.0,
 	}
 
 	c.client = client
@@ -54,7 +54,7 @@ func (c *BeaconsClientV1Fixture) testCreateBeacons(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, beacon)
 	assert.Equal(t, c.BEACON1.Udi, beacon.Udi)
-	assert.Equal(t, c.BEACON1.SiteId, beacon.SiteId)
+	assert.Equal(t, c.BEACON1.OrgId, beacon.OrgId)
 	assert.Equal(t, c.BEACON1.Type, beacon.Type)
 	assert.Equal(t, c.BEACON1.Label, beacon.Label)
 
@@ -63,7 +63,7 @@ func (c *BeaconsClientV1Fixture) testCreateBeacons(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, beacon)
 	assert.Equal(t, c.BEACON2.Udi, beacon.Udi)
-	assert.Equal(t, c.BEACON2.SiteId, beacon.SiteId)
+	assert.Equal(t, c.BEACON2.OrgId, beacon.OrgId)
 	assert.Equal(t, c.BEACON2.Type, beacon.Type)
 	assert.Equal(t, c.BEACON2.Label, beacon.Label)
 }
