@@ -62,6 +62,9 @@ func (c *BeaconsPostgresPersistence) composeFilter(filter cquery.FilterParams) s
 		ids := strings.Split(udis, ",")
 		filters = append(filters, "udi IN ('"+strings.Join(ids, "','")+"')")
 	}
+	if enabled, ok := filter.GetAsNullableString("enabled"); ok && enabled != "" {
+		filters = append(filters, "enabled='+enabled+'")
+	}
 
 	if len(filters) > 0 {
 		return strings.Join(filters, " AND ")

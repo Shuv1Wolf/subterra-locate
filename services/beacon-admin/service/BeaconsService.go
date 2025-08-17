@@ -5,6 +5,7 @@ import (
 
 	data "github.com/Shuv1Wolf/subterra-locate/services/beacon-admin/data/version1"
 	"github.com/Shuv1Wolf/subterra-locate/services/beacon-admin/persistence"
+	"github.com/Shuv1Wolf/subterra-locate/services/beacon-admin/publisher"
 
 	cconf "github.com/pip-services4/pip-services4-go/pip-services4-components-go/config"
 	cref "github.com/pip-services4/pip-services4-go/pip-services4-components-go/refer"
@@ -13,8 +14,9 @@ import (
 )
 
 type BeaconsService struct {
-	persistence persistence.IBeaconsPersistence
-	commandSet  *BeaconsCommandSet
+	persistence   persistence.IBeaconsPersistence
+	commandSet    *BeaconsCommandSet
+	beaconsEvents publisher.IPublisher
 }
 
 func NewBeaconsService() *BeaconsService {
@@ -34,15 +36,18 @@ func (c *BeaconsService) GetCommandSet() *ccmd.CommandSet {
 }
 
 func (c *BeaconsService) SetReferences(ctx context.Context, references cref.IReferences) {
-	locator := cref.NewDescriptor("beacon-admin", "persistence", "*", "*", "1.0")
-	p, err := references.GetOneRequired(locator)
-	if p != nil && err == nil {
-		if _pers, ok := p.(persistence.IBeaconsPersistence); ok {
-			c.persistence = _pers
-			return
-		}
+	res, err := references.GetOneRequired(
+		cref.NewDescriptor("beacon-admin", "persistence", "*", "*", "1.0"),
+	)
+	if err != nil {
+		panic(err)
 	}
-	panic(cref.NewReferenceError(ctx, locator))
+	c.persistence = res.(persistence.IBeaconsPersistence)
+
+	res = references.GetOneOptional(
+		cref.NewDescriptor("beacon-admin", "publisher", "nats", "beacons-events", "1.0"),
+	)
+	c.beaconsEvents = res.(publisher.IPublisher)
 }
 
 func (c *BeaconsService) GetBeacons(ctx context.Context,
@@ -69,7 +74,19 @@ func (c *BeaconsService) CreateBeacon(ctx context.Context,
 		beacon.Type = data.Unknown
 	}
 
-	return c.persistence.Create(ctx, beacon)
+	b, err := c.persistence.Create(ctx, beacon)
+	if err != nil {
+		return b, err
+	}
+
+	if c.beaconsEvents != nil {
+		err = c.beaconsEvents.SendBeaconCreatedEvent(ctx, b.Id)
+		if err != nil {
+			return b, err
+		}
+	}
+
+	return b, nil
 }
 
 func (c *BeaconsService) UpdateBeacon(ctx context.Context,
@@ -79,11 +96,35 @@ func (c *BeaconsService) UpdateBeacon(ctx context.Context,
 		beacon.Type = data.Unknown
 	}
 
-	return c.persistence.Update(ctx, beacon)
+	b, err := c.persistence.Update(ctx, beacon)
+	if err != nil {
+		return b, err
+	}
+
+	if c.beaconsEvents != nil {
+		err = c.beaconsEvents.SendBeaconChangedEvent(ctx, b.Id)
+		if err != nil {
+			return b, err
+		}
+	}
+
+	return b, err
 }
 
 func (c *BeaconsService) DeleteBeaconById(ctx context.Context,
 	beaconId string) (data.BeaconV1, error) {
 
-	return c.persistence.DeleteById(ctx, beaconId)
+	b, err := c.persistence.DeleteById(ctx, beaconId)
+	if err != nil {
+		return b, err
+	}
+
+	if c.beaconsEvents != nil {
+		err = c.beaconsEvents.SendBeaconCreatedEvent(ctx, b.Id)
+		if err != nil {
+			return b, err
+		}
+	}
+
+	return b, err
 }

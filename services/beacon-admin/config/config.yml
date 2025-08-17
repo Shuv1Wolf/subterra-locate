@@ -32,6 +32,19 @@
     password: {{POSTGRES_PASSWORD}}{{#unless POSTGRES_PASSWORD}}"postgres"{{/unless}}
 {{/if}}
 
+# NATS beacons event publisher
+- descriptor: "beacon-admin:publisher:nats:beacons-events:1.0"
+  subject: "beacons.events"
+  connection:
+    uri:  {{NATS_SERVICE_URI}}
+    host: {{NATS_SERVICE_HOST}}{{#unless NATS_SERVICE_HOST}}"localhost"{{/unless}}
+    port: {{NATS_SERVICE_PORT}}{{#unless NATS_SERVICE_PORT}}4222{{/unless}}
+  credential:
+    username: {{NATS_USER}}
+    password: {{NATS_PASS}}
+  options:
+    autosubscribe: true
+
 # Service
 - descriptor: "beacon-admin:service:default:default:1.0"
 

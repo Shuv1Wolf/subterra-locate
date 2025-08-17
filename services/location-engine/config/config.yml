@@ -23,9 +23,8 @@
     password: {{NATS_PASS}}
   options:
     autosubscribe: true
-    jetstream: true
 
-# NATS JetStream device position publisher
+# NATS device position publisher
 - descriptor: "location-engine:publisher:nats:device-position:1.0"
   subject: "events.device.position"
   connection:
@@ -37,8 +36,31 @@
     password: {{NATS_PASS}}
   options:
     autosubscribe: true
-    jetstream:
-      stream: "generic"
+
+# NATS beacons event listener
+- descriptor: "location-engine:listener:nats:beacons-events:1.0"
+  subject: "beacons.events"
+  connection:
+    uri:  {{NATS_SERVICE_URI}}
+    host: {{NATS_SERVICE_HOST}}{{#unless NATS_SERVICE_HOST}}"localhost"{{/unless}}
+    port: {{NATS_SERVICE_PORT}}{{#unless NATS_SERVICE_PORT}}4222{{/unless}}
+  credential:
+    username: {{NATS_USER}}
+    password: {{NATS_PASS}}
+  options:
+    autosubscribe: true
+
+# Beacon-admin client
+{{^MOCK}}
+- descriptor: "beacon-admin:client:grpc:default:1.0"
+  connection:
+    protocol: "http"
+    host: {{BEACON_ADMIN_SERVICE_HOST}}{{^BEACON_ADMIN_SERVICE_HOST}}"localhost"{{/BEACON_ADMIN_SERVICE_HOST}}
+    port: {{BEACON_ADMIN_SERVICE_PORT}}{{^BEACON_ADMIN_SERVICE_PORT}}10010{{/BEACON_ADMIN_SERVICE_PORT}}
+{{/MOCK}}
+{{#if MOCK}}
+- descriptor: "beacon-admin:client:mock:default:1.0"
+{{/if}}
 
 # Service
 - descriptor: "location-engine:service:default:default:1.0"
