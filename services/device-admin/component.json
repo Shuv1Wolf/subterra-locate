@@ -1,0 +1,7 @@
+{
+    "name":  "device-admin",
+    "type": "services",
+    "language": "go",
+    "version": "1.0.0",
+    "build": 0
+}

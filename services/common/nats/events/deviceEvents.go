@@ -1,5 +1,6 @@
 package events
 
-type DeviceChangedEvent struct {
+type BeaconChangedEvent struct {
 	Id string `json:"id"`
 }
+
