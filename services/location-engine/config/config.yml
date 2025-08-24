@@ -50,6 +50,19 @@
   options:
     autosubscribe: true
 
+# NATS device event listener
+- descriptor: "location-engine:listener:nats:device-events:1.0"
+  subject: "device.events"
+  connection:
+    uri:  {{NATS_SERVICE_URI}}
+    host: {{NATS_SERVICE_HOST}}{{#unless NATS_SERVICE_HOST}}"localhost"{{/unless}}
+    port: {{NATS_SERVICE_PORT}}{{#unless NATS_SERVICE_PORT}}4222{{/unless}}
+  credential:
+    username: {{NATS_USER}}
+    password: {{NATS_PASS}}
+  options:
+    autosubscribe: true
+
 # Beacon-admin client
 {{^MOCK}}
 - descriptor: "beacon-admin:client:grpc:default:1.0"
@@ -60,6 +73,18 @@
 {{/MOCK}}
 {{#if MOCK}}
 - descriptor: "beacon-admin:client:mock:default:1.0"
+{{/if}}
+
+# Device-admin client
+{{^MOCK}}
+- descriptor: "device-admin:client:grpc:default:1.0"
+  connection:
+    protocol: "http"
+    host: {{DEVICE_ADMIN_SERVICE_HOST}}{{^DEVICE_ADMIN_SERVICE_HOST}}"localhost"{{/DEVICE_ADMIN_SERVICE_HOST}}
+    port: {{DEVICE_ADMIN_SERVICE_PORT}}{{^DEVICE_ADMIN_SERVICE_PORT}}10020{{/DEVICE_ADMIN_SERVICE_PORT}}
+{{/MOCK}}
+{{#if MOCK}}
+- descriptor: "device-admin:client:mock:default:1.0"
 {{/if}}
 
 # Service

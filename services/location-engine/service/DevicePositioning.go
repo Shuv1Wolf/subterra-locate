@@ -70,6 +70,14 @@ func (c *LocationEngineService) bleEventHandler(ctx context.Context, envelope *c
 		c.Logger.Error(ctx, err, "Failed to deserialize message")
 	}
 
+	c.mu.Lock()
+	d, ok := c.deviceMap[event.DeviceId]
+	c.mu.Unlock()
+	if !ok || !d.Enabled {
+		c.Logger.Warn(ctx, "Device not found: "+event.DeviceId)
+		return nil
+	}
+
 	x, y, z, err := c.EstimateXYZ(ctx, event, 3, -59)
 	if err != nil {
 		c.Logger.Error(ctx, err, "Failed to estimate XYZ")

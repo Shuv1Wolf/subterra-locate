@@ -2,19 +2,22 @@ module github.com/Shuv1Wolf/subterra-locate/services/location-engine
 
 go 1.24.4
 
-replace github.com/Shuv1Wolf/subterra-locate/services/common => ../common
-
-replace github.com/Shuv1Wolf/subterra-locate/services/beacon-admin => ../beacon-admin
+replace (
+	github.com/Shuv1Wolf/subterra-locate/services/beacon-admin => ../beacon-admin
+	github.com/Shuv1Wolf/subterra-locate/services/common => ../common
+	github.com/Shuv1Wolf/subterra-locate/services/device-admin => ../device-admin
+)
 
 require (
 	github.com/Shuv1Wolf/subterra-locate/clients/beacon-admin v1.0.2
+	github.com/Shuv1Wolf/subterra-locate/clients/device-admin v1.0.1
 	github.com/Shuv1Wolf/subterra-locate/services/beacon-admin v1.0.1
 	github.com/Shuv1Wolf/subterra-locate/services/common v1.3.0
+	github.com/Shuv1Wolf/subterra-locate/services/device-admin v1.0.0
 	github.com/nats-io/nats.go v1.44.0
 	github.com/pip-services4/pip-services4-go/pip-services4-components-go v0.0.1-2
 	github.com/pip-services4/pip-services4-go/pip-services4-container-go v0.0.1-3
 	github.com/pip-services4/pip-services4-go/pip-services4-data-go v0.0.1-2
-	github.com/pip-services4/pip-services4-go/pip-services4-logic-go v0.0.1-3
 	github.com/pip-services4/pip-services4-go/pip-services4-messaging-go v0.0.3-6
 	github.com/pip-services4/pip-services4-go/pip-services4-nats-go v0.0.1-2
 	github.com/pip-services4/pip-services4-go/pip-services4-observability-go v0.0.1-3
@@ -39,6 +42,7 @@ require (
 	github.com/pip-services4/pip-services4-go/pip-services4-config-go v0.0.1-3 // indirect
 	github.com/pip-services4/pip-services4-go/pip-services4-expressions-go v0.0.1-2 // indirect
 	github.com/pip-services4/pip-services4-go/pip-services4-grpc-go v0.0.1-3 // indirect
+	github.com/pip-services4/pip-services4-go/pip-services4-logic-go v0.0.1-3 // indirect
 	github.com/pip-services4/pip-services4-go/pip-services4-persistence-go v0.0.1-3 // indirect
 	github.com/pip-services4/pip-services4-go/pip-services4-postgres-go v0.0.1-2 // indirect
 	github.com/pip-services4/pip-services4-go/pip-services4-rpc-go v0.0.1-3 // indirect

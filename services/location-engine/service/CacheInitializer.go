@@ -72,3 +72,64 @@ func (c *LocationEngineService) beaconDeletedEvent(ctx context.Context, msg stri
 }
 
 // -------------------- Device cache --------------------
+func (c *LocationEngineService) initDeviceCache() {
+	filter := query.NewFilterParamsFromTuples("enabled", true)
+	limit := int64(100)
+	skip := int64(0)
+
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	for {
+		page := query.NewPagingParams(skip, limit, false)
+		res, err := c.deviceAdmin.GetDevices(context.Background(), *filter, *page)
+		if err != nil {
+			c.Logger.Error(context.Background(), err, "Failed to get devices from device admin service")
+			return
+		}
+
+		if len(res.Data) == 0 {
+			break
+		}
+
+		for _, device := range res.Data {
+			c.deviceMap[device.Id] = &device
+		}
+
+		if int64(len(res.Data)) < limit {
+			break
+		}
+
+		skip += limit
+	}
+
+	c.Logger.Info(context.Background(), "Devices stored in cache")
+}
+
+func (c *LocationEngineService) deviceChangedEvent(ctx context.Context, msg string) error {
+	var event natsEvents.DeviceChangedEvent
+	err := json.Unmarshal([]byte(msg), &event)
+	if err != nil {
+		c.Logger.Error(ctx, err, "Failed to deserialize message")
+	}
+
+	d, err := c.deviceAdmin.GetDeviceById(context.Background(), event.Id)
+	if err != nil {
+		c.Logger.Error(context.Background(), err, "Failed to get device from device admin service")
+		return err
+	}
+
+	c.deviceMap[event.Id] = d
+	return nil
+}
+
+func (c *LocationEngineService) deviceDeletedEvent(ctx context.Context, msg string) error {
+	var event natsEvents.DeviceChangedEvent
+	err := json.Unmarshal([]byte(msg), &event)
+	if err != nil {
+		c.Logger.Error(ctx, err, "Failed to deserialize message")
+	}
+
+	delete(c.deviceMap, event.Id)
+	return nil
+}

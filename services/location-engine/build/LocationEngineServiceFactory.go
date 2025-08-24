@@ -18,13 +18,17 @@ func NewLocationEngineServiceFactory() *LocationEngineServiceFactory {
 
 	natsRawBleListenerDescriptor := cref.NewDescriptor("location-engine", "listener", "nats", "ble-raw-rssi", "1.0")
 	natsHistoryBlePublisherDescriptor := cref.NewDescriptor("location-engine", "publisher", "nats", "device-position", "1.0")
+
 	beaconsEventsListenerDescriptor := cref.NewDescriptor("location-engine", "listener", "nats", "beacons-events", "1.0")
+	deviceEventsListenerDescriptor := cref.NewDescriptor("location-engine", "listener", "nats", "device-events", "1.0")
 
 	serviceDescriptor := cref.NewDescriptor("location-engine", "service", "default", "*", "1.0")
 
 	c.RegisterType(natsRawBleListenerDescriptor, listener.NewNatsListener)
-	c.RegisterType(beaconsEventsListenerDescriptor, listener.NewNatsListener)
 	c.RegisterType(natsHistoryBlePublisherDescriptor, publisher.NewNatsPublisher)
+
+	c.RegisterType(beaconsEventsListenerDescriptor, listener.NewNatsListener)
+	c.RegisterType(deviceEventsListenerDescriptor, listener.NewNatsListener)
 
 	c.RegisterType(serviceDescriptor, service.NewLocationEngineService)
 

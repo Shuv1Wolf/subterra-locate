@@ -10,11 +10,12 @@ import (
 	cqueues "github.com/pip-services4/pip-services4-go/pip-services4-messaging-go/queues"
 	clog "github.com/pip-services4/pip-services4-go/pip-services4-observability-go/log"
 
-	ddata "github.com/Shuv1Wolf/subterra-locate/services/device-admin/data/version1"
 	bdata "github.com/Shuv1Wolf/subterra-locate/services/beacon-admin/data/version1"
 	natsConst "github.com/Shuv1Wolf/subterra-locate/services/common/nats/const"
+	ddata "github.com/Shuv1Wolf/subterra-locate/services/device-admin/data/version1"
 
-	bClient "github.com/Shuv1Wolf/subterra-locate/clients/beacon-admin/clients/version1"
+	bclient "github.com/Shuv1Wolf/subterra-locate/clients/beacon-admin/clients/version1"
+	dclient "github.com/Shuv1Wolf/subterra-locate/clients/device-admin/clients/version1"
 
 	"github.com/Shuv1Wolf/subterra-locate/services/location-engine/listener"
 	"github.com/Shuv1Wolf/subterra-locate/services/location-engine/publisher"
@@ -27,12 +28,12 @@ type LocationEngineService struct {
 	devicePositionPublisher publisher.IPublisher
 
 	beaconsMap           map[string]*bdata.BeaconV1
-	beaconAdmin          bClient.IBeaconsClientV1
+	beaconAdmin          bclient.IBeaconsClientV1
 	beaconsEventListener listener.IListener
 
-	deviceMap            map[string]*bdata.BeaconV1
-	beaconAdmin          bClient.IBeaconsClientV1
-	beaconsEventListener listener.IListener
+	deviceMap           map[string]*ddata.DeviceV1
+	deviceAdmin         dclient.IDeviceClientV1
+	deviceEventListener listener.IListener
 
 	mu     sync.RWMutex
 	isOpen bool
@@ -42,6 +43,7 @@ func NewLocationEngineService() *LocationEngineService {
 	return &LocationEngineService{
 		Logger:     clog.NewCompositeLogger(),
 		beaconsMap: map[string]*bdata.BeaconV1{},
+		deviceMap:  map[string]*ddata.DeviceV1{},
 	}
 }
 
@@ -61,6 +63,19 @@ func (c *LocationEngineService) SetReferences(ctx context.Context, references cr
 	c.rawBleListener = res.(listener.IListener)
 
 	res, err = references.GetOneRequired(
+		cref.NewDescriptor("location-engine", "publisher", "nats", "device-position", "1.0"),
+	)
+	if err != nil {
+		panic(err)
+	}
+	c.devicePositionPublisher = res.(publisher.IPublisher)
+
+	c.seEventsReferences(ctx, references)
+	c.setClientsReferences(ctx, references)
+}
+
+func (c *LocationEngineService) seEventsReferences(ctx context.Context, references cref.IReferences) {
+	res, err := references.GetOneRequired(
 		cref.NewDescriptor("location-engine", "listener", "nats", "beacons-events", "1.0"),
 	)
 	if err != nil {
@@ -69,14 +84,12 @@ func (c *LocationEngineService) SetReferences(ctx context.Context, references cr
 	c.beaconsEventListener = res.(listener.IListener)
 
 	res, err = references.GetOneRequired(
-		cref.NewDescriptor("location-engine", "publisher", "nats", "device-position", "1.0"),
+		cref.NewDescriptor("location-engine", "listener", "nats", "device-events", "1.0"),
 	)
 	if err != nil {
 		panic(err)
 	}
-	c.devicePositionPublisher = res.(publisher.IPublisher)
-
-	c.setClientsReferences(ctx, references)
+	c.deviceEventListener = res.(listener.IListener)
 }
 
 func (c *LocationEngineService) setClientsReferences(ctx context.Context, references cref.IReferences) {
@@ -86,7 +99,15 @@ func (c *LocationEngineService) setClientsReferences(ctx context.Context, refere
 	if err != nil {
 		panic(err)
 	}
-	c.beaconAdmin = res.(bClient.IBeaconsClientV1)
+	c.beaconAdmin = res.(bclient.IBeaconsClientV1)
+
+	res, err = references.GetOneRequired(
+		cref.NewDescriptor("device-admin", "client", "*", "*", "1.0"),
+	)
+	if err != nil {
+		panic(err)
+	}
+	c.deviceAdmin = res.(dclient.IDeviceClientV1)
 }
 
 func (c *LocationEngineService) Open(ctx context.Context) error {
@@ -95,6 +116,7 @@ func (c *LocationEngineService) Open(ctx context.Context) error {
 	}
 
 	c.initBeaconsCache()
+	c.initDeviceCache()
 
 	c.Logger.Info(ctx, "Starting message listener for ble")
 	if err := c.rawBleListener.Listen(ctx, c); err != nil {
@@ -103,6 +125,11 @@ func (c *LocationEngineService) Open(ctx context.Context) error {
 
 	c.Logger.Info(ctx, "Starting message listener for beacons")
 	if err := c.beaconsEventListener.Listen(ctx, c); err != nil {
+		c.Logger.Error(ctx, err, "Error while listening to message bus")
+	}
+
+	c.Logger.Info(ctx, "Starting message listener for devices")
+	if err := c.deviceEventListener.Listen(ctx, c); err != nil {
 		c.Logger.Error(ctx, err, "Error while listening to message bus")
 	}
 
@@ -118,6 +145,7 @@ func (c *LocationEngineService) Close(ctx context.Context) error {
 	if c.isOpen {
 		c.rawBleListener.EndListen(ctx)
 		c.beaconsEventListener.EndListen(ctx)
+		c.deviceEventListener.EndListen(ctx)
 		c.isOpen = false
 	}
 	return nil
@@ -140,6 +168,14 @@ func (c *LocationEngineService) ReceiveMessage(ctx context.Context, envelope *cq
 			c.beaconChangedEvent(ctx, envelope.GetMessageAsString())
 		case natsConst.NATS_BEACONS_EVENTS_DELETED_TYPE:
 			c.beaconDeletedEvent(ctx, envelope.GetMessageAsString())
+		}
+
+	case natsConst.NATS_DEVICE_EVENTS_TOPIC:
+		switch envelope.MessageType {
+		case natsConst.NATS_DEVICE_EVENTS_CHANGED_TYPE, natsConst.NATS_DEVICE_EVENTS_CREATED_TYPE:
+			c.deviceChangedEvent(ctx, envelope.GetMessageAsString())
+		case natsConst.NATS_DEVICE_EVENTS_DELETED_TYPE:
+			c.deviceDeletedEvent(ctx, envelope.GetMessageAsString())
 		}
 	default:
 		c.Logger.Debug(ctx, "Unknown subject: "+subject)
