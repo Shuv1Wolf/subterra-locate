@@ -20,7 +20,7 @@ func NewDeviceGrpcClientV1() *DeviceGrpcClientV1 {
 	return c
 }
 
-func (c *DeviceGrpcClientV1) GetDevice(ctx context.Context,
+func (c *DeviceGrpcClientV1) GetDevices(ctx context.Context,
 	filter cquery.FilterParams,
 	paging cquery.PagingParams) (*cquery.DataPage[data1.DeviceV1], error) {
 
@@ -28,7 +28,7 @@ func (c *DeviceGrpcClientV1) GetDevice(ctx context.Context,
 	c.AddFilterParams(params, &filter)
 	c.AddPagingParams(params, &paging)
 
-	response, err := c.CallCommand(ctx, "get_device", cdata.NewAnyValueMapFromValue(params.Value()))
+	response, err := c.CallCommand(ctx, "get_devices", cdata.NewAnyValueMapFromValue(params.Value()))
 
 	if err != nil {
 		return cquery.NewEmptyDataPage[data1.DeviceV1](), err
