@@ -75,7 +75,7 @@ func (c *DevicePostgresPersistence) Create(ctx context.Context, item data.Device
 		if err := row.Scan(&nextId); err != nil {
 			return item, err
 		}
-		item.Id = fmt.Sprintf("beacon$%d", nextId)
+		item.Id = fmt.Sprintf("de$%d", nextId)
 	}
 
 	return c.IdentifiablePostgresPersistence.Create(ctx, item)

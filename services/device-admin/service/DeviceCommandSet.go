@@ -66,7 +66,7 @@ func (c *DeviceCommandSet) makeCreateDeviceCommand() ccmd.ICommand {
 	return ccmd.NewCommand(
 		"create_device",
 		cvalid.NewObjectSchema().
-			WithRequiredProperty("devcie", data.NewDeviceV1Schema()),
+			WithRequiredProperty("device", data.NewDeviceV1Schema()),
 		func(ctx context.Context, args *exec.Parameters) (result any, err error) {
 
 			var device data.DeviceV1

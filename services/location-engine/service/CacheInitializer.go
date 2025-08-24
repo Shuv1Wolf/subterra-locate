@@ -8,6 +8,7 @@ import (
 	"github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
 )
 
+// -------------------- Beacons cache --------------------
 func (c *LocationEngineService) initBeaconsCache() {
 	filter := query.NewFilterParamsFromTuples("enabled", true)
 	limit := int64(100)
@@ -69,3 +70,5 @@ func (c *LocationEngineService) beaconDeletedEvent(ctx context.Context, msg stri
 	delete(c.beaconsMap, event.Id)
 	return nil
 }
+
+// -------------------- Device cache --------------------

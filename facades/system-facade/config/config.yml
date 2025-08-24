@@ -1,0 +1,41 @@
+---
+# Container info
+- descriptor: "pip-services:container-info:default:default:*"
+  name: "system-facades"
+  description: "System-facades microservice"
+
+# Console logger
+- descriptor: "pip-services:logger:console:default:*"
+  level: trace
+
+# Log counters
+- descriptor: "pip-services:counters:log:default:*"
+
+# Device-admin client
+{{^MOCK}}
+- descriptor: "device-admin:client:grpc:default:1.0"
+  connection:
+    protocol: "http"
+    host: {{DEVICE_ADMIN_SERVICE_HOST}}{{^DEVICE_ADMIN_SERVICE_HOST}}"localhost"{{/DEVICE_ADMIN_SERVICE_HOST}}
+    port: {{DEVICE_ADMIN_SERVICE_PORT}}{{^DEVICE_ADMIN_SERVICE_PORT}}10020{{/DEVICE_ADMIN_SERVICE_PORT}}
+{{/MOCK}}
+{{#if MOCK}}
+- descriptor: "device-admin:client:mock:default:1.0"
+{{/if}}
+
+# Main facade service
+- descriptor: "pip-services:endpoint:http:default:*"
+  root_path: ""
+  connection:
+    protocol: "http"
+    host: "0.0.0.0"
+    port: 8082
+
+# Facade API V1
+- descriptor: "system-facade:controller:http:default:1.0"
+
+# Hearbeat service
+- descriptor: "pip-services:heartbeat-controller:http:default:1.0"
+
+# Status service
+- descriptor: "pip-services:status-controller:http:default:1.0"

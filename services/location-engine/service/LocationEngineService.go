@@ -10,7 +10,8 @@ import (
 	cqueues "github.com/pip-services4/pip-services4-go/pip-services4-messaging-go/queues"
 	clog "github.com/pip-services4/pip-services4-go/pip-services4-observability-go/log"
 
-	data1 "github.com/Shuv1Wolf/subterra-locate/services/beacon-admin/data/version1"
+	ddata "github.com/Shuv1Wolf/subterra-locate/services/device-admin/data/version1"
+	bdata "github.com/Shuv1Wolf/subterra-locate/services/beacon-admin/data/version1"
 	natsConst "github.com/Shuv1Wolf/subterra-locate/services/common/nats/const"
 
 	bClient "github.com/Shuv1Wolf/subterra-locate/clients/beacon-admin/clients/version1"
@@ -25,7 +26,11 @@ type LocationEngineService struct {
 	rawBleListener          listener.IListener
 	devicePositionPublisher publisher.IPublisher
 
-	beaconsMap           map[string]*data1.BeaconV1
+	beaconsMap           map[string]*bdata.BeaconV1
+	beaconAdmin          bClient.IBeaconsClientV1
+	beaconsEventListener listener.IListener
+
+	deviceMap            map[string]*bdata.BeaconV1
 	beaconAdmin          bClient.IBeaconsClientV1
 	beaconsEventListener listener.IListener
 
@@ -36,7 +41,7 @@ type LocationEngineService struct {
 func NewLocationEngineService() *LocationEngineService {
 	return &LocationEngineService{
 		Logger:     clog.NewCompositeLogger(),
-		beaconsMap: map[string]*data1.BeaconV1{},
+		beaconsMap: map[string]*bdata.BeaconV1{},
 	}
 }
 
