@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"net"
 	"sync"
 
 	"github.com/nats-io/nats.go"
@@ -9,6 +10,7 @@ import (
 	cref "github.com/pip-services4/pip-services4-go/pip-services4-components-go/refer"
 	cqueues "github.com/pip-services4/pip-services4-go/pip-services4-messaging-go/queues"
 	clog "github.com/pip-services4/pip-services4-go/pip-services4-observability-go/log"
+	grpc "google.golang.org/grpc"
 
 	bdata "github.com/Shuv1Wolf/subterra-locate/services/beacon-admin/data/version1"
 	natsConst "github.com/Shuv1Wolf/subterra-locate/services/common/nats/const"
@@ -18,6 +20,7 @@ import (
 	dclient "github.com/Shuv1Wolf/subterra-locate/clients/device-admin/clients/version1"
 
 	"github.com/Shuv1Wolf/subterra-locate/services/location-engine/listener"
+	protos "github.com/Shuv1Wolf/subterra-locate/services/location-engine/protos"
 	"github.com/Shuv1Wolf/subterra-locate/services/location-engine/publisher"
 )
 
@@ -37,6 +40,9 @@ type LocationEngineService struct {
 
 	mu     sync.RWMutex
 	isOpen bool
+
+	monitorPort string
+	stateStore  *StateStore
 }
 
 func NewLocationEngineService() *LocationEngineService {
@@ -44,11 +50,13 @@ func NewLocationEngineService() *LocationEngineService {
 		Logger:     clog.NewCompositeLogger(),
 		beaconsMap: map[string]*bdata.BeaconV1{},
 		deviceMap:  map[string]*ddata.DeviceV1{},
+		stateStore: NewStateStore(),
 	}
 }
 
 func (c *LocationEngineService) Configure(ctx context.Context, config *cconf.ConfigParams) {
 	c.Logger.Configure(ctx, config)
+	c.monitorPort = config.GetAsStringWithDefault("monitor.port", ":10030")
 }
 
 func (c *LocationEngineService) SetReferences(ctx context.Context, references cref.IReferences) {
@@ -70,11 +78,11 @@ func (c *LocationEngineService) SetReferences(ctx context.Context, references cr
 	}
 	c.devicePositionPublisher = res.(publisher.IPublisher)
 
-	c.seEventsReferences(ctx, references)
+	c.setEventsReferences(ctx, references)
 	c.setClientsReferences(ctx, references)
 }
 
-func (c *LocationEngineService) seEventsReferences(ctx context.Context, references cref.IReferences) {
+func (c *LocationEngineService) setEventsReferences(ctx context.Context, references cref.IReferences) {
 	res, err := references.GetOneRequired(
 		cref.NewDescriptor("location-engine", "listener", "nats", "beacons-events", "1.0"),
 	)
@@ -117,21 +125,8 @@ func (c *LocationEngineService) Open(ctx context.Context) error {
 
 	c.initBeaconsCache()
 	c.initDeviceCache()
-
-	c.Logger.Info(ctx, "Starting message listener for ble")
-	if err := c.rawBleListener.Listen(ctx, c); err != nil {
-		c.Logger.Error(ctx, err, "Error while listening to message bus")
-	}
-
-	c.Logger.Info(ctx, "Starting message listener for beacons")
-	if err := c.beaconsEventListener.Listen(ctx, c); err != nil {
-		c.Logger.Error(ctx, err, "Error while listening to message bus")
-	}
-
-	c.Logger.Info(ctx, "Starting message listener for devices")
-	if err := c.deviceEventListener.Listen(ctx, c); err != nil {
-		c.Logger.Error(ctx, err, "Error while listening to message bus")
-	}
+	c.startMessageListener(ctx)
+	c.runMonitorLocation()
 
 	c.isOpen = true
 	return nil
@@ -181,4 +176,42 @@ func (c *LocationEngineService) ReceiveMessage(ctx context.Context, envelope *cq
 		c.Logger.Debug(ctx, "Unknown subject: "+subject)
 	}
 	return nil
+}
+
+func (c *LocationEngineService) startMessageListener(ctx context.Context) {
+	c.Logger.Info(ctx, "Starting message listener for ble")
+	if err := c.rawBleListener.Listen(ctx, c); err != nil {
+		c.Logger.Error(ctx, err, "Error while listening to message bus")
+	}
+
+	c.Logger.Info(ctx, "Starting message listener for beacons")
+	if err := c.beaconsEventListener.Listen(ctx, c); err != nil {
+		c.Logger.Error(ctx, err, "Error while listening to message bus")
+	}
+
+	c.Logger.Info(ctx, "Starting message listener for devices")
+	if err := c.deviceEventListener.Listen(ctx, c); err != nil {
+		c.Logger.Error(ctx, err, "Error while listening to message bus")
+	}
+}
+
+func (s *LocationEngineService) runMonitorLocation() {
+	lis, err := net.Listen("tcp", s.monitorPort)
+	if err != nil {
+		s.Logger.Error(context.Background(), err, "Failed to listen: %v", err)
+	}
+
+	opts := []grpc.ServerOption{}
+
+	grpcServer := grpc.NewServer(opts...)
+
+	monitorSvc := NewMonitorLocation(s.stateStore, s.Logger)
+	protos.RegisterLocationMonitorServer(grpcServer, monitorSvc)
+
+	go func() {
+		s.Logger.Info(context.Background(), "Starting monitor service on port %s", s.monitorPort)
+		if err := grpcServer.Serve(lis); err != nil {
+			s.Logger.Error(context.Background(), err, "Failed to serve: %v", err)
+		}
+	}()
 }

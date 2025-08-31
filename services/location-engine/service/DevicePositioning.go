@@ -83,9 +83,25 @@ func (c *LocationEngineService) bleEventHandler(ctx context.Context, envelope *c
 		c.Logger.Error(ctx, err, "Failed to estimate XYZ")
 	}
 
-	err = c.devicePositionPublisher.SendDevicePosition(ctx, &natsEvents.DevicePositioningEventV1{
+	pos := &natsEvents.DevicePositioningEventV1{
 		DeviceId: event.DeviceId, X: x, Y: y, Z: z, Time: time.Now(),
+	}
+
+	c.stateStore.upsert(&DeviceState{
+		OrgID:      d.OrgId,
+		DeviceID:   pos.DeviceId,
+		DeviceName: d.Name,
+		X:          float32(pos.X),
+		Y:          float32(pos.Y),
+		Z:          float32(pos.Z),
+		Info: map[string]string{
+			"source": "ble",
+			"time":   pos.Time.Format(time.RFC3339),
+		},
+		UpdatedAt: time.Now(),
 	})
+
+	err = c.devicePositionPublisher.SendDevicePosition(ctx, pos)
 	if err != nil {
 		c.Logger.Error(ctx, err, "Failed to send message")
 	}

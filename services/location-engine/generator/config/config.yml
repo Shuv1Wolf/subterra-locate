@@ -1,0 +1,28 @@
+---
+# Container descriptor
+- descriptor: "pip-services:context-info:default:default:1.0"
+  name: "service-location-engine"
+  description: "Location engine service"
+
+# Console logger
+- descriptor: "pip-services:logger:console:default:1.0"
+  level: "trace"
+
+# Performance log counters
+- descriptor: "pip-services:counters:log:default:1.0"
+
+# NATS generator publisher
+- descriptor: "generator:publisher:nats:default:1.0"
+  connection:
+    uri:  {{NATS_SERVICE_URI}}
+    host: {{NATS_SERVICE_HOST}}{{#unless NATS_SERVICE_HOST}}"localhost"{{/unless}}
+    port: {{NATS_SERVICE_PORT}}{{#unless NATS_SERVICE_PORT}}4222{{/unless}}
+  credential:
+    username: {{NATS_USER}}
+    password: {{NATS_PASS}}
+  options:
+    autosubscribe: true
+
+# Service
+- descriptor: "generator:service:default:default:1.0"
+

@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package location.engine.protos;
+option go_package = "github.com/Shuv1Wolf/subterra-locate/services/location-engine/protos";
+
+message MonitorDeviceLocationRequestV1 {
+    string org_id = 1;
+    repeated string device_id = 2;
+}
+
+message MonitorDeviceLocationStreamEventV1 {
+    message LocationEventV1 {
+        string device_id = 1;
+        string device_name = 2;
+        float x = 3;
+        float y = 4;
+        float z = 5; 
+        map<string, string> info = 6;
+    }
+
+    repeated LocationEventV1 event = 1;
+}
+
+
+service LocationMonitor {
+    rpc MonitorDeviceLocationV1(MonitorDeviceLocationRequestV1) returns (stream MonitorDeviceLocationStreamEventV1) {}
+}

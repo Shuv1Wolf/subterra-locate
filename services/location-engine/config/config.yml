@@ -89,4 +89,6 @@
 
 # Service
 - descriptor: "location-engine:service:default:default:1.0"
+  monitor:
+    port: ":10030"
 

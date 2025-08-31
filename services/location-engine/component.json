@@ -1,0 +1,8 @@
+{
+    "name":  "location-engine",
+    "type": "services",
+    "language": "go",
+    "version": "1.0.0",
+    "registry": "shuv1Wolf",
+    "build": 0
+}
