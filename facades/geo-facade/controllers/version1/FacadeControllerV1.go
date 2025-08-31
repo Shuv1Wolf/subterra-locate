@@ -13,12 +13,14 @@ import (
 
 type FacadeControllerV1 struct {
 	*httpcontr.RestController
-	beaconsOperations *operations1.BeaconAdminOperationsV1
+	beaconsOperations  *operations1.BeaconAdminOperationsV1
+	locationOperations *operations1.LocationEngineOperationsV1
 }
 
 func NewFacadeControllerV1() *FacadeControllerV1 {
 	c := &FacadeControllerV1{
-		beaconsOperations: operations1.NewBeaconAdminOperationsV1(),
+		beaconsOperations:  operations1.NewBeaconAdminOperationsV1(),
+		locationOperations: operations1.NewLocationEngineOperationsV1(),
 	}
 	c.RestController = httpcontr.InheritRestController(c)
 	c.BaseRoute = "api/v1/geo"
@@ -29,12 +31,14 @@ func (c *FacadeControllerV1) Configure(ctx context.Context, config *cconf.Config
 	c.RestController.Configure(ctx, config)
 
 	c.beaconsOperations.Configure(ctx, config)
+	c.locationOperations.Configure(ctx, config)
 }
 
 func (c *FacadeControllerV1) SetReferences(ctx context.Context, references cref.IReferences) {
 	c.RestController.SetReferences(ctx, references)
 
 	c.beaconsOperations.SetReferences(ctx, references)
+	c.locationOperations.SetReferences(ctx, references)
 }
 
 func (c *FacadeControllerV1) Register() {
@@ -55,4 +59,10 @@ func (c *FacadeControllerV1) FacadeControllerV1() {
 		func(res http.ResponseWriter, req *http.Request) { c.beaconsOperations.UpdateBeacon(res, req) })
 	c.RegisterRoute("delete", "/beacons/:id", nil,
 		func(res http.ResponseWriter, req *http.Request) { c.beaconsOperations.DeleteBeaconById(res, req) })
+
+	// Locations routes
+	c.RegisterRoute("get", "/location/device/monitor", nil,
+		func(res http.ResponseWriter, req *http.Request) {
+			c.locationOperations.MonitorDeviceLocationWS(res, req)
+		})
 }

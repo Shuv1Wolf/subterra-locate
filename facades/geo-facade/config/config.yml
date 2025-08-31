@@ -23,6 +23,13 @@
 - descriptor: "beacon-admin:client:mock:default:1.0"
 {{/if}}
 
+# Location-monitor client
+- descriptor: "location-monitor:client:grpc:default:1.0"
+  connection:
+    protocol: "http"
+    host: {{LOCATION_MONITOR_SERVICE_HOST}}{{^LOCATION_MONITOR_SERVICE_HOST}}"localhost"{{/LOCATION_MONITOR_SERVICE_HOST}}
+    port: {{LOCATION_MONITOR_SERVICE_PORT}}{{^LOCATION_MONITOR_SERVICE_PORT}}10030{{/LOCATION_MONITOR_SERVICE_PORT}}
+
 # Main facade service
 - descriptor: "pip-services:endpoint:http:default:*"
   root_path: ""
