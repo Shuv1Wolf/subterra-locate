@@ -1,4 +1,4 @@
-package version1
+package clients1
 
 import (
 	"context"
@@ -20,7 +20,7 @@ func NewLocationMonitorGrpcClientV1() *LocationMonitorGrpcClientV1 {
 	return c
 }
 
-func (c *LocationMonitorGrpcClientV1) Open(ctx context.Context, correlationId string) error {
+func (c *LocationMonitorGrpcClientV1) Open(ctx context.Context) error {
 	err := c.GrpcClient.Open(ctx)
 	if err == nil {
 		c.client = protos.NewLocationMonitorClient(c.Connection)
