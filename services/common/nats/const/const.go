@@ -18,3 +18,10 @@ const (
 	NATS_DEVICE_EVENTS_DELETED_TYPE = "device.events.deleted"
 	NATS_DEVICE_EVENTS_CHANGED_TYPE = "device.events.changed"
 )
+
+const (
+	NATS_MAP2D_EVENTS_TOPIC        = "map2d.events"
+	NATS_MAP2D_EVENTS_CREATED_TYPE = "map2d.events.created"
+	NATS_MAP2D_EVENTS_DELETED_TYPE = "map2d.events.deleted"
+	NATS_MAP2D_EVENTS_CHANGED_TYPE = "map2d.events.changed"
+)
