@@ -114,7 +114,7 @@ func (c *DeviceService) DeleteDeviceById(ctx context.Context,
 	}
 
 	if c.deviceEvents != nil {
-		err = c.deviceEvents.SendDeviceCreatedEvent(ctx, b.Id)
+		err = c.deviceEvents.SendDeviceDeletedEvent(ctx, b.Id)
 		if err != nil {
 			return b, err
 		}
