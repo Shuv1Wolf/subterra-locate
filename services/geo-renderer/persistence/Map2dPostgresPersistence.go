@@ -32,7 +32,10 @@ func (c *Map2dPostgresPersistence) DefineSchema() {
 		"\"scale_x\" FLOAT, " +
 		"\"scale_y\" FLOAT, " +
 		"\"created_at\" TIMESTAMP, " +
-		"\"org_id\" VARCHAR(32))")
+		"\"org_id\" VARCHAR(32), " +
+		"\"width\" FLOAT, " +
+		"\"height\" FLOAT, " +
+		"\"level\" INTEGER)")
 
 	c.EnsureIndex(c.TableName+"_org_id", map[string]string{"org_id": "1"}, nil)
 }
@@ -59,7 +62,7 @@ func (c *Map2dPostgresPersistence) composeFilter(filter cquery.FilterParams) str
 func (c *Map2dPostgresPersistence) Create(ctx context.Context, item data1.Map2dV1) (data1.Map2dV1, error) {
 	if item.Id == "" {
 		var nextId int64
-		row := c.Client.QueryRow(ctx, "SELECT nextval('device_id_seq')")
+		row := c.Client.QueryRow(ctx, "SELECT nextval('map_2d_id_seq')")
 		if err := row.Scan(&nextId); err != nil {
 			return item, err
 		}

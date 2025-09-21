@@ -46,7 +46,7 @@
   connection:
     protocol: http
     host: 0.0.0.0
-    port: {{GEO_RENDER_PORT}}{{#unless GEO_RENDER_PORT}}10030{{/unless}}
+    port: {{GEO_RENDER_PORT}}{{#unless GEO_RENDER_PORT}}10040{{/unless}}
 
 # Commandable GRPC V1
 - descriptor: "geo-renderer:controller:grpc:default:1.0"

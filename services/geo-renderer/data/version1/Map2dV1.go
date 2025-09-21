@@ -5,11 +5,14 @@ import "time"
 type Map2dV1 struct {
 	Id        string    `json:"id"`
 	Name      string    `json:"name"`
-	SVG       string    `json:"svg_content"`
-	ScaleX    float64   `json:"scale_x"`
-	ScaleY    float64   `json:"scale_y"`
+	SVG       string    `json:"svg_content"` // original svg
+	ScaleX    float64   `json:"scale_x"`     // scale in meters
+	ScaleY    float64   `json:"scale_y"`     // scale in meters
 	CreatedAt time.Time `json:"created_at"`
 	OrgId     string    `json:"org_id"`
+	Width     float64   `json:"width"`  // width in meters
+	Height    float64   `json:"height"` // height in meters
+	Level     int       `json:"level"`  // level of the map
 }
 
 func (m *Map2dV1) Clone() Map2dV1 {
