@@ -4,17 +4,19 @@ go 1.24.4
 
 require (
 	github.com/Shuv1Wolf/subterra-locate/clients/beacon-admin v1.0.2
+	github.com/Shuv1Wolf/subterra-locate/clients/geo-renderer v1.0.2
+	github.com/Shuv1Wolf/subterra-locate/clients/location-engine v1.0.3
 	github.com/Shuv1Wolf/subterra-locate/services/beacon-admin v1.0.1
+	github.com/Shuv1Wolf/subterra-locate/services/geo-renderer v1.0.1
+	github.com/gorilla/websocket v1.5.3
 	github.com/pip-services4/pip-services4-go/pip-services4-components-go v0.0.1-2
 	github.com/pip-services4/pip-services4-go/pip-services4-container-go v0.0.1-3
 	github.com/pip-services4/pip-services4-go/pip-services4-http-go v0.0.1-4
 )
 
 require (
-	github.com/Shuv1Wolf/subterra-locate/clients/location-engine v1.0.3 // indirect
-	github.com/Shuv1Wolf/subterra-locate/services/location-engine v1.0.0 // indirect
+	github.com/Shuv1Wolf/subterra-locate/services/location-engine v1.0.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.14.0 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect

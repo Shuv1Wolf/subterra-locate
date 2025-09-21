@@ -30,6 +30,13 @@
     host: {{LOCATION_MONITOR_SERVICE_HOST}}{{^LOCATION_MONITOR_SERVICE_HOST}}"localhost"{{/LOCATION_MONITOR_SERVICE_HOST}}
     port: {{LOCATION_MONITOR_SERVICE_PORT}}{{^LOCATION_MONITOR_SERVICE_PORT}}10030{{/LOCATION_MONITOR_SERVICE_PORT}}
 
+# Geo-renderer client
+- descriptor: "geo-renderer:client:grpc:default:1.0"
+  connection:
+    protocol: "http"
+    host: {{GEO_RENDERER_SERVICE_HOST}}{{^GEO_RENDERER_SERVICE_HOST}}"localhost"{{/GEO_RENDERER_SERVICE_HOST}}
+    port: {{GEO_RENDERER_SERVICE_PORT}}{{^GEO_RENDERER_SERVICE_PORT}}10040{{/GEO_RENDERER_SERVICE_PORT}}
+
 # Main facade service
 - descriptor: "pip-services:endpoint:http:default:*"
   root_path: ""
