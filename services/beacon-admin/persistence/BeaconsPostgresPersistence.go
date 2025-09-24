@@ -34,10 +34,12 @@ func (c *BeaconsPostgresPersistence) DefineSchema() {
 		"\"y\" FLOAT, " +
 		"\"z\" FLOAT, " +
 		"\"org_id\" VARCHAR(32), " +
+		"\"map_id\" VARCHAR(32), " +
 		"\"enabled\" BOOLEAN)")
 
 	c.EnsureIndex(c.TableName+"_type", map[string]string{"type": "1"}, nil)
 	c.EnsureIndex(c.TableName+"_org_id", map[string]string{"org_id": "1"}, nil)
+	c.EnsureIndex(c.TableName+"_map_id", map[string]string{"map_id": "1"}, nil)
 	c.EnsureIndex(c.TableName+"_udi", map[string]string{"udi": "1"}, nil)
 }
 
@@ -46,8 +48,11 @@ func (c *BeaconsPostgresPersistence) composeFilter(filter cquery.FilterParams) s
 	if id, ok := filter.GetAsNullableString("id"); ok && id != "" {
 		filters = append(filters, "id='"+id+"'")
 	}
-	if siteId, ok := filter.GetAsNullableString("org_id"); ok && siteId != "" {
-		filters = append(filters, "org_id='"+siteId+"'")
+	if org_id, ok := filter.GetAsNullableString("org_id"); ok && org_id != "" {
+		filters = append(filters, "org_id='"+org_id+"'")
+	}
+	if map_id, ok := filter.GetAsNullableString("map_id"); ok && map_id != "" {
+		filters = append(filters, "map_id='"+map_id+"'")
 	}
 	if typeId, ok := filter.GetAsNullableString("type"); ok && typeId != "" {
 		filters = append(filters, "type='"+typeId+"'")
