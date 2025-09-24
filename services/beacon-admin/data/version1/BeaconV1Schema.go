@@ -21,6 +21,7 @@ func NewBeaconV1Schema() *BeaconV1Schema {
 	c.WithOptionalProperty("y", cconv.Float)
 	c.WithOptionalProperty("z", cconv.Float)
 	c.WithOptionalProperty("org_id", cconv.String)
+	c.WithOptionalProperty("map_id", cconv.String)
 	c.WithOptionalProperty("enabled", cconv.Boolean)
 	return &c
 }

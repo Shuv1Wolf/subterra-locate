@@ -10,6 +10,7 @@ type BeaconV1 struct {
 	Z       float32 `json:"z"`
 	OrgId   string  `json:"org_id"`
 	Enabled bool    `json:"enabled"`
+	MapId   string  `json:"mao_id"`
 	// Radius float32    `json:"radius" bson:"radius"`
 }
 
@@ -24,6 +25,7 @@ func (b BeaconV1) Clone() BeaconV1 {
 		Z:       b.Z,
 		OrgId:   b.OrgId,
 		Enabled: b.Enabled,
+		MapId:   b.MapId,
 		// Radius: b.Radius,
 	}
 }
