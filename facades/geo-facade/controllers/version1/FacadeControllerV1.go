@@ -77,6 +77,8 @@ func (c *FacadeControllerV1) FacadeControllerV1() {
 		func(res http.ResponseWriter, req *http.Request) { c.geoRendererOperations.GetMapById(res, req) })
 	c.RegisterRoute("post", "/map", nil,
 		func(res http.ResponseWriter, req *http.Request) { c.geoRendererOperations.CreateMap(res, req) })
+	c.RegisterRoute("post", "/map/upload", nil,
+		func(res http.ResponseWriter, req *http.Request) { c.geoRendererOperations.UploadMapSVG(res, req) })
 	c.RegisterRoute("put", "/map", nil,
 		func(res http.ResponseWriter, req *http.Request) { c.geoRendererOperations.UpdateMap(res, req) })
 	c.RegisterRoute("delete", "/map/:id", nil,

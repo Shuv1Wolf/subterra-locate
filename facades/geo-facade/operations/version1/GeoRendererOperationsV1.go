@@ -3,9 +3,12 @@ package operations1
 import (
 	"context"
 	"net/http"
+	"time"
 
 	cref "github.com/pip-services4/pip-services4-go/pip-services4-components-go/refer"
 	httpcontr "github.com/pip-services4/pip-services4-go/pip-services4-http-go/controllers"
+
+	"io/ioutil"
 
 	clients1 "github.com/Shuv1Wolf/subterra-locate/clients/geo-renderer/clients/version1"
 	services1 "github.com/Shuv1Wolf/subterra-locate/services/geo-renderer/data/version1"
@@ -59,6 +62,38 @@ func (c *GeoRendererOperationsV1) GetMapById(res http.ResponseWriter, req *http.
 	}
 }
 
+func (c *GeoRendererOperationsV1) UploadMapSVG(res http.ResponseWriter, req *http.Request) {
+	id := c.GetParam(req, "id")
+	if err := req.ParseMultipartForm(10 << 20); err != nil {
+		c.SendError(res, req, err)
+		return
+	}
+	file, _, err := req.FormFile("file")
+	if err != nil {
+		c.SendError(res, req, err)
+		return
+	}
+	defer file.Close()
+	data, err := ioutil.ReadAll(file)
+	if err != nil {
+		c.SendError(res, req, err)
+		return
+	}
+	svgString := string(data)
+	item, err := c.geoRenderer.GetMapById(context.Background(), id)
+	if err != nil {
+		c.SendError(res, req, err)
+		return
+	}
+	item.SVG = svgString
+	updated, err := c.geoRenderer.UpdateMap(context.Background(), *item)
+	if err != nil {
+		c.SendError(res, req, err)
+	} else {
+		c.SendResult(res, req, updated, nil)
+	}
+}
+
 func (c *GeoRendererOperationsV1) CreateMap(res http.ResponseWriter, req *http.Request) {
 
 	data := services1.Map2dV1{}
@@ -66,6 +101,7 @@ func (c *GeoRendererOperationsV1) CreateMap(res http.ResponseWriter, req *http.R
 	if err != nil {
 		c.SendError(res, req, err)
 	}
+	data.CreatedAt = time.Now()
 	item, err := c.geoRenderer.CreateMap(context.Background(), data)
 	if err != nil {
 		c.SendError(res, req, err)

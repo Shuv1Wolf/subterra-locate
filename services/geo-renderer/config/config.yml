@@ -19,7 +19,7 @@
   connection:
     uri: {{POSTGRES_SERVICE_URI}}
     host: {{POSTGRES_SERVICE_HOST}}{{#unless POSTGRES_SERVICE_HOST}}"localhost"{{/unless}}
-    port: {{POSTGRES_SERVICE_PORT}}{{#unless POSTGRES_SERVICE_PORT}}5432{{/unless}}
+    port: {{POSTGRES_SERVICE_PORT}}{{#unless POSTGRES_SERVICE_PORT}}5431{{/unless}}
     database: {{POSTGRES_DB}}{{#unless POSTGRES_DB}}"subterra-locate"{{/unless}}
   credential:
     username: {{POSTGRES_USER}}{{#unless POSTGRES_USER}}"postgres"{{/unless}}

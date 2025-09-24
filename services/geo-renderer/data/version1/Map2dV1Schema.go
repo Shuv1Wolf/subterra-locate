@@ -15,7 +15,6 @@ func NewMap2dV1Schema() *Map2dV1Schema {
 
 	c.WithOptionalProperty("id", cconv.String)
 	c.WithOptionalProperty("name", cconv.String)
-	c.WithOptionalProperty("svg_content", cconv.String)
 	c.WithOptionalProperty("scale_x", cconv.Float)
 	c.WithOptionalProperty("scale_y", cconv.Float)
 	c.WithOptionalProperty("org_id", cconv.String)
