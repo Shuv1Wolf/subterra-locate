@@ -66,7 +66,7 @@ func (c *Map2dPostgresPersistence) Create(ctx context.Context, item data1.Map2dV
 		if err := row.Scan(&nextId); err != nil {
 			return item, err
 		}
-		item.Id = fmt.Sprintf("map2d$%d", nextId)
+		item.Id = fmt.Sprintf("map$%d", nextId)
 	}
 
 	return c.IdentifiablePostgresPersistence.Create(ctx, item)
