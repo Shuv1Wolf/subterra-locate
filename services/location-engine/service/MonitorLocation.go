@@ -78,14 +78,20 @@ func (s *MonitorLocation) MonitorDeviceLocationV1(
 			return ctx.Err()
 
 		case c := <-sub.C():
-			if mapID != "" && c.ev.GetMapId() != mapID {
-				continue
-			}
 			if len(devFilter) > 0 {
 				if _, ok := devFilter[c.ev.GetDeviceId()]; !ok {
 					continue
 				}
 			}
+
+			if c.ev.X == 0 && c.ev.Y == 0 && c.ev.Z == 0 {
+				pending[c.ev.GetDeviceId()] = c.ev
+			}
+
+			if mapID != "" && c.ev.GetMapId() != mapID {
+				continue
+			}
+
 			pending[c.ev.GetDeviceId()] = c.ev
 
 		case <-ticker.C:

@@ -68,6 +68,8 @@ func (c *LocationEngineOperationsV1) MonitorDeviceLocationWS(res http.ResponseWr
 		return
 	}
 
+	mapId := strings.TrimSpace(q.Get("map_id"))
+
 	deviceIDs := make([]string, 0)
 	if v := strings.TrimSpace(q.Get("device_ids")); v != "" {
 		deviceIDs = splitAndTrim(v) // безопасный сплит
@@ -78,7 +80,7 @@ func (c *LocationEngineOperationsV1) MonitorDeviceLocationWS(res http.ResponseWr
 	defer cancel()
 
 	// 4) Start the backend streaming RPC
-	stream, err := c.locationMonitor.MonitorDeviceLocation(ctx, orgID, deviceIDs)
+	stream, err := c.locationMonitor.MonitorDeviceLocation(ctx, orgID, mapId, deviceIDs)
 	if err != nil {
 		_ = writeWSJSON(conn, map[string]any{"error": fmt.Sprintf("stream start failed: %v", err)})
 		return

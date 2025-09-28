@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	natsEvents "github.com/Shuv1Wolf/subterra-locate/services/common/nats/events"
 	"github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
@@ -128,6 +129,22 @@ func (c *LocationEngineService) deviceDeletedEvent(ctx context.Context, msg stri
 	err := json.Unmarshal([]byte(msg), &event)
 	if err != nil {
 		c.Logger.Error(ctx, err, "Failed to deserialize message")
+	}
+
+	if dev, ok := c.deviceMap[event.Id]; ok {
+		c.stateStore.upsert(&DeviceState{
+			OrgID:      dev.OrgId,
+			MapID:      "",
+			DeviceID:   dev.Id,
+			DeviceName: dev.Name,
+			X:          0,
+			Y:          0,
+			Z:          0,
+			Info: map[string]string{
+				"source": "ble",
+			},
+			UpdatedAt: time.Now(),
+		})
 	}
 
 	delete(c.deviceMap, event.Id)
