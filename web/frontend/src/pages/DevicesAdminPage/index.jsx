@@ -55,7 +55,10 @@ export default function DevicesAdminPage() {
     <AdminPageContainer>
       <Header>
         <Title>Devices Admin</Title>
-        <Button onClick={() => navigate('/devices-admin/new')}>Add New Device</Button>
+        <div>
+          <Button onClick={() => navigate('/devices-admin/new')} style={{marginRight: '10px'}}>Add New Device</Button>
+          <Button onClick={() => navigate('/')}>Back to Home</Button>
+        </div>
       </Header>
       <DeviceTable>
         <thead>

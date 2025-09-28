@@ -59,7 +59,10 @@ export default function BeaconsAdminPage() {
     <AdminPageContainer>
       <Header>
         <Title>Beacons Admin</Title>
-        <Button onClick={() => navigate('/beacons-admin/new')}>Add New Beacon</Button>
+        <div>
+          <Button onClick={() => navigate('/beacons-admin/new')} style={{marginRight: '10px'}}>Add New Beacon</Button>
+          <Button onClick={() => navigate('/')}>Back to Home</Button>
+        </div>
       </Header>
       <BeaconTable>
         <thead>
