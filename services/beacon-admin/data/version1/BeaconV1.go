@@ -10,7 +10,7 @@ type BeaconV1 struct {
 	Z       float32 `json:"z"`
 	OrgId   string  `json:"org_id"`
 	Enabled bool    `json:"enabled"`
-	MapId   string  `json:"mao_id"`
+	MapId   string  `json:"map_id"`
 	// Radius float32    `json:"radius" bson:"radius"`
 }
 
