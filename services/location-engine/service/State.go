@@ -9,6 +9,7 @@ import (
 
 type DeviceState struct {
 	OrgID      string
+	MapID      string
 	DeviceID   string
 	DeviceName string
 	X, Y, Z    float32
@@ -86,6 +87,7 @@ func (s *StateStore) upsert(ev *DeviceState) {
 		ev: &protos.MonitorDeviceLocationStreamEventV1_LocationEventV1{
 			DeviceId:   ev.DeviceID,
 			DeviceName: ev.DeviceName,
+			MapId:      ev.MapID,
 			X:          ev.X,
 			Y:          ev.Y,
 			Z:          ev.Z,
@@ -94,7 +96,7 @@ func (s *StateStore) upsert(ev *DeviceState) {
 	})
 }
 
-func (s *StateStore) snapshot(orgID string, filter map[string]struct{}) []*protos.MonitorDeviceLocationStreamEventV1_LocationEventV1 {
+func (s *StateStore) snapshot(orgID string) []*protos.MonitorDeviceLocationStreamEventV1_LocationEventV1 {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	res := make([]*protos.MonitorDeviceLocationStreamEventV1_LocationEventV1, 0)
@@ -102,15 +104,11 @@ func (s *StateStore) snapshot(orgID string, filter map[string]struct{}) []*proto
 	if orgMap == nil {
 		return res
 	}
-	for id, st := range orgMap {
-		if len(filter) > 0 {
-			if _, ok := filter[id]; !ok {
-				continue
-			}
-		}
+	for _, st := range orgMap {
 		res = append(res, &protos.MonitorDeviceLocationStreamEventV1_LocationEventV1{
 			DeviceId:   st.DeviceID,
 			DeviceName: st.DeviceName,
+			MapId:      st.MapID,
 			X:          st.X, Y: st.Y, Z: st.Z,
 			Info: st.Info,
 		})

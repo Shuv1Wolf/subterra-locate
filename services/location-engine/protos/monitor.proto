@@ -5,17 +5,19 @@ option go_package = "github.com/Shuv1Wolf/subterra-locate/services/location-engi
 
 message MonitorDeviceLocationRequestV1 {
     string org_id = 1;
-    repeated string device_id = 2;
+    string map_id = 2;
+    repeated string device_id = 3;
 }
 
 message MonitorDeviceLocationStreamEventV1 {
     message LocationEventV1 {
         string device_id = 1;
         string device_name = 2;
-        float x = 3;
-        float y = 4;
-        float z = 5; 
-        map<string, string> info = 6;
+        string map_id = 3;
+        float x = 4;
+        float y = 5;
+        float z = 6; 
+        map<string, string> info = 7;
     }
 
     repeated LocationEventV1 event = 1;

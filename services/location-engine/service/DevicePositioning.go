@@ -19,7 +19,26 @@ func (c *LocationEngineService) EstimateXYZ(
 	event natsEvents.DeviceDetectedBLERawEventV1,
 	n float64,
 	defaultTxPower int,
-) (x, y, z float64, err error) {
+) (x, y, z float64, mapId string, err error) {
+
+	mapIdCounts := make(map[string]int)
+	for _, e := range event.Beacons {
+		c.mu.Lock()
+		b, ok := c.beaconsMap[e.Id]
+		c.mu.Unlock()
+		if ok && b.Enabled {
+			mapIdCounts[b.MapId]++
+		}
+	}
+
+	var mostFrequentMapId string
+	maxCount := 0
+	for mapId, count := range mapIdCounts {
+		if count > maxCount {
+			maxCount = count
+			mostFrequentMapId = mapId
+		}
+	}
 
 	var data []utils.Obs
 	for _, e := range event.Beacons {
@@ -48,7 +67,7 @@ func (c *LocationEngineService) EstimateXYZ(
 	}
 
 	if len(data) < 3 {
-		return 0, 0, 0, fmt.Errorf("need >=3 beacons, got %d", len(data))
+		return 0, 0, 0, "", fmt.Errorf("need >=3 beacons, got %d", len(data))
 	}
 
 	utils.NormalizeWeights(data)
@@ -56,11 +75,11 @@ func (c *LocationEngineService) EstimateXYZ(
 	// If all beacons are on approximately the same Z plane, solve in 2D.
 	if planeZ, ok := utils.CommonZ(data, 0.25); ok {
 		xx, yy, _, e := utils.GaussNewton(data, true, planeZ)
-		return xx, yy, planeZ, e
+		return xx, yy, planeZ, mostFrequentMapId, e
 	}
 
 	xx, yy, zz, e := utils.GaussNewton(data, false, 0)
-	return xx, yy, zz, e
+	return xx, yy, zz, mostFrequentMapId, e
 }
 
 func (c *LocationEngineService) bleEventHandler(ctx context.Context, envelope *cqueues.MessageEnvelope) error {
@@ -78,7 +97,7 @@ func (c *LocationEngineService) bleEventHandler(ctx context.Context, envelope *c
 		return nil
 	}
 
-	x, y, z, err := c.EstimateXYZ(ctx, event, 3, -59)
+	x, y, z, mapId, err := c.EstimateXYZ(ctx, event, 3, -59)
 	if err != nil {
 		c.Logger.Error(ctx, err, "Failed to estimate XYZ")
 	}
@@ -89,6 +108,7 @@ func (c *LocationEngineService) bleEventHandler(ctx context.Context, envelope *c
 
 	c.stateStore.upsert(&DeviceState{
 		OrgID:      d.OrgId,
+		MapID:      mapId,
 		DeviceID:   pos.DeviceId,
 		DeviceName: d.Name,
 		X:          float32(pos.X),

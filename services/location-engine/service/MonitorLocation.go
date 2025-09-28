@@ -26,14 +26,27 @@ func (s *MonitorLocation) MonitorDeviceLocationV1(
 ) error {
 	ctx := stream.Context()
 	orgID := in.GetOrgId()
+	mapID := in.GetMapId()
 
-	filter := make(map[string]struct{}, len(in.GetDeviceId()))
+	devFilter := make(map[string]struct{}, len(in.GetDeviceId()))
 	for _, id := range in.GetDeviceId() {
-		filter[id] = struct{}{}
+		devFilter[id] = struct{}{}
 	}
 
-	initial := s.state.snapshot(orgID, filter)
-	if err := stream.Send(&protos.MonitorDeviceLocationStreamEventV1{Event: initial}); err != nil {
+	initial := s.state.snapshot(orgID)
+	resp := make([]*protos.MonitorDeviceLocationStreamEventV1_LocationEventV1, 0, len(initial))
+	for _, ev := range initial {
+		if mapID != "" && ev.GetMapId() != mapID {
+			continue
+		}
+		if len(devFilter) > 0 {
+			if _, ok := devFilter[ev.GetDeviceId()]; !ok {
+				continue
+			}
+		}
+		resp = append(resp, ev)
+	}
+	if err := stream.Send(&protos.MonitorDeviceLocationStreamEventV1{Event: resp}); err != nil {
 		return err
 	}
 
@@ -65,8 +78,11 @@ func (s *MonitorLocation) MonitorDeviceLocationV1(
 			return ctx.Err()
 
 		case c := <-sub.C():
-			if len(filter) > 0 {
-				if _, ok := filter[c.ev.GetDeviceId()]; !ok {
+			if mapID != "" && c.ev.GetMapId() != mapID {
+				continue
+			}
+			if len(devFilter) > 0 {
+				if _, ok := devFilter[c.ev.GetDeviceId()]; !ok {
 					continue
 				}
 			}
