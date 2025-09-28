@@ -33,16 +33,16 @@ export default function HomePage() {
         {/* Devices tile */}
         <Tile>
           <TileIcon>💻</TileIcon>
-          <TileTitle>Devices</TileTitle>
-          <TileDescription>Coming soon</TileDescription>
-          <TileButton disabled>Open</TileButton>
+          <TileTitle>Devices Admin</TileTitle>
+          <TileDescription>Manage devices</TileDescription>
+          <TileButton onClick={() => navigate("/devices-admin")}>Open</TileButton>
         </Tile>
-        {/* Beacons tile */}
+        {/* Beacons Admin tile */}
         <Tile>
-          <TileIcon>📡</TileIcon>
-          <TileTitle>Beacons</TileTitle>
-          <TileDescription>Coming soon</TileDescription>
-          <TileButton disabled>Open</TileButton>
+          <TileIcon>⚙️</TileIcon>
+          <TileTitle>Beacons Admin</TileTitle>
+          <TileDescription>Manage beacons</TileDescription>
+          <TileButton onClick={() => navigate("/beacons-admin")}>Open</TileButton>
         </Tile>
       </TilesContainer>
     </HomePageContainer>

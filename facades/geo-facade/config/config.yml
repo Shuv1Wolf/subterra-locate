@@ -44,6 +44,12 @@
     protocol: "http"
     host: "0.0.0.0"
     port: 8081
+  options:
+    debug: true
+    maintenance_enabled: false
+    max_req_size: "1024mb"
+  cors_headers: "trace_id,access_token,x-session-id,Accept,Content-Type,Content-Length,X-CSRF-Token,authorization"
+  cors_origins:  "*"
 
 # Facade API V1
 - descriptor: "geo-facade:controller:http:default:1.0"
