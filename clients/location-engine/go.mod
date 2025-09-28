@@ -3,7 +3,7 @@ module github.com/Shuv1Wolf/subterra-locate/clients/location-engine
 go 1.24.4
 
 require (
-	github.com/Shuv1Wolf/subterra-locate/services/location-engine v1.0.2
+	github.com/Shuv1Wolf/subterra-locate/services/location-engine v1.0.3
 	github.com/pip-services4/pip-services4-go/pip-services4-components-go v0.0.1-2
 	github.com/pip-services4/pip-services4-go/pip-services4-grpc-go v0.0.1-3
 	google.golang.org/grpc v1.73.0

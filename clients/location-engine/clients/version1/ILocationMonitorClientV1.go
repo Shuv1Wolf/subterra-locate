@@ -8,5 +8,5 @@ import (
 )
 
 type ILocationMonitorClientV1 interface {
-	MonitorDeviceLocation(ctx context.Context, orgId string, deviceIds []string) (grpc.ServerStreamingClient[protos.MonitorDeviceLocationStreamEventV1], error)
+	MonitorDeviceLocation(ctx context.Context, orgId string, mapId string, deviceIds []string) (grpc.ServerStreamingClient[protos.MonitorDeviceLocationStreamEventV1], error)
 }

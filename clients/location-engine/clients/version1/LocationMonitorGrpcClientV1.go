@@ -28,10 +28,11 @@ func (c *LocationMonitorGrpcClientV1) Open(ctx context.Context) error {
 	return err
 }
 
-func (c *LocationMonitorGrpcClientV1) MonitorDeviceLocation(ctx context.Context, orgId string, deviceIds []string) (grpc.ServerStreamingClient[protos.MonitorDeviceLocationStreamEventV1], error) {
+func (c *LocationMonitorGrpcClientV1) MonitorDeviceLocation(ctx context.Context, orgId string, mapId string, deviceIds []string) (grpc.ServerStreamingClient[protos.MonitorDeviceLocationStreamEventV1], error) {
 	request := &protos.MonitorDeviceLocationRequestV1{
 		OrgId:    orgId,
 		DeviceId: deviceIds,
+		MapId:    mapId,
 	}
 
 	stream, err := c.client.MonitorDeviceLocationV1(ctx, request)
