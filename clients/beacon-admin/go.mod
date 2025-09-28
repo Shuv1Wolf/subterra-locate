@@ -3,7 +3,7 @@ module github.com/Shuv1Wolf/subterra-locate/clients/beacon-admin
 go 1.24.4
 
 require (
-	github.com/Shuv1Wolf/subterra-locate/services/beacon-admin v1.0.3
+	github.com/Shuv1Wolf/subterra-locate/services/beacon-admin v1.0.4
 	github.com/pip-services4/pip-services4-go/pip-services4-commons-go v0.0.1-2
 	github.com/pip-services4/pip-services4-go/pip-services4-components-go v0.0.1-2
 	github.com/pip-services4/pip-services4-go/pip-services4-data-go v0.0.1-2
