@@ -157,3 +157,77 @@ export const CloseButton = styled.button`
     color: #fff;
   }
 `;
+
+export const ContextMenu = styled.div`
+  position: absolute;
+  background: #232936;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  padding: 8px;
+  z-index: 1000;
+  border: 1px solid #222a36;
+  width: 160px;
+  white-space: nowrap;
+`;
+
+export const ContextMenuItem = styled.div`
+  padding: 8px 16px;
+  color: #e3eafc;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 14px;
+
+  &:hover {
+    background: #1976d2;
+  }
+`;
+
+export const ModalBackdrop = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+`;
+
+export const ModalContent = styled.div`
+  background: #232936;
+  padding: 20px;
+  border-radius: 12px;
+  width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+  color: #e3eafc;
+  border: 1px solid #222a36;
+
+  h3 {
+    margin-top: 0;
+    color: #90caf9;
+  }
+`;
+
+export const BeaconList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+`;
+
+export const BeaconListItem = styled.li`
+  padding: 12px;
+  border-bottom: 1px solid #222a36;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #1976d2;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+`;
