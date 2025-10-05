@@ -36,7 +36,7 @@ func (c *LocationEngineService) initBeaconsCache() {
 
 			c.beaconStateStore.Upsert(&utils.BeaconState{
 				OrgID:      beacon.OrgId,
-				MapID:      "",
+				MapID:      beacon.MapId,
 				BeaconID:   beacon.Id,
 				BeaconName: beacon.Label,
 				X:          beacon.X,
@@ -74,7 +74,7 @@ func (c *LocationEngineService) beaconChangedEvent(ctx context.Context, msg stri
 
 	c.beaconStateStore.Upsert(&utils.BeaconState{
 		OrgID:      b.OrgId,
-		MapID:      "",
+		MapID:      b.MapId,
 		BeaconID:   b.Id,
 		BeaconName: b.Label,
 		X:          b.X,
@@ -100,7 +100,7 @@ func (c *LocationEngineService) beaconDeletedEvent(ctx context.Context, msg stri
 	if be, ok := c.beaconsMap[event.Id]; ok {
 		c.beaconStateStore.Upsert(&utils.BeaconState{
 			OrgID:      be.OrgId,
-			MapID:      "",
+			MapID:      be.MapId,
 			BeaconID:   be.Id,
 			BeaconName: be.Label,
 			X:          0,
