@@ -70,6 +70,11 @@ func (c *FacadeControllerV1) FacadeControllerV1() {
 			c.locationOperations.MonitorDeviceLocationWS(res, req)
 		})
 
+	c.RegisterRoute("get", "/location/beacon/monitor", nil,
+		func(res http.ResponseWriter, req *http.Request) {
+			c.locationOperations.MonitorBeaconLocationWS(res, req)
+		})
+
 	// Geo renderer routes
 	c.RegisterRoute("get", "/map", nil,
 		func(res http.ResponseWriter, req *http.Request) { c.geoRendererOperations.GetMaps(res, req) })
