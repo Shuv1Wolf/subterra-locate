@@ -42,3 +42,18 @@ func (c *LocationMonitorGrpcClientV1) MonitorDeviceLocation(ctx context.Context,
 
 	return stream, nil
 }
+
+func (c *LocationMonitorGrpcClientV1) MonitorBeaconLocation(ctx context.Context, orgId string, mapId string, beaconIds []string) (grpc.ServerStreamingClient[protos.MonitorBeaconLocationStreamEventV1], error) {
+	request := &protos.MonitorBeaconLocationRequestV1{
+		OrgId:    orgId,
+		BeaconId: beaconIds,
+		MapId:    mapId,
+	}
+
+	stream, err := c.client.MonitorBeaconLocationV1(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	return stream, nil
+}
