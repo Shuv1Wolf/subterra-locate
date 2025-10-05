@@ -155,7 +155,9 @@ export default function NewMapPage() {
   };
 
   const handleBeaconSelect = async (beacon) => {
+    console.log('Selected beacon:', beacon);
     setIsBeaconModalOpen(false);
+    console.log(contextMenu);
     if (!contextMenu) return;
 
     const updatedBeacon = {
@@ -410,7 +412,7 @@ export default function NewMapPage() {
               <div ref={mapContentRef} style={{ position: 'relative', width: selectedMap.width, height: selectedMap.height }}>
                 <div style={{ width: '100%', height: '100%' }} dangerouslySetInnerHTML={{ __html: selectedMap.svg_content }} />
                 {contextMenu && (
-                  <ContextMenu style={{ top: contextMenu.y, left: contextMenu.x }}>
+                  <ContextMenu style={{ top: contextMenu.y, left: contextMenu.x }} onClick={(e) => e.stopPropagation()}>
                     <ContextMenuItem onClick={handlePlaceBeacon}>Place a beacon</ContextMenuItem>
                   </ContextMenu>
                 )}
