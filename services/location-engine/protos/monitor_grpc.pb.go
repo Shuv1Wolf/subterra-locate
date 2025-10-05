@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	LocationMonitor_MonitorDeviceLocationV1_FullMethodName = "/location.engine.protos.LocationMonitor/MonitorDeviceLocationV1"
+	LocationMonitor_MonitorBeaconLocationV1_FullMethodName = "/location.engine.protos.LocationMonitor/MonitorBeaconLocationV1"
 )
 
 // LocationMonitorClient is the client API for LocationMonitor service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type LocationMonitorClient interface {
 	MonitorDeviceLocationV1(ctx context.Context, in *MonitorDeviceLocationRequestV1, opts ...grpc.CallOption) (grpc.ServerStreamingClient[MonitorDeviceLocationStreamEventV1], error)
+	MonitorBeaconLocationV1(ctx context.Context, in *MonitorBeaconLocationRequestV1, opts ...grpc.CallOption) (grpc.ServerStreamingClient[MonitorBeaconLocationStreamEventV1], error)
 }
 
 type locationMonitorClient struct {
@@ -56,11 +58,31 @@ func (c *locationMonitorClient) MonitorDeviceLocationV1(ctx context.Context, in 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type LocationMonitor_MonitorDeviceLocationV1Client = grpc.ServerStreamingClient[MonitorDeviceLocationStreamEventV1]
 
+func (c *locationMonitorClient) MonitorBeaconLocationV1(ctx context.Context, in *MonitorBeaconLocationRequestV1, opts ...grpc.CallOption) (grpc.ServerStreamingClient[MonitorBeaconLocationStreamEventV1], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &LocationMonitor_ServiceDesc.Streams[1], LocationMonitor_MonitorBeaconLocationV1_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[MonitorBeaconLocationRequestV1, MonitorBeaconLocationStreamEventV1]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type LocationMonitor_MonitorBeaconLocationV1Client = grpc.ServerStreamingClient[MonitorBeaconLocationStreamEventV1]
+
 // LocationMonitorServer is the server API for LocationMonitor service.
 // All implementations must embed UnimplementedLocationMonitorServer
 // for forward compatibility.
 type LocationMonitorServer interface {
 	MonitorDeviceLocationV1(*MonitorDeviceLocationRequestV1, grpc.ServerStreamingServer[MonitorDeviceLocationStreamEventV1]) error
+	MonitorBeaconLocationV1(*MonitorBeaconLocationRequestV1, grpc.ServerStreamingServer[MonitorBeaconLocationStreamEventV1]) error
 	mustEmbedUnimplementedLocationMonitorServer()
 }
 
@@ -73,6 +95,9 @@ type UnimplementedLocationMonitorServer struct{}
 
 func (UnimplementedLocationMonitorServer) MonitorDeviceLocationV1(*MonitorDeviceLocationRequestV1, grpc.ServerStreamingServer[MonitorDeviceLocationStreamEventV1]) error {
 	return status.Errorf(codes.Unimplemented, "method MonitorDeviceLocationV1 not implemented")
+}
+func (UnimplementedLocationMonitorServer) MonitorBeaconLocationV1(*MonitorBeaconLocationRequestV1, grpc.ServerStreamingServer[MonitorBeaconLocationStreamEventV1]) error {
+	return status.Errorf(codes.Unimplemented, "method MonitorBeaconLocationV1 not implemented")
 }
 func (UnimplementedLocationMonitorServer) mustEmbedUnimplementedLocationMonitorServer() {}
 func (UnimplementedLocationMonitorServer) testEmbeddedByValue()                         {}
@@ -106,6 +131,17 @@ func _LocationMonitor_MonitorDeviceLocationV1_Handler(srv interface{}, stream gr
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type LocationMonitor_MonitorDeviceLocationV1Server = grpc.ServerStreamingServer[MonitorDeviceLocationStreamEventV1]
 
+func _LocationMonitor_MonitorBeaconLocationV1_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(MonitorBeaconLocationRequestV1)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(LocationMonitorServer).MonitorBeaconLocationV1(m, &grpc.GenericServerStream[MonitorBeaconLocationRequestV1, MonitorBeaconLocationStreamEventV1]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type LocationMonitor_MonitorBeaconLocationV1Server = grpc.ServerStreamingServer[MonitorBeaconLocationStreamEventV1]
+
 // LocationMonitor_ServiceDesc is the grpc.ServiceDesc for LocationMonitor service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -117,6 +153,11 @@ var LocationMonitor_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "MonitorDeviceLocationV1",
 			Handler:       _LocationMonitor_MonitorDeviceLocationV1_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "MonitorBeaconLocationV1",
+			Handler:       _LocationMonitor_MonitorBeaconLocationV1_Handler,
 			ServerStreams: true,
 		},
 	},

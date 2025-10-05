@@ -106,7 +106,7 @@ func (c *LocationEngineService) bleEventHandler(ctx context.Context, envelope *c
 		DeviceId: event.DeviceId, X: x, Y: y, Z: z, Time: time.Now(),
 	}
 
-	c.stateStore.upsert(&DeviceState{
+	c.deviceStateStore.Upsert(&utils.DeviceState{
 		OrgID:      d.OrgId,
 		MapID:      mapId,
 		DeviceID:   pos.DeviceId,

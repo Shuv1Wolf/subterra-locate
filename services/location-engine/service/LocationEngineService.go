@@ -22,6 +22,7 @@ import (
 	"github.com/Shuv1Wolf/subterra-locate/services/location-engine/listener"
 	protos "github.com/Shuv1Wolf/subterra-locate/services/location-engine/protos"
 	"github.com/Shuv1Wolf/subterra-locate/services/location-engine/publisher"
+	"github.com/Shuv1Wolf/subterra-locate/services/location-engine/utils"
 )
 
 type LocationEngineService struct {
@@ -41,16 +42,18 @@ type LocationEngineService struct {
 	mu     sync.RWMutex
 	isOpen bool
 
-	monitorPort string
-	stateStore  *StateStore
+	monitorPort      string
+	deviceStateStore *utils.DeviceStateStore
+	beaconStateStore *utils.BeaconStateStore
 }
 
 func NewLocationEngineService() *LocationEngineService {
 	return &LocationEngineService{
-		Logger:     clog.NewCompositeLogger(),
-		beaconsMap: map[string]*bdata.BeaconV1{},
-		deviceMap:  map[string]*ddata.DeviceV1{},
-		stateStore: NewStateStore(),
+		Logger:           clog.NewCompositeLogger(),
+		beaconsMap:       map[string]*bdata.BeaconV1{},
+		deviceMap:        map[string]*ddata.DeviceV1{},
+		deviceStateStore: utils.NewDeviceStateStore(),
+		beaconStateStore: utils.NewBeaconStateStore(),
 	}
 }
 
@@ -205,7 +208,7 @@ func (s *LocationEngineService) runMonitorLocation() {
 
 	grpcServer := grpc.NewServer(opts...)
 
-	monitorSvc := NewMonitorLocation(s.stateStore, s.Logger)
+	monitorSvc := NewMonitorLocation(s.deviceStateStore, s.beaconStateStore, s.Logger)
 	protos.RegisterLocationMonitorServer(grpcServer, monitorSvc)
 
 	go func() {

@@ -1,4 +1,4 @@
-package service
+package utils
 
 import (
 	"sync"
@@ -17,34 +17,34 @@ type DeviceState struct {
 	UpdatedAt  time.Time
 }
 
-type change struct {
+type changeDevice struct {
 	orgID string
-	ev    *protos.MonitorDeviceLocationStreamEventV1_LocationEventV1
+	Ev    *protos.MonitorDeviceLocationStreamEventV1_LocationEventV1
 }
 
-type orgBus struct {
+type orgBusDevice struct {
 	mu   sync.RWMutex
-	subs map[chan change]struct{}
+	subs map[chan changeDevice]struct{}
 }
 
-func newOrgBus() *orgBus { return &orgBus{subs: map[chan change]struct{}{}} }
+func newOrgBusDevice() *orgBusDevice { return &orgBusDevice{subs: map[chan changeDevice]struct{}{}} }
 
-func (b *orgBus) subscribe() chan change {
-	ch := make(chan change, 256)
+func (b *orgBusDevice) subscribe() chan changeDevice {
+	ch := make(chan changeDevice, 256)
 	b.mu.Lock()
 	b.subs[ch] = struct{}{}
 	b.mu.Unlock()
 	return ch
 }
 
-func (b *orgBus) unsubscribe(ch chan change) {
+func (b *orgBusDevice) unsubscribe(ch chan changeDevice) {
 	b.mu.Lock()
 	delete(b.subs, ch)
 	b.mu.Unlock()
 	close(ch)
 }
 
-func (b *orgBus) publish(c change) {
+func (b *orgBusDevice) publish(c changeDevice) {
 	b.mu.RLock()
 	for ch := range b.subs {
 		select {
@@ -56,22 +56,22 @@ func (b *orgBus) publish(c change) {
 	b.mu.RUnlock()
 }
 
-type StateStore struct {
+type DeviceStateStore struct {
 	mu sync.RWMutex
 	// orgID -> deviceID -> state
 	byOrg map[string]map[string]*DeviceState
 	// orgID -> bus
-	bus map[string]*orgBus
+	bus map[string]*orgBusDevice
 }
 
-func NewStateStore() *StateStore {
-	return &StateStore{
+func NewDeviceStateStore() *DeviceStateStore {
+	return &DeviceStateStore{
 		byOrg: map[string]map[string]*DeviceState{},
-		bus:   map[string]*orgBus{},
+		bus:   map[string]*orgBusDevice{},
 	}
 }
 
-func (s *StateStore) upsert(ev *DeviceState) {
+func (s *DeviceStateStore) Upsert(ev *DeviceState) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if _, ok := s.byOrg[ev.OrgID]; !ok {
@@ -80,11 +80,11 @@ func (s *StateStore) upsert(ev *DeviceState) {
 	s.byOrg[ev.OrgID][ev.DeviceID] = ev
 
 	if _, ok := s.bus[ev.OrgID]; !ok {
-		s.bus[ev.OrgID] = newOrgBus()
+		s.bus[ev.OrgID] = newOrgBusDevice()
 	}
-	s.bus[ev.OrgID].publish(change{
+	s.bus[ev.OrgID].publish(changeDevice{
 		orgID: ev.OrgID,
-		ev: &protos.MonitorDeviceLocationStreamEventV1_LocationEventV1{
+		Ev: &protos.MonitorDeviceLocationStreamEventV1_LocationEventV1{
 			DeviceId:   ev.DeviceID,
 			DeviceName: ev.DeviceName,
 			MapId:      ev.MapID,
@@ -96,7 +96,7 @@ func (s *StateStore) upsert(ev *DeviceState) {
 	})
 }
 
-func (s *StateStore) snapshot(orgID string) []*protos.MonitorDeviceLocationStreamEventV1_LocationEventV1 {
+func (s *DeviceStateStore) Snapshot(orgID string) []*protos.MonitorDeviceLocationStreamEventV1_LocationEventV1 {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	res := make([]*protos.MonitorDeviceLocationStreamEventV1_LocationEventV1, 0)
@@ -116,21 +116,21 @@ func (s *StateStore) snapshot(orgID string) []*protos.MonitorDeviceLocationStrea
 	return res
 }
 
-func (s *StateStore) subscribe(orgID string) *orgBusSubscription {
+func (s *DeviceStateStore) Subscribe(orgID string) *orgBusSubscriptionDevice {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if _, ok := s.bus[orgID]; !ok {
-		s.bus[orgID] = newOrgBus()
+		s.bus[orgID] = newOrgBusDevice()
 	}
 	ch := s.bus[orgID].subscribe()
-	return &orgBusSubscription{bus: s.bus[orgID], ch: ch}
+	return &orgBusSubscriptionDevice{bus: s.bus[orgID], ch: ch}
 }
 
-type orgBusSubscription struct {
-	bus *orgBus
-	ch  chan change
+type orgBusSubscriptionDevice struct {
+	bus *orgBusDevice
+	ch  chan changeDevice
 }
 
-func (sub *orgBusSubscription) C() <-chan change { return sub.ch }
+func (sub *orgBusSubscriptionDevice) C() <-chan changeDevice { return sub.ch }
 
-func (sub *orgBusSubscription) Close() { sub.bus.unsubscribe(sub.ch) }
+func (sub *orgBusSubscriptionDevice) Close() { sub.bus.unsubscribe(sub.ch) }

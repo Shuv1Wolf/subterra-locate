@@ -23,7 +23,27 @@ message MonitorDeviceLocationStreamEventV1 {
     repeated LocationEventV1 event = 1;
 }
 
+message MonitorBeaconLocationRequestV1 {
+    string org_id = 1;
+    string map_id = 2;
+    repeated string beacon_id = 3;
+}
+
+message MonitorBeaconLocationStreamEventV1 {
+    message LocationEventV1 {
+        string beacon_id = 1;
+        string beacon_name = 2;
+        string map_id = 3;
+        float x = 4;
+        float y = 5;
+        float z = 6; 
+        map<string, string> info = 7;
+    }
+
+    repeated LocationEventV1 event = 1;
+}
 
 service LocationMonitor {
     rpc MonitorDeviceLocationV1(MonitorDeviceLocationRequestV1) returns (stream MonitorDeviceLocationStreamEventV1) {}
+    rpc MonitorBeaconLocationV1(MonitorBeaconLocationRequestV1) returns (stream MonitorBeaconLocationStreamEventV1) {}
 }

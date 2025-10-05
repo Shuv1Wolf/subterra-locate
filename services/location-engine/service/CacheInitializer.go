@@ -6,6 +6,7 @@ import (
 	"time"
 
 	natsEvents "github.com/Shuv1Wolf/subterra-locate/services/common/nats/events"
+	"github.com/Shuv1Wolf/subterra-locate/services/location-engine/utils"
 	"github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
 )
 
@@ -32,6 +33,20 @@ func (c *LocationEngineService) initBeaconsCache() {
 
 		for _, beacon := range res.Data {
 			c.beaconsMap[beacon.Id] = &beacon
+
+			c.beaconStateStore.Upsert(&utils.BeaconState{
+				OrgID:      beacon.OrgId,
+				MapID:      "",
+				BeaconID:   beacon.Id,
+				BeaconName: beacon.Label,
+				X:          beacon.X,
+				Y:          beacon.Y,
+				Z:          beacon.Z,
+				Info: map[string]string{
+					"source": "system",
+				},
+				UpdatedAt: time.Now(),
+			})
 		}
 
 		if int64(len(res.Data)) < limit {
@@ -57,6 +72,20 @@ func (c *LocationEngineService) beaconChangedEvent(ctx context.Context, msg stri
 		return err
 	}
 
+	c.beaconStateStore.Upsert(&utils.BeaconState{
+		OrgID:      b.OrgId,
+		MapID:      "",
+		BeaconID:   b.Id,
+		BeaconName: b.Label,
+		X:          b.X,
+		Y:          b.Y,
+		Z:          b.Z,
+		Info: map[string]string{
+			"source": "system",
+		},
+		UpdatedAt: time.Now(),
+	})
+
 	c.beaconsMap[event.Id] = b
 	return nil
 }
@@ -66,6 +95,22 @@ func (c *LocationEngineService) beaconDeletedEvent(ctx context.Context, msg stri
 	err := json.Unmarshal([]byte(msg), &event)
 	if err != nil {
 		c.Logger.Error(ctx, err, "Failed to deserialize message")
+	}
+
+	if be, ok := c.beaconsMap[event.Id]; ok {
+		c.beaconStateStore.Upsert(&utils.BeaconState{
+			OrgID:      be.OrgId,
+			MapID:      "",
+			BeaconID:   be.Id,
+			BeaconName: be.Label,
+			X:          0,
+			Y:          0,
+			Z:          0,
+			Info: map[string]string{
+				"source": "system",
+			},
+			UpdatedAt: time.Now(),
+		})
 	}
 
 	delete(c.beaconsMap, event.Id)
@@ -132,7 +177,7 @@ func (c *LocationEngineService) deviceDeletedEvent(ctx context.Context, msg stri
 	}
 
 	if dev, ok := c.deviceMap[event.Id]; ok {
-		c.stateStore.upsert(&DeviceState{
+		c.deviceStateStore.Upsert(&utils.DeviceState{
 			OrgID:      dev.OrgId,
 			MapID:      "",
 			DeviceID:   dev.Id,
