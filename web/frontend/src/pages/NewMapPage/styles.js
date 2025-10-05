@@ -10,23 +10,66 @@ export const MapsPageContainer = styled.div`
 export const MapSelectorContainer = styled.div`
   position: absolute;
   top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 20px;
   background: rgba(35, 41, 54, 0.9);
   border-radius: 12px;
-  padding: 12px 24px;
+  padding: 12px;
   z-index: 10;
   display: flex;
-  align-items: center;
-  gap: 20px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 15px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   border: 1px solid #222a36;
+  transition: right 0.3s ease-in-out;
+  width: 300px;
 
-  @media (max-width: 600px) {
-    flex-direction: column;
-    gap: 10px;
-    padding: 10px;
+  &.hidden {
+    right: -330px;
   }
+`;
+
+export const ToggleButton = styled.button`
+  position: absolute;
+  top: 12px;
+  right: 100%;
+  margin-right: 10px;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  z-index: 11;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #1565c0;
+  }
+`;
+
+export const FilterBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  background: #181c24;
+  border-radius: 8px;
+`;
+
+export const FilterHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #e3eafc;
+`;
+
+export const CheckboxLabel = styled.label`
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #e3eafc;
 `;
 
 export const MapSelect = styled.select`

@@ -4,6 +4,7 @@ import Select from 'react-select';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import Draggable from 'react-draggable';
 import UserIcon from '../../assets/user.svg';
+import BeaconIcon from '../../assets/bullseye-animated.gif';
 import { GEO_HOST, SYSTEM_HOST } from '../../config';
 import {
   MapsPageContainer,
@@ -22,23 +23,27 @@ import {
   ModalContent,
   BeaconList,
   BeaconListItem,
+  FilterBlock,
+  FilterHeader,
+  CheckboxLabel,
+  ToggleButton,
 } from './styles.js';
 
 // Styles for React-Select
 const selectStyles = {
-  container: (provided) => ({ ...provided, width: '250px', }),
-  control: (provided) => ({ ...provided, backgroundColor: '#181c24', borderColor: '#222a36', color: '#e3eafc', }),
-  menu: (provided) => ({ ...provided, backgroundColor: '#181c24', }),
-  option: (provided, state) => ({ ...provided, backgroundColor: state.isSelected ? '#1976d2' : state.isFocused ? '#232936' : '#181c24', color: '#e3eafc', }),
-  multiValue: (provided) => ({ ...provided, backgroundColor: '#232936', }),
-  multiValueLabel: (provided) => ({ ...provided, color: '#e3eafc', }),
-  input: (provided) => ({ ...provided, color: '#e3eafc', }),
+  container: (provided) => ({ ...provided, width: '250px' }),
+  control: (provided) => ({ ...provided, backgroundColor: '#181c24', borderColor: '#222a36', color: '#e3eafc' }),
+  menu: (provided) => ({ ...provided, backgroundColor: '#181c24' }),
+  option: (provided, state) => ({ ...provided, backgroundColor: state.isSelected ? '#1976d2' : state.isFocused ? '#232936' : '#181c24', color: '#e3eafc' }),
+  multiValue: (provided) => ({ ...provided, backgroundColor: '#232936' }),
+  multiValueLabel: (provided) => ({ ...provided, color: '#e3eafc' }),
+  input: (provided) => ({ ...provided, color: '#e3eafc' }),
 };
 
 const BeaconSelectorModal = ({ beacons, onSelect, onClose }) => (
   <ModalBackdrop onClick={onClose}>
     <ModalContent onClick={(e) => e.stopPropagation()}>
-      <h3>Выберите маяк для перемещения</h3>
+      <h3>Select the beacon to move</h3>
       <BeaconList>
         {beacons.map((beacon) => (
           <BeaconListItem key={beacon.id} onClick={() => onSelect(beacon)}>
@@ -70,15 +75,40 @@ const DeviceInfoPopup = ({ device, onClose }) => (
   </Draggable>
 );
 
+// Beacon Info Popup Component
+const BeaconInfoPopup = ({ beacon, onClose }) => (
+  <Draggable handle=".popup-header">
+    <PopupContainer>
+      <PopupHeader className="popup-header">
+        <h2>{beacon.label || beacon.name}</h2>
+        <CloseButton onClick={onClose}>&times;</CloseButton>
+      </PopupHeader>
+      <div>
+        <p><strong>ID:</strong> {beacon.id}</p>
+        <p><strong>Label:</strong> {beacon.label}</p>
+        <p><strong>UDI:</strong> {beacon.udi}</p>
+        <p><strong>Status:</strong> {beacon.enabled ? 'Enabled' : 'Disabled'}</p>
+      </div>
+    </PopupContainer>
+  </Draggable>
+);
+
 export default function NewMapPage() {
   const navigate = useNavigate();
   const [maps, setMaps] = useState([]);
   const [selectedMapId, setSelectedMapId] = useState('');
   const [devices, setDevices] = useState([]);
+  const [beacons, setBeacons] = useState([]);
   const [allDevices, setAllDevices] = useState([]);
-  const [stagedFilters, setStagedFilters] = useState([]);
-  const [activeFilters, setActiveFilters] = useState([]);
+  const [stagedDeviceFilters, setStagedDeviceFilters] = useState([]);
+  const [activeDeviceFilters, setActiveDeviceFilters] = useState([]);
+  const [stagedBeaconFilters, setStagedBeaconFilters] = useState([]);
+  const [activeBeaconFilters, setActiveBeaconFilters] = useState([]);
+  const [showDevices, setShowDevices] = useState(true);
+  const [showBeacons, setShowBeacons] = useState(true);
+  const [isPanelVisible, setIsPanelVisible] = useState(true);
   const [selectedDevice, setSelectedDevice] = useState(null);
+  const [selectedBeacon, setSelectedBeacon] = useState(null);
   const [allBeacons, setAllBeacons] = useState([]);
   const [isBeaconModalOpen, setIsBeaconModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -167,13 +197,30 @@ export default function NewMapPage() {
     }
   };
 
-  const applyFilters = () => {
-    setDevices([]); // Clear devices before applying new filters
-    setActiveFilters(stagedFilters);
+  const handleBeaconClick = async (beaconId) => {
+    try {
+      const response = await fetch(`${GEO_HOST}/api/v1/geo/beacons/${beaconId}`);
+      if (!response.ok) throw new Error('Failed to fetch beacon details');
+      const data = await response.json();
+      setSelectedBeacon(data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleFilterChange = (selectedOptions) => {
-    setStagedFilters(selectedOptions);
+  const applyFilters = () => {
+    setDevices([]);
+    setBeacons([]);
+    setActiveDeviceFilters(stagedDeviceFilters);
+    setActiveBeaconFilters(stagedBeaconFilters);
+  };
+
+  const handleDeviceFilterChange = (selectedOptions) => {
+    setStagedDeviceFilters(selectedOptions);
+  };
+
+  const handleBeaconFilterChange = (selectedOptions) => {
+    setStagedBeaconFilters(selectedOptions);
   };
 
   // Fetch initial data
@@ -201,15 +248,20 @@ export default function NewMapPage() {
     fetchData();
   }, []);
 
-  // WebSocket connection
+  // WebSocket connection for devices
   useEffect(() => {
-    if (!selectedMapId) return;
-    if (ws.current) ws.current.close();
+    if (!selectedMapId || !showDevices) {
+      if (ws.current) {
+        ws.current.close();
+      }
+      setDevices([]);
+      return;
+    }
 
     const wsHost = GEO_HOST.replace('http://', 'ws://');
     let wsUrl = `${wsHost}/api/v1/geo/location/device/monitor?org_id=org$1&map_id=${selectedMapId}`;
     
-    const deviceIds = activeFilters.map(d => d.value);
+    const deviceIds = activeDeviceFilters.map(d => d.value);
     if (deviceIds.length > 0) {
       wsUrl += `&device_ids=${deviceIds.join(',')}`;
     }
@@ -240,12 +292,63 @@ export default function NewMapPage() {
       });
     };
 
+    const currentWs = ws.current;
     return () => {
-      if (ws.current) ws.current.close();
+      if (currentWs) {
+        currentWs.close();
+      }
     };
-  }, [selectedMapId, activeFilters]);
+  }, [selectedMapId, activeDeviceFilters, showDevices]);
+
+  // WebSocket connection for beacons
+  useEffect(() => {
+    if (!selectedMapId || !showBeacons) {
+      setBeacons([]);
+      return;
+    }
+
+    const wsHost = GEO_HOST.replace('http://', 'ws://');
+    let wsUrl = `${wsHost}/api/v1/geo/location/beacon/monitor?org_id=org$1&map_id=${selectedMapId}`;
+    
+    const beaconIds = activeBeaconFilters.map(b => b.value);
+    if (beaconIds.length > 0) {
+      wsUrl += `&beacon_ids=${beaconIds.join(',')}`;
+    }
+    
+    const beaconWs = new WebSocket(wsUrl);
+    
+    beaconWs.onmessage = (event) => {
+      const messages = event.data.split('\n');
+      messages.forEach(messageStr => {
+        if (messageStr.trim() === '') return;
+        try {
+          const message = JSON.parse(messageStr);
+          if (message.event) {
+            setBeacons(prev => {
+              const map = new Map(prev.map(b => [b.beacon_id, b]));
+              for (const beacon of message.event) {
+                 if (beacon.x == null || beacon.y == null) {
+                  map.delete(beacon.beacon_id);
+                } else {
+                  map.set(beacon.beacon_id, beacon);
+                }
+              }
+              return Array.from(map.values());
+            });
+          }
+        } catch (e) {
+          console.error('Failed to parse WebSocket message for beacons:', e);
+        }
+      });
+    };
+
+    return () => {
+      beaconWs.close();
+    };
+  }, [selectedMapId, activeBeaconFilters, showBeacons]);
 
   const deviceOptions = allDevices.map(d => ({ value: d.id, label: d.name }));
+  const beaconOptions = allBeacons.map(b => ({ value: b.id, label: b.label }));
   const selectedMap = maps.find((map) => map.id === selectedMapId);
 
   if (loading) return <MapsPageContainer>Loading data...</MapsPageContainer>;
@@ -261,19 +364,43 @@ export default function NewMapPage() {
         />
       )}
       {selectedDevice && <DeviceInfoPopup device={selectedDevice} onClose={() => setSelectedDevice(null)} />}
+      {selectedBeacon && <BeaconInfoPopup beacon={selectedBeacon} onClose={() => setSelectedBeacon(null)} />}
       <BackArrow onClick={() => navigate('/')}>&#x2190;</BackArrow>
-      <MapSelectorContainer>
+      <MapSelectorContainer className={isPanelVisible ? '' : 'hidden'}>
+        <ToggleButton onClick={() => setIsPanelVisible(!isPanelVisible)}>
+          {isPanelVisible ? 'Hide' : 'Show'}
+        </ToggleButton>
         <MapSelect value={selectedMapId} onChange={(e) => setSelectedMapId(e.target.value)}>
           {maps.map((map) => (<option key={map.id} value={map.id}>{map.name}</option>))}
         </MapSelect>
-        <Select isMulti options={deviceOptions} value={stagedFilters} onChange={handleFilterChange} styles={selectStyles} placeholder="Filter by device..." />
+
+        <FilterBlock>
+          <FilterHeader>
+            <CheckboxLabel>
+              <input type="checkbox" checked={showDevices} onChange={() => setShowDevices(!showDevices)} />
+              Devices
+            </CheckboxLabel>
+          </FilterHeader>
+          <Select isMulti options={deviceOptions} value={stagedDeviceFilters} onChange={handleDeviceFilterChange} styles={selectStyles} placeholder="Filter by device..." />
+        </FilterBlock>
+
+        <FilterBlock>
+          <FilterHeader>
+            <CheckboxLabel>
+              <input type="checkbox" checked={showBeacons} onChange={() => setShowBeacons(!showBeacons)} />
+              Beacons
+            </CheckboxLabel>
+          </FilterHeader>
+          <Select isMulti options={beaconOptions} value={stagedBeaconFilters} onChange={handleBeaconFilterChange} styles={selectStyles} placeholder="Filter by beacon..." />
+        </FilterBlock>
+
         <FilterButton onClick={applyFilters}>Apply</FilterButton>
+
         {selectedMap && <MapInfo><span>Level: {selectedMap.level}</span><span>Size: {(selectedMap.width * selectedMap.scale_x).toFixed(2)}x{(selectedMap.height * selectedMap.scale_y).toFixed(2)} м</span></MapInfo>}
       </MapSelectorContainer>
       <MapWrapper onContextMenu={handleContextMenu} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} onClick={handleCloseContextMenu}>
         {selectedMap && (
           <TransformWrapper
-            key={isPanningDisabled ? 'panning-disabled' : 'panning-enabled'}
             panning={{
               disabled: isPanningDisabled,
             }}
@@ -287,13 +414,27 @@ export default function NewMapPage() {
                     <ContextMenuItem onClick={handlePlaceBeacon}>Place a beacon</ContextMenuItem>
                   </ContextMenu>
                 )}
-                {devices.map((device) => (
+                {showDevices && devices.map((device) => (
                   <UserIcon
                     key={device.device_id}
                     title={`${device.device_name} (x: ${device.x.toFixed(2)}, y: ${device.y.toFixed(2)})`}
                     onClick={() => handleDeviceClick(device.device_id)}
                     style={{ position: 'absolute', top: `${device.y}px`, left: `${device.x}px`, width: '24px', height: '24px', transform: 'translate(-50%, -50%)', cursor: 'pointer' }}
                   />
+                ))}
+                {showBeacons && beacons.map((beacon) => (
+                  <div
+                    key={beacon.beacon_id}
+                    title={`${beacon.beacon_name} (x: ${beacon.x.toFixed(2)}, y: ${beacon.y.toFixed(2)})`}
+                    onClick={() => handleBeaconClick(beacon.beacon_id)}
+                    style={{ position: 'absolute', top: `${beacon.y}px`, left: `${beacon.x}px`, width: '24px', height: '24px', transform: 'translate(-50%, -50%)', cursor: 'pointer' }}
+                  >
+                    <img
+                      src={BeaconIcon}
+                      alt={beacon.beacon_name}
+                      style={{ width: '100%', height: '100%' }}
+                    />
+                  </div>
                 ))}
               </div>
             </TransformComponent>
