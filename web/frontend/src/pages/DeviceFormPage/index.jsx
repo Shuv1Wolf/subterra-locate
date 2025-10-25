@@ -107,7 +107,10 @@ export default function DeviceFormPage() {
       <AdminPageContainer>
         <FormContainer as="form" onSubmit={handleSubmit}>
           <FormBlock>
-            <BlockTitle>General Information</BlockTitle>
+            <BlockTitle>
+              <span>General Information</span>
+              {isEditing && <span style={{ opacity: 0.5, fontSize: '0.8rem' }}>{deviceId}</span>}
+            </BlockTitle>
             <FormGroup>
               <Label htmlFor="name">Name</Label>
               <Input type="text" name="name" id="name" value={device.name} onChange={handleChange} required />

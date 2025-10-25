@@ -125,7 +125,10 @@ export default function BeaconFormPage() {
       <AdminPageContainer>
         <FormContainer as="form" onSubmit={handleSubmit}>
           <FormBlock>
-            <BlockTitle>General Information</BlockTitle>
+            <BlockTitle>
+              <span>General Information</span>
+              {isEditing && <span style={{ opacity: 0.5, fontSize: '0.8rem' }}>{beaconId}</span>}
+            </BlockTitle>
             <FormGroup>
               <Label htmlFor="label">Label</Label>
               <Input type="text" name="label" id="label" value={beacon.label} onChange={handleChange} required />

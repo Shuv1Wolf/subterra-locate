@@ -17,6 +17,9 @@ export const FormBlock = styled.div`
 export const BlockTitle = styled.h2`
   color: #90caf9;
   margin-top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;
 
 export const FormGroup = styled.div`
