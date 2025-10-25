@@ -407,6 +407,15 @@ export default function NewMapPage() {
             panning={{
               disabled: isPanningDisabled,
             }}
+            wheel={{
+              step: 0.2,
+            }}
+            pinch={{
+              disabled: true,
+            }}
+            doubleClick={{
+              disabled: true,
+            }}
             onTransformed={(ref, state) => setTransformState(state)}
           >
             <TransformComponent>
@@ -422,7 +431,15 @@ export default function NewMapPage() {
                     key={device.device_id}
                     title={`${device.device_name} (x: ${device.x.toFixed(2)}, y: ${device.y.toFixed(2)})`}
                     onClick={() => handleDeviceClick(device.device_id)}
-                    style={{ position: 'absolute', top: `${device.y}px`, left: `${device.x}px`, width: '24px', height: '24px', transform: 'translate(-50%, -50%)', cursor: 'pointer' }}
+                    style={{
+                      position: 'absolute',
+                      top: `${device.y}px`,
+                      left: `${device.x}px`,
+                      width: '24px',
+                      height: '24px',
+                      transform: `translate(-50%, -50%) scale(${1 / transformState.scale})`,
+                      cursor: 'pointer',
+                    }}
                   />
                 ))}
                 {showBeacons && beacons.map((beacon) => (
@@ -430,7 +447,15 @@ export default function NewMapPage() {
                     key={beacon.beacon_id}
                     title={`${beacon.beacon_name} (x: ${beacon.x.toFixed(2)}, y: ${beacon.y.toFixed(2)})`}
                     onClick={() => handleBeaconClick(beacon.beacon_id)}
-                    style={{ position: 'absolute', top: `${beacon.y}px`, left: `${beacon.x}px`, width: '24px', height: '24px', transform: 'translate(-50%, -50%)', cursor: 'pointer' }}
+                    style={{
+                      position: 'absolute',
+                      top: `${beacon.y}px`,
+                      left: `${beacon.x}px`,
+                      width: '24px',
+                      height: '24px',
+                      transform: `translate(-50%, -50%) scale(${1 / transformState.scale})`,
+                      cursor: 'pointer',
+                    }}
                   >
                     <img
                       src={BeaconIcon}

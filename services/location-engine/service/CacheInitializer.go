@@ -181,6 +181,22 @@ func (c *LocationEngineService) deviceChangedEvent(ctx context.Context, msg stri
 		return err
 	}
 
+	if !d.Enabled {
+		c.deviceStateStore.Upsert(&utils.DeviceState{
+			OrgID:      d.OrgId,
+			MapID:      "",
+			DeviceID:   d.Id,
+			DeviceName: d.Name,
+			X:          0,
+			Y:          0,
+			Z:          0,
+			Info: map[string]string{
+				"source": "ble",
+			},
+			UpdatedAt: time.Now(),
+		})
+	}
+
 	c.deviceMap[event.Id] = d
 	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"net"
 	"sync"
+	"time"
 
 	"github.com/nats-io/nats.go"
 	cconf "github.com/pip-services4/pip-services4-go/pip-services4-components-go/config"
@@ -130,6 +131,7 @@ func (c *LocationEngineService) Open(ctx context.Context) error {
 	c.initDeviceCache()
 	c.startMessageListener(ctx)
 	c.runMonitorLocation()
+	c.startStaleDeviceChecker(ctx)
 
 	c.isOpen = true
 	return nil
@@ -195,6 +197,37 @@ func (c *LocationEngineService) startMessageListener(ctx context.Context) {
 	c.Logger.Info(ctx, "Starting message listener for devices")
 	if err := c.deviceEventListener.Listen(ctx, c); err != nil {
 		c.Logger.Error(ctx, err, "Error while listening to message bus")
+	}
+}
+
+func (c *LocationEngineService) startStaleDeviceChecker(ctx context.Context) {
+	go func() {
+		ticker := time.NewTicker(1 * time.Minute) // Check every minute
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ticker.C:
+				c.checkStaleDevices(ctx)
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+}
+
+func (c *LocationEngineService) checkStaleDevices(ctx context.Context) {
+	devices := c.deviceStateStore.GetAllDevices()
+	for _, device := range devices {
+		if device.Online && time.Since(device.UpdatedAt) > 15*time.Minute {
+			c.Logger.Info(ctx, "Device %s is offline", device.DeviceID)
+			device.X = 0
+			device.Y = 0
+			device.Z = 0
+			device.Online = false
+			device.UpdatedAt = time.Now()
+			c.deviceStateStore.Upsert(device)
+		}
 	}
 }
 

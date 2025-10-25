@@ -119,11 +119,15 @@ func (c *LocationEngineService) bleEventHandler(ctx context.Context, envelope *c
 			"time":   pos.Time.Format(time.RFC3339),
 		},
 		UpdatedAt: time.Now(),
+		Online:     true,
 	})
 
-	err = c.devicePositionPublisher.SendDevicePosition(ctx, pos)
-	if err != nil {
-		c.Logger.Error(ctx, err, "Failed to send message")
+	// Only send position if the device is online
+	if d, ok := c.deviceMap[event.DeviceId]; ok && d.Enabled {
+		err = c.devicePositionPublisher.SendDevicePosition(ctx, pos)
+		if err != nil {
+			c.Logger.Error(ctx, err, "Failed to send message")
+		}
 	}
 	c.Logger.Debug(ctx, "Received message: "+envelope.GetMessageAsString())
 	return nil

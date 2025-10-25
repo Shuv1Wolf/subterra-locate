@@ -111,10 +111,6 @@ export const MapWrapper = styled.div`
     justify-content: center;
   }
 
-  svg {
-    max-width: 100%;
-    max-height: 100%;
-  }
 `;
 
 export const FilterButton = styled.button`

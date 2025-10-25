@@ -15,6 +15,7 @@ type DeviceState struct {
 	X, Y, Z    float32
 	Info       map[string]string
 	UpdatedAt  time.Time
+	Online     bool
 }
 
 type changeDevice struct {
@@ -69,6 +70,18 @@ func NewDeviceStateStore() *DeviceStateStore {
 		byOrg: map[string]map[string]*DeviceState{},
 		bus:   map[string]*orgBusDevice{},
 	}
+}
+
+func (s *DeviceStateStore) GetAllDevices() []*DeviceState {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	devices := make([]*DeviceState, 0)
+	for _, orgDevices := range s.byOrg {
+		for _, device := range orgDevices {
+			devices = append(devices, device)
+		}
+	}
+	return devices
 }
 
 func (s *DeviceStateStore) Upsert(ev *DeviceState) {
