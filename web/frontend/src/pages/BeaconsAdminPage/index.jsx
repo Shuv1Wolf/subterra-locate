@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GEO_HOST } from '../../config';
+import Header from '../../components/Header';
 import {
   AdminPageContainer,
-  Header,
-  Title,
   Button,
   BeaconTable,
   ActionsContainer,
@@ -56,16 +55,14 @@ export default function BeaconsAdminPage() {
   if (error) return <AdminPageContainer>Error: {error}</AdminPageContainer>;
 
   return (
-    <AdminPageContainer>
-      <Header>
-        <Title>Beacons Admin</Title>
-        <div>
-          <Button onClick={() => navigate('/beacons-admin/new')} style={{marginRight: '10px'}}>Add New Beacon</Button>
-          <Button onClick={() => navigate('/')}>Back to Home</Button>
+    <>
+      <Header variant="page" title="Beacons Admin" />
+      <AdminPageContainer>
+        <div style={{ marginBottom: '20px' }}>
+          <Button onClick={() => navigate('/beacons-admin/new')}>Add New Beacon</Button>
         </div>
-      </Header>
-      <BeaconTable>
-        <thead>
+        <BeaconTable>
+          <thead>
           <tr>
             <th>Label</th>
             <th>Map ID</th>
@@ -90,7 +87,8 @@ export default function BeaconsAdminPage() {
             </tr>
           ))}
         </tbody>
-      </BeaconTable>
-    </AdminPageContainer>
+        </BeaconTable>
+      </AdminPageContainer>
+    </>
   );
 }

@@ -3,7 +3,16 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { SYSTEM_HOST } from '../../config';
 import Header from '../../components/Header';
 import { AdminPageContainer, Button } from '../DevicesAdminPage/styles';
-import { FormContainer, FormGroup, Label, Input, CheckboxContainer } from './styles';
+import {
+  FormContainer,
+  FormBlock,
+  BlockTitle,
+  FormGroup,
+  Label,
+  Input,
+  CheckboxContainer,
+  Footer,
+} from './styles';
 
 export default function DeviceFormPage() {
   const navigate = useNavigate();
@@ -76,6 +85,20 @@ export default function DeviceFormPage() {
     }
   };
 
+  const handleDelete = async () => {
+    if (window.confirm('Are you sure you want to delete this device?')) {
+      try {
+        const response = await fetch(`${SYSTEM_HOST}/api/v1/system/device/${deviceId}`, {
+          method: 'DELETE',
+        });
+        if (!response.ok) throw new Error('Failed to delete device');
+        navigate('/devices-admin');
+      } catch (e) {
+        setError(e.message);
+      }
+    }
+  };
+
   if (loading && isEditing) return <AdminPageContainer>Loading...</AdminPageContainer>;
 
   return (
@@ -83,34 +106,46 @@ export default function DeviceFormPage() {
       <Header variant="page" title={isEditing ? 'Edit Device' : 'Create Device'} />
       <AdminPageContainer>
         <FormContainer as="form" onSubmit={handleSubmit}>
-          <FormGroup>
-          <Label htmlFor="name">Name</Label>
-          <Input type="text" name="name" id="name" value={device.name} onChange={handleChange} required />
-        </FormGroup>
-        <FormGroup>
-          <Label htmlFor="type">Type</Label>
-          <Input type="text" name="type" id="type" value={device.type} onChange={handleChange} />
-        </FormGroup>
-        <FormGroup>
-          <Label htmlFor="model">Model</Label>
-          <Input type="text" name="model" id="model" value={device.model} onChange={handleChange} />
-        </FormGroup>
-        <FormGroup>
-          <Label htmlFor="mac_address">MAC Address</Label>
-          <Input type="text" name="mac_address" id="mac_address" value={device.mac_address} onChange={handleChange} />
-        </FormGroup>
-        <FormGroup>
-          <Label htmlFor="ip_address">IP Address</Label>
-          <Input type="text" name="ip_address" id="ip_address" value={device.ip_address} onChange={handleChange} />
-        </FormGroup>
-        <FormGroup>
-          <CheckboxContainer>
-            <Input type="checkbox" name="enabled" id="enabled" checked={device.enabled} onChange={handleChange} style={{ width: 'auto' }} />
-            <Label htmlFor="enabled" style={{ marginBottom: 0 }}>Enabled</Label>
-          </CheckboxContainer>
-        </FormGroup>
+          <FormBlock>
+            <BlockTitle>General Information</BlockTitle>
+            <FormGroup>
+              <Label htmlFor="name">Name</Label>
+              <Input type="text" name="name" id="name" value={device.name} onChange={handleChange} required />
+            </FormGroup>
+            <FormGroup>
+              <Label htmlFor="type">Type</Label>
+              <Input type="text" name="type" id="type" value={device.type} onChange={handleChange} />
+            </FormGroup>
+            <FormGroup>
+              <Label htmlFor="model">Model</Label>
+              <Input type="text" name="model" id="model" value={device.model} onChange={handleChange} />
+            </FormGroup>
+            <FormGroup>
+              <CheckboxContainer>
+                <Input type="checkbox" name="enabled" id="enabled" checked={device.enabled} onChange={handleChange} style={{ width: 'auto' }} />
+                <Label htmlFor="enabled" style={{ marginBottom: 0 }}>Enabled</Label>
+              </CheckboxContainer>
+            </FormGroup>
+          </FormBlock>
+
+          <FormBlock>
+            <BlockTitle>Network Details</BlockTitle>
+            <FormGroup>
+              <Label htmlFor="mac_address">MAC Address</Label>
+              <Input type="text" name="mac_address" id="mac_address" value={device.mac_address} onChange={handleChange} />
+            </FormGroup>
+            <FormGroup>
+              <Label htmlFor="ip_address">IP Address</Label>
+              <Input type="text" name="ip_address" id="ip_address" value={device.ip_address} onChange={handleChange} />
+            </FormGroup>
+          </FormBlock>
+
           {error && <p style={{ color: 'red' }}>{error}</p>}
-          <Button type="submit" disabled={loading}>{loading ? 'Saving...' : 'Save Device'}</Button>
+          
+          <Footer>
+            <Button type="submit" disabled={loading}>{loading ? 'Saving...' : 'Save Device'}</Button>
+            {isEditing && <Button type="button" onClick={handleDelete} style={{ background: '#d32f2f' }}>Delete</Button>}
+          </Footer>
         </FormContainer>
       </AdminPageContainer>
     </>

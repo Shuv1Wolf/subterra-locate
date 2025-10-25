@@ -3,17 +3,9 @@ import styled from 'styled-components';
 export const AdminPageContainer = styled.div`
   padding: 24px;
   color: #e3eafc;
-`;
-
-export const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-`;
-
-export const Title = styled.h1`
-  color: #90caf9;
+  height: calc(100vh - 50px);
+  overflow-y: auto;
+  box-sizing: border-box;
 `;
 
 export const Button = styled.button`

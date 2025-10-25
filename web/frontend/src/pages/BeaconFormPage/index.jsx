@@ -1,8 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { GEO_HOST } from '../../config';
-import { AdminPageContainer, Header, Title, Button } from '../BeaconsAdminPage/styles.js';
-import { FormContainer, FormGroup, Label, Input, Select, CheckboxContainer } from './styles.js';
+import Header from '../../components/Header';
+import { AdminPageContainer, Button } from '../DevicesAdminPage/styles';
+import {
+  FormContainer,
+  FormBlock,
+  BlockTitle,
+  FormGroup,
+  Label,
+  Input,
+  Select,
+  CheckboxContainer,
+  Footer,
+} from '../DeviceFormPage/styles';
 
 export default function BeaconFormPage() {
   const navigate = useNavigate();
@@ -92,50 +103,75 @@ export default function BeaconFormPage() {
     }
   };
 
+  const handleDelete = async () => {
+    if (window.confirm('Are you sure you want to delete this beacon?')) {
+      try {
+        const response = await fetch(`${GEO_HOST}/api/v1/geo/beacons/${beaconId}`, {
+          method: 'DELETE',
+        });
+        if (!response.ok) throw new Error('Failed to delete beacon');
+        navigate('/beacons-admin');
+      } catch (e) {
+        setError(e.message);
+      }
+    }
+  };
+
   if (loading && isEditing) return <AdminPageContainer>Loading...</AdminPageContainer>;
 
   return (
-    <AdminPageContainer>
-      <Header>
-        <Title>{isEditing ? 'Edit Beacon' : 'Create Beacon'}</Title>
-        <Button onClick={() => navigate('/beacons-admin')}>Back to List</Button>
-      </Header>
-      <FormContainer as="form" onSubmit={handleSubmit}>
-        <FormGroup>
-          <Label htmlFor="label">Label</Label>
-          <Input type="text" name="label" id="label" value={beacon.label} onChange={handleChange} required />
-        </FormGroup>
-        <FormGroup>
-          <Label htmlFor="udi">UDI</Label>
-          <Input type="text" name="udi" id="udi" value={beacon.udi} onChange={handleChange} />
-        </FormGroup>
-        <FormGroup>
-          <Label htmlFor="map_id">Map</Label>
-          <Select name="map_id" id="map_id" value={beacon.map_id} onChange={handleChange} required>
-            {maps.map(map => <option key={map.id} value={map.id}>{map.name}</option>)}
-          </Select>
-        </FormGroup>
-        <FormGroup>
-          <Label htmlFor="x">X Coordinate</Label>
-          <Input type="number" name="x" id="x" value={beacon.x} onChange={handleChange} step="0.1" required />
-        </FormGroup>
-        <FormGroup>
-          <Label htmlFor="y">Y Coordinate</Label>
-          <Input type="number" name="y" id="y" value={beacon.y} onChange={handleChange} step="0.1" required />
-        </FormGroup>
-        <FormGroup>
-          <Label htmlFor="z">Z Coordinate</Label>
-          <Input type="number" name="z" id="z" value={beacon.z} onChange={handleChange} step="0.1" required />
-        </FormGroup>
-        <FormGroup>
-          <CheckboxContainer>
-            <Input type="checkbox" name="enabled" id="enabled" checked={beacon.enabled} onChange={handleChange} style={{ width: 'auto' }} />
-            <Label htmlFor="enabled" style={{ marginBottom: 0 }}>Enabled</Label>
-          </CheckboxContainer>
-        </FormGroup>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <Button type="submit" disabled={loading}>{loading ? 'Saving...' : 'Save Beacon'}</Button>
-      </FormContainer>
-    </AdminPageContainer>
+    <>
+      <Header variant="page" title={isEditing ? 'Edit Beacon' : 'Create Beacon'} />
+      <AdminPageContainer>
+        <FormContainer as="form" onSubmit={handleSubmit}>
+          <FormBlock>
+            <BlockTitle>General Information</BlockTitle>
+            <FormGroup>
+              <Label htmlFor="label">Label</Label>
+              <Input type="text" name="label" id="label" value={beacon.label} onChange={handleChange} required />
+            </FormGroup>
+            <FormGroup>
+              <Label htmlFor="udi">UDI</Label>
+              <Input type="text" name="udi" id="udi" value={beacon.udi} onChange={handleChange} />
+            </FormGroup>
+            <FormGroup>
+              <CheckboxContainer>
+                <Input type="checkbox" name="enabled" id="enabled" checked={beacon.enabled} onChange={handleChange} style={{ width: 'auto' }} />
+                <Label htmlFor="enabled" style={{ marginBottom: 0 }}>Enabled</Label>
+              </CheckboxContainer>
+            </FormGroup>
+          </FormBlock>
+
+          <FormBlock>
+            <BlockTitle>Location</BlockTitle>
+            <FormGroup>
+              <Label htmlFor="map_id">Map</Label>
+              <Select name="map_id" id="map_id" value={beacon.map_id} onChange={handleChange} required>
+                {maps.map(map => <option key={map.id} value={map.id}>{map.name}</option>)}
+              </Select>
+            </FormGroup>
+            <FormGroup>
+              <Label htmlFor="x">X Coordinate</Label>
+              <Input type="number" name="x" id="x" value={beacon.x} onChange={handleChange} step="0.1" required />
+            </FormGroup>
+            <FormGroup>
+              <Label htmlFor="y">Y Coordinate</Label>
+              <Input type="number" name="y" id="y" value={beacon.y} onChange={handleChange} step="0.1" required />
+            </FormGroup>
+            <FormGroup>
+              <Label htmlFor="z">Z Coordinate</Label>
+              <Input type="number" name="z" id="z" value={beacon.z} onChange={handleChange} step="0.1" required />
+            </FormGroup>
+          </FormBlock>
+
+          {error && <p style={{ color: 'red' }}>{error}</p>}
+
+          <Footer>
+            <Button type="submit" disabled={loading}>{loading ? 'Saving...' : 'Save Beacon'}</Button>
+            {isEditing && <Button type="button" onClick={handleDelete} style={{ background: '#d32f2f' }}>Delete</Button>}
+          </Footer>
+        </FormContainer>
+      </AdminPageContainer>
+    </>
   );
 }

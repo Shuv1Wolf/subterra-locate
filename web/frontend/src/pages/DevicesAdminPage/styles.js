@@ -3,7 +3,9 @@ import styled from 'styled-components';
 export const AdminPageContainer = styled.div`
   padding: 24px;
   color: #e3eafc;
-  min-height: calc(100vh - 50px);
+  height: calc(100vh - 50px);
+  overflow-y: auto;
+  box-sizing: border-box;
 `;
 
 export const Button = styled.button`
