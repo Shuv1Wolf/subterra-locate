@@ -72,19 +72,35 @@ func (c *LocationEngineService) beaconChangedEvent(ctx context.Context, msg stri
 		return err
 	}
 
-	c.beaconStateStore.Upsert(&utils.BeaconState{
-		OrgID:      b.OrgId,
-		MapID:      b.MapId,
-		BeaconID:   b.Id,
-		BeaconName: b.Label,
-		X:          b.X,
-		Y:          b.Y,
-		Z:          b.Z,
-		Info: map[string]string{
-			"source": "system",
-		},
-		UpdatedAt: time.Now(),
-	})
+	if !b.Enabled {
+		c.beaconStateStore.Upsert(&utils.BeaconState{
+			OrgID:      b.OrgId,
+			MapID:      b.MapId,
+			BeaconID:   b.Id,
+			BeaconName: b.Label,
+			X:          0,
+			Y:          0,
+			Z:          0,
+			Info: map[string]string{
+				"source": "system",
+			},
+			UpdatedAt: time.Now(),
+		})
+	} else {
+		c.beaconStateStore.Upsert(&utils.BeaconState{
+			OrgID:      b.OrgId,
+			MapID:      b.MapId,
+			BeaconID:   b.Id,
+			BeaconName: b.Label,
+			X:          b.X,
+			Y:          b.Y,
+			Z:          b.Z,
+			Info: map[string]string{
+				"source": "system",
+			},
+			UpdatedAt: time.Now(),
+		})
+	}
 
 	c.beaconsMap[event.Id] = b
 	return nil

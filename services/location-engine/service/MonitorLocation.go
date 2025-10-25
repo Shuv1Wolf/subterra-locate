@@ -9,7 +9,7 @@ import (
 	grpc "google.golang.org/grpc"
 )
 
-const heartbeatInterval = 5 * time.Second
+const heartbeatInterval = 2 * time.Second
 
 type MonitorLocation struct {
 	protos.UnimplementedLocationMonitorServer
