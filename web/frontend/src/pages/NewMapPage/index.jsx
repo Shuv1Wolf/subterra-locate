@@ -6,13 +6,13 @@ import Draggable from 'react-draggable';
 import UserIcon from '../../assets/user.svg';
 import BeaconIcon from '../../assets/bullseye-animated.gif';
 import { GEO_HOST, SYSTEM_HOST } from '../../config';
+import Header from '../../components/Header';
 import {
   MapsPageContainer,
   MapSelectorContainer,
   MapSelect,
   MapInfo,
   MapWrapper,
-  BackArrow,
   PopupContainer,
   PopupHeader,
   CloseButton,
@@ -357,19 +357,20 @@ export default function NewMapPage() {
   if (error) return <MapsPageContainer>Error: {error}</MapsPageContainer>;
 
   return (
-    <MapsPageContainer>
-      {isBeaconModalOpen && (
-        <BeaconSelectorModal
-          beacons={allBeacons}
-          onSelect={handleBeaconSelect}
-          onClose={() => setIsBeaconModalOpen(false)}
-        />
-      )}
-      {selectedDevice && <DeviceInfoPopup device={selectedDevice} onClose={() => setSelectedDevice(null)} />}
-      {selectedBeacon && <BeaconInfoPopup beacon={selectedBeacon} onClose={() => setSelectedBeacon(null)} />}
-      <BackArrow onClick={() => navigate('/')}>&#x2190;</BackArrow>
-      <MapSelectorContainer className={isPanelVisible ? '' : 'hidden'}>
-        <ToggleButton onClick={() => setIsPanelVisible(!isPanelVisible)}>
+    <>
+      <Header variant="page" title="Map" />
+      <MapsPageContainer>
+        {isBeaconModalOpen && (
+          <BeaconSelectorModal
+            beacons={allBeacons}
+            onSelect={handleBeaconSelect}
+            onClose={() => setIsBeaconModalOpen(false)}
+          />
+        )}
+        {selectedDevice && <DeviceInfoPopup device={selectedDevice} onClose={() => setSelectedDevice(null)} />}
+        {selectedBeacon && <BeaconInfoPopup beacon={selectedBeacon} onClose={() => setSelectedBeacon(null)} />}
+        <MapSelectorContainer className={isPanelVisible ? '' : 'hidden'}>
+          <ToggleButton onClick={() => setIsPanelVisible(!isPanelVisible)}>
           {isPanelVisible ? 'Hide' : 'Show'}
         </ToggleButton>
         <MapSelect value={selectedMapId} onChange={(e) => setSelectedMapId(e.target.value)}>
@@ -443,6 +444,7 @@ export default function NewMapPage() {
           </TransformWrapper>
         )}
       </MapWrapper>
-    </MapsPageContainer>
+      </MapsPageContainer>
+    </>
   );
 }

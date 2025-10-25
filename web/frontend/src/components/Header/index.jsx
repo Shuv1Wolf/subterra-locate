@@ -3,14 +3,15 @@ import { useNavigate } from "react-router-dom";
 import {
   HeaderContainer,
   MenuIcon,
-  Title,
   AlarmsButton,
-  OrgName,
   DropdownMenu,
   MenuItem,
+  BackButton,
+  Title,
+  OrgName,
 } from "./styles";
 
-export default function Header() {
+export default function Header({ variant = 'home', title = 'Subterra Locate' }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   const headerRef = useRef(null);
@@ -35,10 +36,14 @@ export default function Header() {
 
   return (
     <HeaderContainer ref={headerRef}>
-      <MenuIcon onClick={() => setIsMenuOpen(!isMenuOpen)}>&#9776;</MenuIcon>
-      <Title>Subterra Locate</Title>
-      <AlarmsButton>Alarms</AlarmsButton>
-      <OrgName>ORG_NAME</OrgName>
+      {variant === 'home' ? (
+        <MenuIcon onClick={() => setIsMenuOpen(!isMenuOpen)}>&#9776;</MenuIcon>
+      ) : (
+        <BackButton onClick={() => navigate(-1)}>&#8592;</BackButton>
+      )}
+      <Title>{title}</Title>
+      {variant === 'home' && <AlarmsButton>Alarms</AlarmsButton>}
+      <OrgName>Test organization</OrgName>
       {isMenuOpen && (
         <DropdownMenu>
           <MenuItem onClick={() => handleNavigate("/maps")}>Maps</MenuItem>

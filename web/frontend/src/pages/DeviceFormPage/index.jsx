@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SYSTEM_HOST } from '../../config';
-import { AdminPageContainer, Header, Title, Button } from '../DevicesAdminPage/styles';
+import Header from '../../components/Header';
+import { AdminPageContainer, Button } from '../DevicesAdminPage/styles';
 import { FormContainer, FormGroup, Label, Input, CheckboxContainer } from './styles';
 
 export default function DeviceFormPage() {
@@ -78,13 +79,11 @@ export default function DeviceFormPage() {
   if (loading && isEditing) return <AdminPageContainer>Loading...</AdminPageContainer>;
 
   return (
-    <AdminPageContainer>
-      <Header>
-        <Title>{isEditing ? 'Edit Device' : 'Create Device'}</Title>
-        <Button onClick={() => navigate('/devices-admin')}>Back to List</Button>
-      </Header>
-      <FormContainer as="form" onSubmit={handleSubmit}>
-        <FormGroup>
+    <>
+      <Header variant="page" title={isEditing ? 'Edit Device' : 'Create Device'} />
+      <AdminPageContainer>
+        <FormContainer as="form" onSubmit={handleSubmit}>
+          <FormGroup>
           <Label htmlFor="name">Name</Label>
           <Input type="text" name="name" id="name" value={device.name} onChange={handleChange} required />
         </FormGroup>
@@ -110,9 +109,10 @@ export default function DeviceFormPage() {
             <Label htmlFor="enabled" style={{ marginBottom: 0 }}>Enabled</Label>
           </CheckboxContainer>
         </FormGroup>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <Button type="submit" disabled={loading}>{loading ? 'Saving...' : 'Save Device'}</Button>
-      </FormContainer>
-    </AdminPageContainer>
+          {error && <p style={{ color: 'red' }}>{error}</p>}
+          <Button type="submit" disabled={loading}>{loading ? 'Saving...' : 'Save Device'}</Button>
+        </FormContainer>
+      </AdminPageContainer>
+    </>
   );
 }

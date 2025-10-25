@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SYSTEM_HOST } from '../../config';
+import Header from '../../components/Header';
 import {
   AdminPageContainer,
-  Header,
-  Title,
   Button,
   BeaconTable as DeviceTable, // Renaming for clarity
   ActionsContainer,
@@ -52,16 +51,14 @@ export default function DevicesAdminPage() {
   if (error) return <AdminPageContainer>Error: {error}</AdminPageContainer>;
 
   return (
-    <AdminPageContainer>
-      <Header>
-        <Title>Devices Admin</Title>
-        <div>
-          <Button onClick={() => navigate('/devices-admin/new')} style={{marginRight: '10px'}}>Add New Device</Button>
-          <Button onClick={() => navigate('/')}>Back to Home</Button>
+    <>
+      <Header variant="page" title="Devices Admin" />
+      <AdminPageContainer>
+        <div style={{ marginBottom: '20px' }}>
+          <Button onClick={() => navigate('/devices-admin/new')}>Add New Device</Button>
         </div>
-      </Header>
-      <DeviceTable>
-        <thead>
+        <DeviceTable>
+          <thead>
           <tr>
             <th>Name</th>
             <th>Type</th>
@@ -88,7 +85,8 @@ export default function DevicesAdminPage() {
             </tr>
           ))}
         </tbody>
-      </DeviceTable>
-    </AdminPageContainer>
+        </DeviceTable>
+      </AdminPageContainer>
+    </>
   );
 }

@@ -16,6 +16,12 @@ export const MenuIcon = styled.div`
   cursor: pointer;
 `;
 
+export const BackButton = styled.div`
+  font-size: 24px;
+  margin-right: 16px;
+  cursor: pointer;
+`;
+
 export const Title = styled.h1`
   font-size: 20px;
   margin: 0;

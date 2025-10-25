@@ -16,7 +16,7 @@ export default function HomePage() {
 
   return (
     <>
-      <Header />
+      <Header variant="home" />
       <HomePageContainer>
         <TilesContainer>
           {/* Maps tile */}

@@ -2,14 +2,14 @@ import styled from 'styled-components';
 
 export const MapsPageContainer = styled.div`
   width: 100vw;
-  height: 100vh;
+  height: calc(100vh - 50px);
   overflow: hidden;
   position: relative;
 `;
 
 export const MapSelectorContainer = styled.div`
   position: absolute;
-  top: 20px;
+  top: 10px;
   right: 20px;
   background: rgba(35, 41, 54, 0.9);
   border-radius: 12px;
@@ -114,21 +114,6 @@ export const MapWrapper = styled.div`
   svg {
     max-width: 100%;
     max-height: 100%;
-  }
-`;
-
-export const BackArrow = styled.div`
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  z-index: 10;
-  cursor: pointer;
-  font-size: 24px;
-  color: #90caf9;
-  transition: color 0.2s;
-
-  &:hover {
-    color: #fff;
   }
 `;
 
