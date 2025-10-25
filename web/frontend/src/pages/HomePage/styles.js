@@ -1,38 +1,17 @@
 import styled from 'styled-components';
 
 export const HomePageContainer = styled.div`
-  min-height: 100vh;
+  min-height: calc(100vh - 50px);
   min-width: 100vw;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  padding: 48px 0 32px 0;
+  padding: 32px 0;
 
   @media (max-width: 700px) {
-    padding: 24px 0 16px 0;
-  }
-`;
-
-export const Title = styled.h1`
-  margin-bottom: 8px;
-  font-size: 38px;
-  text-align: center;
-
-  @media (max-width: 500px) {
-    font-size: 28px;
-  }
-`;
-
-export const Description = styled.p`
-  max-width: 500px;
-  text-align: center;
-  margin-bottom: 32px;
-  font-size: 18px;
-
-  @media (max-width: 500px) {
-    font-size: 15px;
+    padding: 16px 0;
   }
 `;
 
