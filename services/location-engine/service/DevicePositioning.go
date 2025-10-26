@@ -103,7 +103,13 @@ func (c *LocationEngineService) bleEventHandler(ctx context.Context, envelope *c
 	}
 
 	pos := &natsEvents.DevicePositioningEventV1{
-		DeviceId: event.DeviceId, X: x, Y: y, Z: z, Time: time.Now(),
+		DeviceId:  event.DeviceId,
+		X:         x,
+		Y:         y,
+		Z:         z,
+		Timestamp: envelope.SentTime,
+		MapId:     mapId,
+		OrgId:     d.OrgId,
 	}
 
 	c.deviceStateStore.Upsert(&utils.DeviceState{
@@ -116,10 +122,10 @@ func (c *LocationEngineService) bleEventHandler(ctx context.Context, envelope *c
 		Z:          float32(pos.Z),
 		Info: map[string]string{
 			"source": "ble",
-			"time":   pos.Time.Format(time.RFC3339),
+			"time":   pos.Timestamp.Format(time.RFC3339),
 		},
 		UpdatedAt: time.Now(),
-		Online:     true,
+		Online:    true,
 	})
 
 	// Only send position if the device is online
