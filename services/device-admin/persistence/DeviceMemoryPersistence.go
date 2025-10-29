@@ -26,6 +26,7 @@ func (c *DeviceMemoryPersistence) composeFilter(filter cquery.FilterParams) func
 	OrgId := filter.GetAsString("org_id")
 	name := filter.GetAsString("name")
 	model := filter.GetAsString("model")
+	macAddress := filter.GetAsString("mac_address")
 
 	return func(beacon data.DeviceV1) bool {
 		if id != "" && beacon.Id != id {
@@ -38,6 +39,9 @@ func (c *DeviceMemoryPersistence) composeFilter(filter cquery.FilterParams) func
 			return false
 		}
 		if model != "" && beacon.Model != model {
+			return false
+		}
+		if macAddress != "" && beacon.MacAddress != macAddress {
 			return false
 		}
 		return true

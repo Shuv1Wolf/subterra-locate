@@ -60,6 +60,9 @@ func (c *DevicePostgresPersistence) composeFilter(filter cquery.FilterParams) st
 	if enabled, ok := filter.GetAsNullableString("enabled"); ok && enabled != "" {
 		filters = append(filters, "enabled="+enabled)
 	}
+	if macAddress, ok := filter.GetAsNullableString("mac_address"); ok && macAddress != "" {
+		filters = append(filters, "mac_address='"+macAddress+"'")
+	}
 
 	if len(filters) > 0 {
 		return strings.Join(filters, " AND ")
