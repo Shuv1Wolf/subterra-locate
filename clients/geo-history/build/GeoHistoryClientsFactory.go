@@ -1,7 +1,7 @@
 package build
 
 import (
-	clients1 "github.com/Shuv1Wolf/subterra-locate/clients/geo-hitory/clients/version1"
+	clients1 "github.com/Shuv1Wolf/subterra-locate/clients/geo-history/clients/version1"
 	cbuild "github.com/pip-services4/pip-services4-go/pip-services4-components-go/build"
 	cref "github.com/pip-services4/pip-services4-go/pip-services4-components-go/refer"
 )

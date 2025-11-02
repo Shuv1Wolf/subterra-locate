@@ -1,4 +1,4 @@
-module github.com/Shuv1Wolf/subterra-locate/clients/geo-hitory
+module github.com/Shuv1Wolf/subterra-locate/clients/geo-history
 
 go 1.24.4
 
