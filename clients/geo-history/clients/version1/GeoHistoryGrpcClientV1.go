@@ -28,10 +28,9 @@ func (c *GeoHistoryGrpcClientV1) GetHistory(ctx context.Context, orgId, mapId, f
 		"map_id", mapId,
 		"from", from,
 		"to", to,
-		"name", sortField.Name,
-		"ascending", sortField.Ascending,
+		"sort", sortField,
+		"paging", paging,
 	)
-	c.AddPagingParams(params, &paging)
 
 	response, err := c.CallCommand(ctx, "get_device_history", cdata.NewAnyValueMapFromValue(params.Value()))
 
