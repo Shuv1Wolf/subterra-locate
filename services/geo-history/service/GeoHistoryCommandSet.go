@@ -31,7 +31,7 @@ func NewGeoHistoryCommandSet(controller IGeoHistoryService) *GeoHistoryCommandSe
 
 func (c *GeoHistoryCommandSet) makeGetHistoryCommand() ccmd.ICommand {
 	return ccmd.NewCommand(
-		"get_maps",
+		"get_device_history",
 		cvalid.NewObjectSchema().
 			WithRequiredProperty("org_id", cconv.String).
 			WithRequiredProperty("map_id", cconv.String).
