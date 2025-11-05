@@ -8,8 +8,8 @@ import (
 )
 
 type IBeaconsClientV1 interface {
-	GetBeacons(ctx context.Context, filter cquery.FilterParams,
-		paging cquery.PagingParams) (*cquery.DataPage[data1.BeaconV1], error)
+	GetBeacons(ctx context.Context, filter *cquery.FilterParams,
+		paging *cquery.PagingParams) (*cquery.DataPage[data1.BeaconV1], error)
 
 	GetBeaconById(ctx context.Context, beaconId string) (*data1.BeaconV1, error)
 

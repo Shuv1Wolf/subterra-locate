@@ -22,12 +22,23 @@ func NewBeaconsGrpcClientV1() *BeaconsGrpcClientV1 {
 }
 
 func (c *BeaconsGrpcClientV1) GetBeacons(ctx context.Context,
-	filter cquery.FilterParams,
-	paging cquery.PagingParams) (*cquery.DataPage[data1.BeaconV1], error) {
+	filter *cquery.FilterParams,
+	paging *cquery.PagingParams) (*cquery.DataPage[data1.BeaconV1], error) {
 
-	params := cdata.NewEmptyStringValueMap()
-	c.AddFilterParams(params, &filter)
-	c.AddPagingParams(params, &paging)
+	var pagingMap map[string]interface{}
+
+	if paging != nil {
+		pagingMap = map[string]interface{}{
+			"skip":  paging.Skip,
+			"take":  paging.Take,
+			"total": paging.Total,
+		}
+	}
+
+	params := cdata.NewAnyValueMapFromTuples(
+		"filter", filter.StringValueMap.Value(),
+		"paging", pagingMap,
+	)
 
 	response, err := c.CallCommand(ctx, "get_beacons", cdata.NewAnyValueMapFromValue(params.Value()))
 

@@ -75,7 +75,7 @@ func (c *BeaconsClientV1Fixture) TestCrudOperations(t *testing.T) {
 	c.testCreateBeacons(t)
 
 	// Get all beacons
-	page, err := c.client.GetBeacons(c.ctx, *cquery.NewEmptyFilterParams(), *cquery.NewEmptyPagingParams())
+	page, err := c.client.GetBeacons(c.ctx, cquery.NewEmptyFilterParams(), cquery.NewEmptyPagingParams())
 	assert.Nil(t, err)
 	assert.NotNil(t, page)
 	assert.Len(t, page.Data, 2)

@@ -15,8 +15,8 @@ func NewBeaconsNullClientV1() *BeaconsNullClientV1 {
 }
 
 func (c *BeaconsNullClientV1) GetBeacons(ctx context.Context,
-	filter cquery.FilterParams,
-	paging cquery.PagingParams) (*cquery.DataPage[data1.BeaconV1], error) {
+	filter *cquery.FilterParams,
+	paging *cquery.PagingParams) (*cquery.DataPage[data1.BeaconV1], error) {
 	return cquery.NewEmptyDataPage[data1.BeaconV1](), nil
 }
 

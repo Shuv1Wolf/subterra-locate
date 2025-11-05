@@ -34,9 +34,9 @@ func (c *BeaconsDirectClientV1) SetReferences(ctx context.Context, references cr
 }
 
 func (c *BeaconsDirectClientV1) GetBeacons(ctx context.Context,
-	filter cquery.FilterParams, paging cquery.PagingParams) (*cquery.DataPage[data1.BeaconV1], error) {
+	filter *cquery.FilterParams, paging *cquery.PagingParams) (*cquery.DataPage[data1.BeaconV1], error) {
 	timing := c.Instrument(ctx, "beacons.get_beacons")
-	result, err := c.service.GetBeacons(ctx, filter, paging)
+	result, err := c.service.GetBeacons(ctx, *filter, *paging)
 	timing.EndTiming(ctx, err)
 	return &result, err
 }

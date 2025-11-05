@@ -61,8 +61,8 @@ func (c *BeaconsMemoryClientV1) composeFilter(filter cquery.FilterParams) func(i
 }
 
 func (c *BeaconsMemoryClientV1) GetBeacons(ctx context.Context,
-	filter cquery.FilterParams, paging cquery.PagingParams) (page *cquery.DataPage[data1.BeaconV1], err error) {
-	filterBeacons := c.composeFilter(filter)
+	filter *cquery.FilterParams, paging *cquery.PagingParams) (page *cquery.DataPage[data1.BeaconV1], err error) {
+	filterBeacons := c.composeFilter(*filter)
 
 	beacons := make([]data1.BeaconV1, 0)
 	for _, v := range c.items {
