@@ -40,7 +40,7 @@ func (c *BeaconAdminOperationsV1) GetBeacons(res http.ResponseWriter, req *http.
 	var paging = c.GetPagingParams(req)
 
 	page, err := c.beaconAdmin.GetBeacons(
-		context.Background(), *filter, *paging)
+		context.Background(), filter, paging)
 
 	if err != nil {
 		c.SendError(res, req, err)

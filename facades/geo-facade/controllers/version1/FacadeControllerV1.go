@@ -16,6 +16,7 @@ type FacadeControllerV1 struct {
 	beaconsOperations     *operations1.BeaconAdminOperationsV1
 	locationOperations    *operations1.LocationEngineOperationsV1
 	geoRendererOperations *operations1.GeoRendererOperationsV1
+	geoHistoryOperations  *operations1.GeoHistoryOperationsV1
 }
 
 func NewFacadeControllerV1() *FacadeControllerV1 {
@@ -23,6 +24,7 @@ func NewFacadeControllerV1() *FacadeControllerV1 {
 		beaconsOperations:     operations1.NewBeaconAdminOperationsV1(),
 		locationOperations:    operations1.NewLocationEngineOperationsV1(),
 		geoRendererOperations: operations1.NewGeoRendererOperationsV1(),
+		geoHistoryOperations:  operations1.NewGeoHistoryOperationsV1(),
 	}
 	c.RestController = httpcontr.InheritRestController(c)
 	c.BaseRoute = "api/v1/geo"
@@ -35,6 +37,7 @@ func (c *FacadeControllerV1) Configure(ctx context.Context, config *cconf.Config
 	c.beaconsOperations.Configure(ctx, config)
 	c.locationOperations.Configure(ctx, config)
 	c.geoRendererOperations.Configure(ctx, config)
+	c.geoHistoryOperations.Configure(ctx, config)
 }
 
 func (c *FacadeControllerV1) SetReferences(ctx context.Context, references cref.IReferences) {
@@ -43,6 +46,7 @@ func (c *FacadeControllerV1) SetReferences(ctx context.Context, references cref.
 	c.beaconsOperations.SetReferences(ctx, references)
 	c.locationOperations.SetReferences(ctx, references)
 	c.geoRendererOperations.SetReferences(ctx, references)
+	c.geoHistoryOperations.SetReferences(ctx, references)
 }
 
 func (c *FacadeControllerV1) Register() {
@@ -88,4 +92,9 @@ func (c *FacadeControllerV1) FacadeControllerV1() {
 		func(res http.ResponseWriter, req *http.Request) { c.geoRendererOperations.UpdateMap(res, req) })
 	c.RegisterRoute("delete", "/map/:id", nil,
 		func(res http.ResponseWriter, req *http.Request) { c.geoRendererOperations.DeleteMapById(res, req) })
+
+	// Geo history routes
+	c.RegisterRoute("get", "/history", nil,
+		func(res http.ResponseWriter, req *http.Request) { c.geoHistoryOperations.GetHistory(res, req) })
+
 }

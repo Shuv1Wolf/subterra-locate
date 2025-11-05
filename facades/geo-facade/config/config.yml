@@ -20,7 +20,7 @@
     port: {{BEACON_ADMIN_SERVICE_PORT}}{{^BEACON_ADMIN_SERVICE_PORT}}10010{{/BEACON_ADMIN_SERVICE_PORT}}
 {{/MOCK}}
 {{#if MOCK}}
-- descriptor: "beacon-admin:client:mock:default:1.0"
+- descriptor: "beacon-admin:client:null:default:1.0"
 {{/if}}
 
 # Location-monitor client
@@ -36,6 +36,13 @@
     protocol: "http"
     host: {{GEO_RENDERER_SERVICE_HOST}}{{^GEO_RENDERER_SERVICE_HOST}}"localhost"{{/GEO_RENDERER_SERVICE_HOST}}
     port: {{GEO_RENDERER_SERVICE_PORT}}{{^GEO_RENDERER_SERVICE_PORT}}10040{{/GEO_RENDERER_SERVICE_PORT}}
+
+# Geo-history client
+- descriptor: "geo-history:client:grpc:default:1.0"
+  connection:
+    protocol: "http"
+    host: {{GEO_HISTORY_SERVICE_HOST}}{{^GEO_HISTORY_SERVICE_HOST}}"localhost"{{/GEO_HISTORY_SERVICE_HOST}}
+    port: {{GEO_HISTORY_SERVICE_PORT}}{{^GEO_HISTORY_SERVICE_PORT}}10050{{/GEO_HISTORY_SERVICE_PORT}}
 
 # Main facade service
 - descriptor: "pip-services:endpoint:http:default:*"

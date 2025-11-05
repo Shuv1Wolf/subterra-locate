@@ -43,7 +43,7 @@ func (c *GeoRendererOperationsV1) GetMaps(res http.ResponseWriter, req *http.Req
 	var paging = c.GetPagingParams(req)
 
 	page, err := c.geoRenderer.GetMaps(
-		context.Background(), *filter, *paging)
+		context.Background(), filter, paging)
 
 	if err != nil {
 		c.SendError(res, req, err)
