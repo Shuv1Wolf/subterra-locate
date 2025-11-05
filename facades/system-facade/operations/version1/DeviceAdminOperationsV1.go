@@ -40,7 +40,7 @@ func (c *DeviceAdminOperationsV1) GetDevices(res http.ResponseWriter, req *http.
 	var paging = c.GetPagingParams(req)
 
 	page, err := c.deviceAdmin.GetDevices(
-		context.Background(), *filter, *paging)
+		context.Background(), filter, paging)
 
 	if err != nil {
 		c.SendError(res, req, err)
