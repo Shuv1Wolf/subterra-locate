@@ -15,8 +15,8 @@ func NewGeoRendererNullClientV1() *GeoRendererNullClientV1 {
 }
 
 func (c *GeoRendererNullClientV1) GetMaps(ctx context.Context,
-	filter cquery.FilterParams,
-	paging cquery.PagingParams) (*cquery.DataPage[data1.Map2dV1], error) {
+	filter *cquery.FilterParams,
+	paging *cquery.PagingParams) (*cquery.DataPage[data1.Map2dV1], error) {
 	return cquery.NewEmptyDataPage[data1.Map2dV1](), nil
 }
 

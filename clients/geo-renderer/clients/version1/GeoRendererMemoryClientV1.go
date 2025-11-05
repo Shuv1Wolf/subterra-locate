@@ -47,8 +47,8 @@ func (c *GeoRendererMemoryClientV1) composeFilter(filter cquery.FilterParams) fu
 }
 
 func (c *GeoRendererMemoryClientV1) GetMaps(ctx context.Context,
-	filter cquery.FilterParams, paging cquery.PagingParams) (page *cquery.DataPage[data1.Map2dV1], err error) {
-	filterDevice := c.composeFilter(filter)
+	filter *cquery.FilterParams, paging *cquery.PagingParams) (page *cquery.DataPage[data1.Map2dV1], err error) {
+	filterDevice := c.composeFilter(*filter)
 
 	map2d := make([]data1.Map2dV1, 0)
 	for _, v := range c.items {

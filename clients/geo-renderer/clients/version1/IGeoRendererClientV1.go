@@ -8,7 +8,7 @@ import (
 )
 
 type IGeoRendererClientV1 interface {
-	GetMaps(ctx context.Context, filter cquery.FilterParams, paging cquery.PagingParams) (*cquery.DataPage[data1.Map2dV1], error)
+	GetMaps(ctx context.Context, filter *cquery.FilterParams, paging *cquery.PagingParams) (*cquery.DataPage[data1.Map2dV1], error)
 
 	GetMapById(ctx context.Context, id string) (*data1.Map2dV1, error)
 
