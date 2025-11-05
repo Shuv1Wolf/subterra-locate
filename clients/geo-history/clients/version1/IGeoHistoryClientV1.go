@@ -8,5 +8,5 @@ import (
 )
 
 type IGeoHistoryClientV1 interface {
-	GetHistory(ctx context.Context, orgId, mapId, from, to string, paging cquery.PagingParams, sortField cquery.SortField) (cquery.DataPage[data1.HistoricalRecordV1], error)
+	GetHistory(ctx context.Context, orgId, mapId, from, to string, paging *cquery.PagingParams, sortField *cquery.SortField) (cquery.DataPage[data1.HistoricalRecordV1], error)
 }

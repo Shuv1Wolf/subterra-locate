@@ -21,15 +21,32 @@ func NewGeoHistoryGrpcClientV1() *GeoHistoryGrpcClientV1 {
 }
 
 func (c *GeoHistoryGrpcClientV1) GetHistory(ctx context.Context, orgId, mapId, from, to string,
-	paging cquery.PagingParams, sortField cquery.SortField) (cquery.DataPage[data1.HistoricalRecordV1], error) {
+	paging *cquery.PagingParams, sortField *cquery.SortField) (cquery.DataPage[data1.HistoricalRecordV1], error) {
+
+	var pagingMap map[string]interface{}
+	if paging != nil {
+		pagingMap = map[string]interface{}{
+			"skip":  paging.Skip,
+			"take":  paging.Take,
+			"total": paging.Total,
+		}
+	}
+
+	var sortMap map[string]interface{}
+	if sortField != nil {
+		sortMap = map[string]interface{}{
+			"name":      sortField.Name,
+			"ascending": sortField.Ascending,
+		}
+	}
 
 	params := cdata.NewStringValueMapFromTuples(
 		"org_id", orgId,
 		"map_id", mapId,
 		"from", from,
 		"to", to,
-		"sort", sortField,
-		"paging", paging,
+		"sort", sortMap,
+		"paging", pagingMap,
 	)
 
 	response, err := c.CallCommand(ctx, "get_device_history", cdata.NewAnyValueMapFromValue(params.Value()))
