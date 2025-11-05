@@ -15,8 +15,8 @@ func NewDeviceNullClientV1() *DeviceNullClientV1 {
 }
 
 func (c *DeviceNullClientV1) GetDevice(ctx context.Context,
-	filter cquery.FilterParams,
-	paging cquery.PagingParams) (*cquery.DataPage[data1.DeviceV1], error) {
+	filter *cquery.FilterParams,
+	paging *cquery.PagingParams) (*cquery.DataPage[data1.DeviceV1], error) {
 	return cquery.NewEmptyDataPage[data1.DeviceV1](), nil
 }
 

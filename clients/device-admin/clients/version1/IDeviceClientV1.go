@@ -8,8 +8,8 @@ import (
 )
 
 type IDeviceClientV1 interface {
-	GetDevices(ctx context.Context, filter cquery.FilterParams,
-		paging cquery.PagingParams) (*cquery.DataPage[data1.DeviceV1], error)
+	GetDevices(ctx context.Context, filter *cquery.FilterParams,
+		paging *cquery.PagingParams) (*cquery.DataPage[data1.DeviceV1], error)
 
 	GetDeviceById(ctx context.Context, id string) (*data1.DeviceV1, error)
 

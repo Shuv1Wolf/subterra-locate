@@ -47,8 +47,8 @@ func (c *DeviceMemoryClientV1) composeFilter(filter cquery.FilterParams) func(it
 }
 
 func (c *DeviceMemoryClientV1) GetDevices(ctx context.Context,
-	filter cquery.FilterParams, paging cquery.PagingParams) (page *cquery.DataPage[data1.DeviceV1], err error) {
-	filterDevice := c.composeFilter(filter)
+	filter *cquery.FilterParams, paging *cquery.PagingParams) (page *cquery.DataPage[data1.DeviceV1], err error) {
+	filterDevice := c.composeFilter(*filter)
 
 	Device := make([]data1.DeviceV1, 0)
 	for _, v := range c.items {

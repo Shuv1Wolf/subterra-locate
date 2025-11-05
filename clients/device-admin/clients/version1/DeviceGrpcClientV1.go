@@ -21,12 +21,23 @@ func NewDeviceGrpcClientV1() *DeviceGrpcClientV1 {
 }
 
 func (c *DeviceGrpcClientV1) GetDevices(ctx context.Context,
-	filter cquery.FilterParams,
-	paging cquery.PagingParams) (*cquery.DataPage[data1.DeviceV1], error) {
+	filter *cquery.FilterParams,
+	paging *cquery.PagingParams) (*cquery.DataPage[data1.DeviceV1], error) {
 
-	params := cdata.NewEmptyStringValueMap()
-	c.AddFilterParams(params, &filter)
-	c.AddPagingParams(params, &paging)
+	var pagingMap map[string]interface{}
+
+	if paging != nil {
+		pagingMap = map[string]interface{}{
+			"skip":  paging.Skip,
+			"take":  paging.Take,
+			"total": paging.Total,
+		}
+	}
+
+	params := cdata.NewAnyValueMapFromTuples(
+		"filter", filter.StringValueMap.Value(),
+		"paging", pagingMap,
+	)
 
 	response, err := c.CallCommand(ctx, "get_devices", cdata.NewAnyValueMapFromValue(params.Value()))
 
