@@ -40,7 +40,7 @@ func (c *GeoHistoryGrpcClientV1) GetHistory(ctx context.Context, orgId, mapId, f
 		}
 	}
 
-	params := cdata.NewStringValueMapFromTuples(
+	params := cdata.NewAnyValueMapFromTuples(
 		"org_id", orgId,
 		"map_id", mapId,
 		"from", from,
