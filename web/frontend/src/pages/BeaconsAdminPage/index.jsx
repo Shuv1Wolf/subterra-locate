@@ -7,6 +7,7 @@ import {
   Button,
   BeaconTable,
   ActionsContainer,
+  PaginationContainer,
 } from './styles.js';
 
 export default function BeaconsAdminPage() {
@@ -14,16 +15,23 @@ export default function BeaconsAdminPage() {
   const [beacons, setBeacons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [take] = useState(10); // Items per page
+  const [total, setTotal] = useState(0);
 
   const fetchBeacons = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${GEO_HOST}/api/v1/geo/beacons`);
+      const skip = (page - 1) * take;
+      const response = await fetch(
+        `${GEO_HOST}/api/v1/geo/beacons?total=true&skip=${skip}&take=${take}`
+      );
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
       const data = await response.json();
       setBeacons(data.data || []);
+      setTotal(data.total || 0);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -49,7 +57,7 @@ export default function BeaconsAdminPage() {
 
   useEffect(() => {
     fetchBeacons();
-  }, []);
+  }, [page]);
 
   if (loading) return <AdminPageContainer>Loading beacons...</AdminPageContainer>;
   if (error) return <AdminPageContainer>Error: {error}</AdminPageContainer>;
@@ -88,6 +96,17 @@ export default function BeaconsAdminPage() {
           ))}
         </tbody>
         </BeaconTable>
+        <PaginationContainer>
+          <Button onClick={() => setPage(page - 1)} disabled={page === 1}>
+            Previous
+          </Button>
+          <span>
+            Showing {(page - 1) * take + 1} - {Math.min(page * take, total)} of {total}
+          </span>
+          <Button onClick={() => setPage(page + 1)} disabled={page * take >= total}>
+            Next
+          </Button>
+        </PaginationContainer>
       </AdminPageContainer>
     </>
   );

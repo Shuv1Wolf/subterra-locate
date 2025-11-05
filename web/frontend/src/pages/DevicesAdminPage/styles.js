@@ -46,3 +46,20 @@ export const ActionsContainer = styled.div`
   display: flex;
   gap: 10px;
 `;
+
+export const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+
+  button {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+
+  span {
+    font-size: 14px;
+  }
+`;
