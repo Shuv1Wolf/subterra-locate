@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SYSTEM_HOST } from '../../config';
+import { apiClient } from '../../utils/api';
 import Header from '../../components/Header';
 import {
   AdminPageContainer,
@@ -23,11 +24,9 @@ export default function DevicesAdminPage() {
     try {
       setLoading(true);
       const skip = (page - 1) * take;
-      const response = await fetch(
+      const data = await apiClient.get(
         `${SYSTEM_HOST}/api/v1/system/devices?total=true&skip=${skip}&take=${take}`
       );
-      if (!response.ok) throw new Error('Network response was not ok');
-      const data = await response.json();
       setDevices(data.data || []);
       setTotal(data.total || 0);
     } catch (e) {
@@ -40,10 +39,7 @@ export default function DevicesAdminPage() {
   const handleDelete = async (deviceId) => {
     if (window.confirm('Are you sure you want to delete this device?')) {
       try {
-        const response = await fetch(`${SYSTEM_HOST}/api/v1/system/device/${deviceId}`, {
-          method: 'DELETE',
-        });
-        if (!response.ok) throw new Error('Failed to delete device');
+        await apiClient.delete(`${SYSTEM_HOST}/api/v1/system/device/${deviceId}`);
         fetchDevices(); // Refresh the list
       } catch (e) {
         setError(e.message);

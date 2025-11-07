@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GEO_HOST } from '../../config';
+import { apiClient } from '../../utils/api';
 import Header from '../../components/Header';
 import {
   AdminPageContainer,
@@ -23,13 +24,9 @@ export default function BeaconsAdminPage() {
     try {
       setLoading(true);
       const skip = (page - 1) * take;
-      const response = await fetch(
+      const data = await apiClient.get(
         `${GEO_HOST}/api/v1/geo/beacons?total=true&skip=${skip}&take=${take}`
       );
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      const data = await response.json();
       setBeacons(data.data || []);
       setTotal(data.total || 0);
     } catch (e) {
@@ -42,12 +39,7 @@ export default function BeaconsAdminPage() {
   const handleDelete = async (beaconId) => {
     if (window.confirm('Are you sure you want to delete this beacon?')) {
       try {
-        const response = await fetch(`${GEO_HOST}/api/v1/geo/beacons/${beaconId}`, {
-          method: 'DELETE',
-        });
-        if (!response.ok) {
-          throw new Error('Failed to delete beacon');
-        }
+        await apiClient.delete(`${GEO_HOST}/api/v1/geo/beacons/${beaconId}`);
         fetchBeacons(); // Refresh the list
       } catch (e) {
         setError(e.message);

@@ -6,6 +6,7 @@ import Draggable from 'react-draggable';
 import UserIcon from '../../assets/user.svg';
 import BeaconIcon from '../../assets/bullseye-animated.gif';
 import { GEO_HOST, SYSTEM_HOST } from '../../config';
+import { apiClient } from '../../utils/api';
 import Header from '../../components/Header';
 import {
   MapsPageContainer,
@@ -170,17 +171,7 @@ export default function NewMapPage() {
     setContextMenu(null);
 
     try {
-      const response = await fetch(`${GEO_HOST}/api/v1/geo/beacons`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedBeacon),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update beacon');
-      }
-
+      await apiClient.put(`${GEO_HOST}/api/v1/geo/beacons`, updatedBeacon);
       alert('The beacon has been successfully relocated!');
     } catch (err) {
       console.error(err);
@@ -190,9 +181,7 @@ export default function NewMapPage() {
 
   const handleDeviceClick = async (deviceId) => {
     try {
-      const response = await fetch(`${SYSTEM_HOST}/api/v1/system/device/${deviceId}`);
-      if (!response.ok) throw new Error('Failed to fetch device details');
-      const data = await response.json();
+      const data = await apiClient.get(`${SYSTEM_HOST}/api/v1/system/device/${deviceId}`);
       setSelectedDevice(data);
     } catch (err) {
       console.error(err);
@@ -201,9 +190,7 @@ export default function NewMapPage() {
 
   const handleBeaconClick = async (beaconId) => {
     try {
-      const response = await fetch(`${GEO_HOST}/api/v1/geo/beacons/${beaconId}`);
-      if (!response.ok) throw new Error('Failed to fetch beacon details');
-      const data = await response.json();
+      const data = await apiClient.get(`${GEO_HOST}/api/v1/geo/beacons/${beaconId}`);
       setSelectedBeacon(data);
     } catch (err) {
       console.error(err);
@@ -230,13 +217,11 @@ export default function NewMapPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [mapsRes, devicesRes, beaconsRes] = await Promise.all([
-          fetch(`${GEO_HOST}/api/v1/geo/map`),
-          fetch(`${SYSTEM_HOST}/api/v1/system/devices`),
-          fetch(`${GEO_HOST}/api/v1/geo/beacons`),
+        const [mapsData, devicesData, beaconsData] = await Promise.all([
+          apiClient.get(`${GEO_HOST}/api/v1/geo/map`),
+          apiClient.get(`${SYSTEM_HOST}/api/v1/system/devices`),
+          apiClient.get(`${GEO_HOST}/api/v1/geo/beacons`),
         ]);
-        if (!mapsRes.ok || !devicesRes.ok || !beaconsRes.ok) throw new Error('Network response was not ok');
-        const [mapsData, devicesData, beaconsData] = await Promise.all([mapsRes.json(), devicesRes.json(), beaconsRes.json()]);
         setMaps(mapsData.data);
         setAllDevices(devicesData.data);
         setAllBeacons(beaconsData.data);
@@ -260,8 +245,12 @@ export default function NewMapPage() {
       return;
     }
 
+    const orgId = localStorage.getItem("selectedOrgId");
     const wsHost = GEO_HOST.replace('http://', 'ws://');
-    let wsUrl = `${wsHost}/api/v1/geo/location/device/monitor?org_id=org$1&map_id=${selectedMapId}`;
+    let wsUrl = `${wsHost}/api/v1/geo/location/device/monitor?map_id=${selectedMapId}`;
+    if (orgId) {
+      wsUrl += `&org_id=${orgId}`;
+    }
     
     const deviceIds = activeDeviceFilters.map(d => d.value);
     if (deviceIds.length > 0) {
@@ -309,8 +298,12 @@ export default function NewMapPage() {
       return;
     }
 
+    const orgId = localStorage.getItem("selectedOrgId");
     const wsHost = GEO_HOST.replace('http://', 'ws://');
-    let wsUrl = `${wsHost}/api/v1/geo/location/beacon/monitor?org_id=org$1&map_id=${selectedMapId}`;
+    let wsUrl = `${wsHost}/api/v1/geo/location/beacon/monitor?map_id=${selectedMapId}`;
+    if (orgId) {
+      wsUrl += `&org_id=${orgId}`;
+    }
     
     const beaconIds = activeBeaconFilters.map(b => b.value);
     if (beaconIds.length > 0) {

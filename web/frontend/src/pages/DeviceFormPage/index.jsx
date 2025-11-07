@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SYSTEM_HOST } from '../../config';
+import { apiClient } from '../../utils/api';
 import Header from '../../components/Header';
 import { AdminPageContainer, Button } from '../DevicesAdminPage/styles';
 import {
@@ -36,8 +37,7 @@ export default function DeviceFormPage() {
       if (!isEditing) return;
       setLoading(true);
       try {
-        const response = await fetch(`${SYSTEM_HOST}/api/v1/system/device/${deviceId}`);
-        const data = await response.json();
+        const data = await apiClient.get(`${SYSTEM_HOST}/api/v1/system/device/${deviceId}`);
         setDevice(data);
       } catch (e) {
         setError('Failed to load device data');
@@ -61,22 +61,11 @@ export default function DeviceFormPage() {
     setLoading(true);
     setError(null);
 
-    const url = isEditing
-      ? `${SYSTEM_HOST}/api/v1/system/device`
-      : `${SYSTEM_HOST}/api/v1/system/device`;
-      
-    const method = isEditing ? 'PUT' : 'POST';
+    const url = `${SYSTEM_HOST}/api/v1/system/device`;
+    const method = isEditing ? 'put' : 'post';
 
     try {
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(device),
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save device');
-      }
+      await apiClient[method](url, device);
       navigate('/devices-admin');
     } catch (err) {
       setError(err.message);
@@ -88,10 +77,7 @@ export default function DeviceFormPage() {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this device?')) {
       try {
-        const response = await fetch(`${SYSTEM_HOST}/api/v1/system/device/${deviceId}`, {
-          method: 'DELETE',
-        });
-        if (!response.ok) throw new Error('Failed to delete device');
+        await apiClient.delete(`${SYSTEM_HOST}/api/v1/system/device/${deviceId}`);
         navigate('/devices-admin');
       } catch (e) {
         setError(e.message);

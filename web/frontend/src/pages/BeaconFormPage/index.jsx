@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { GEO_HOST } from '../../config';
+import { apiClient } from '../../utils/api';
 import Header from '../../components/Header';
 import { AdminPageContainer, Button } from '../DevicesAdminPage/styles';
 import {
@@ -37,8 +38,7 @@ export default function BeaconFormPage() {
   useEffect(() => {
     const fetchMaps = async () => {
       try {
-        const response = await fetch(`${GEO_HOST}/api/v1/geo/map`);
-        const data = await response.json();
+        const data = await apiClient.get(`${GEO_HOST}/api/v1/geo/map`);
         setMaps(data.data || []);
         if (data.data.length > 0 && !isEditing) {
           setBeacon(b => ({ ...b, map_id: data.data[0].id }));
@@ -52,8 +52,7 @@ export default function BeaconFormPage() {
       if (!isEditing) return;
       setLoading(true);
       try {
-        const response = await fetch(`${GEO_HOST}/api/v1/geo/beacons/${beaconId}`);
-        const data = await response.json();
+        const data = await apiClient.get(`${GEO_HOST}/api/v1/geo/beacons/${beaconId}`);
         setBeacon(data);
       } catch (e) {
         setError('Failed to load beacon data');
@@ -79,22 +78,11 @@ export default function BeaconFormPage() {
     setLoading(true);
     setError(null);
 
-    const url = isEditing
-      ? `${GEO_HOST}/api/v1/geo/beacons` // Assuming update is PUT to the collection endpoint with ID in body
-      : `${GEO_HOST}/api/v1/geo/beacons`;
-      
-    const method = isEditing ? 'PUT' : 'POST';
+    const url = `${GEO_HOST}/api/v1/geo/beacons`;
+    const method = isEditing ? 'put' : 'post';
 
     try {
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(beacon),
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save beacon');
-      }
+      await apiClient[method](url, beacon);
       navigate('/beacons-admin');
     } catch (err) {
       setError(err.message);
@@ -106,10 +94,7 @@ export default function BeaconFormPage() {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this beacon?')) {
       try {
-        const response = await fetch(`${GEO_HOST}/api/v1/geo/beacons/${beaconId}`, {
-          method: 'DELETE',
-        });
-        if (!response.ok) throw new Error('Failed to delete beacon');
+        await apiClient.delete(`${GEO_HOST}/api/v1/geo/beacons/${beaconId}`);
         navigate('/beacons-admin');
       } catch (e) {
         setError(e.message);

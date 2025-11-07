@@ -42,6 +42,14 @@ export const AlarmsButton = styled.button`
 export const OrgName = styled.div`
   font-size: 16px;
   font-weight: bold;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #4a4a4a;
+  }
 `;
 
 export const DropdownMenu = styled.div`
