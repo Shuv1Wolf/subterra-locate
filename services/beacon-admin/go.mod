@@ -25,7 +25,7 @@ require (
 )
 
 require (
-	github.com/Shuv1Wolf/subterra-locate/services/common v1.0.5
+	github.com/Shuv1Wolf/subterra-locate/services/common v1.0.8
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
