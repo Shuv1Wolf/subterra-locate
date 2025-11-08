@@ -3,10 +3,10 @@ package logic
 import (
 	"context"
 
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	data "github.com/Shuv1Wolf/subterra-locate/services/device-admin/data/version1"
 	"github.com/Shuv1Wolf/subterra-locate/services/device-admin/persistence"
 	"github.com/Shuv1Wolf/subterra-locate/services/device-admin/publisher"
-
 	cconf "github.com/pip-services4/pip-services4-go/pip-services4-components-go/config"
 	cref "github.com/pip-services4/pip-services4-go/pip-services4-components-go/refer"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
@@ -50,25 +50,25 @@ func (c *DeviceService) SetReferences(ctx context.Context, references cref.IRefe
 	c.deviceEvents = res.(publisher.IPublisher)
 }
 
-func (c *DeviceService) GetDevices(ctx context.Context,
+func (c *DeviceService) GetDevices(ctx context.Context, reqctx cdata.RequestContextV1,
 	filter cquery.FilterParams, paging cquery.PagingParams) (cquery.DataPage[data.DeviceV1], error) {
-	return c.persistence.GetPageByFilter(ctx, filter, paging)
+	return c.persistence.GetPageByFilter(ctx, reqctx, filter, paging)
 }
 
-func (c *DeviceService) GetDeviceById(ctx context.Context,
+func (c *DeviceService) GetDeviceById(ctx context.Context, reqctx cdata.RequestContextV1,
 	deviceId string) (data.DeviceV1, error) {
 
-	return c.persistence.GetOneById(ctx, deviceId)
+	return c.persistence.GetOneById(ctx, reqctx, deviceId)
 }
 
-func (c *DeviceService) CreateDevice(ctx context.Context,
+func (c *DeviceService) CreateDevice(ctx context.Context, reqctx cdata.RequestContextV1,
 	device data.DeviceV1) (data.DeviceV1, error) {
 
 	if device.Type == "" {
 		device.Type = data.Unknown
 	}
 
-	b, err := c.persistence.Create(ctx, device)
+	b, err := c.persistence.Create(ctx, reqctx, device)
 	if err != nil {
 		return b, err
 	}
@@ -83,14 +83,14 @@ func (c *DeviceService) CreateDevice(ctx context.Context,
 	return b, nil
 }
 
-func (c *DeviceService) UpdateDevice(ctx context.Context,
+func (c *DeviceService) UpdateDevice(ctx context.Context, reqctx cdata.RequestContextV1,
 	device data.DeviceV1) (data.DeviceV1, error) {
 
 	if device.Type == "" {
 		device.Type = data.Unknown
 	}
 
-	b, err := c.persistence.Update(ctx, device)
+	b, err := c.persistence.Update(ctx, reqctx, device)
 	if err != nil {
 		return b, err
 	}
@@ -105,10 +105,10 @@ func (c *DeviceService) UpdateDevice(ctx context.Context,
 	return b, err
 }
 
-func (c *DeviceService) DeleteDeviceById(ctx context.Context,
+func (c *DeviceService) DeleteDeviceById(ctx context.Context, reqctx cdata.RequestContextV1,
 	devcieId string) (data.DeviceV1, error) {
 
-	b, err := c.persistence.DeleteById(ctx, devcieId)
+	b, err := c.persistence.DeleteById(ctx, reqctx, devcieId)
 	if err != nil {
 		return b, err
 	}

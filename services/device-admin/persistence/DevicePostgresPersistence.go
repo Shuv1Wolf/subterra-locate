@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	data "github.com/Shuv1Wolf/subterra-locate/services/device-admin/data/version1"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
 	cpg "github.com/pip-services4/pip-services4-go/pip-services4-postgres-go/persistence"
@@ -71,7 +72,7 @@ func (c *DevicePostgresPersistence) composeFilter(filter cquery.FilterParams) st
 	}
 }
 
-func (c *DevicePostgresPersistence) Create(ctx context.Context, item data.DeviceV1) (data.DeviceV1, error) {
+func (c *DevicePostgresPersistence) Create(ctx context.Context, reqctx cdata.RequestContextV1, item data.DeviceV1) (data.DeviceV1, error) {
 	if item.Id == "" {
 		var nextId int64
 		row := c.Client.QueryRow(ctx, "SELECT nextval('device_id_seq')")
@@ -81,12 +82,69 @@ func (c *DevicePostgresPersistence) Create(ctx context.Context, item data.Device
 		item.Id = fmt.Sprintf("device$%d", nextId)
 	}
 
+	if item.OrgId != "" {
+		item.OrgId = reqctx.OrgId
+	}
+
 	return c.IdentifiablePostgresPersistence.Create(ctx, item)
 }
 
-func (c *DevicePostgresPersistence) GetPageByFilter(ctx context.Context, filter cquery.FilterParams, paging cquery.PagingParams) (cquery.DataPage[data.DeviceV1], error) {
+func (c *DevicePostgresPersistence) GetPageByFilter(ctx context.Context, reqctx cdata.RequestContextV1, filter cquery.FilterParams, paging cquery.PagingParams) (cquery.DataPage[data.DeviceV1], error) {
+	if reqctx.OrgId != "" {
+		filter.Put("org_id", reqctx.OrgId)
+	}
+
 	return c.IdentifiablePostgresPersistence.GetPageByFilter(ctx,
 		c.composeFilter(filter), paging,
 		"", "",
 	)
+}
+
+func (c *DevicePostgresPersistence) GetOneById(ctx context.Context, reqctx cdata.RequestContextV1, id string) (data.DeviceV1, error) {
+	filter := cquery.NewFilterParamsFromTuples(
+		"id", id,
+	)
+
+	if reqctx.OrgId != "" {
+		filter.Put("org_id", reqctx.OrgId)
+	}
+
+	paging := *cquery.NewPagingParams(0, 1, false)
+	page, err := c.IdentifiablePostgresPersistence.GetPageByFilter(ctx,
+		c.composeFilter(*filter), paging,
+		"", "",
+	)
+	if err != nil {
+		return data.DeviceV1{}, err
+	}
+	if page.HasData() {
+		return page.Data[0], nil
+	}
+	return data.DeviceV1{}, nil
+}
+
+func (c *DevicePostgresPersistence) Update(ctx context.Context, reqctx cdata.RequestContextV1, item data.DeviceV1) (data.DeviceV1, error) {
+	data, err := c.GetOneById(ctx, reqctx, item.Id)
+	if err != nil {
+		return data, err
+	}
+
+	if data.Id != "" {
+		return data, fmt.Errorf("device not found: %s", item.Id)
+	}
+
+	return c.IdentifiablePostgresPersistence.Update(ctx, item)
+}
+
+func (c *DevicePostgresPersistence) DeleteById(ctx context.Context, reqctx cdata.RequestContextV1, id string) (data.DeviceV1, error) {
+	data, err := c.GetOneById(ctx, reqctx, id)
+	if err != nil {
+		return data, err
+	}
+
+	if data.Id != "" {
+		return data, fmt.Errorf("device not found: %s", id)
+	}
+
+	return c.IdentifiablePostgresPersistence.DeleteById(ctx, id)
 }

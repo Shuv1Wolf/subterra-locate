@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	data "github.com/Shuv1Wolf/subterra-locate/services/device-admin/data/version1"
 	"github.com/Shuv1Wolf/subterra-locate/services/device-admin/persistence"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
@@ -59,7 +60,7 @@ func NewDevicePersistenceFixture(persistence persistence.IDevicePersistence) *De
 
 func (c *DevicePersistenceFixture) testCreateDevices(t *testing.T) {
 	// Create the first device
-	device, err := c.persistence.Create(context.Background(), *c.DEVICE1)
+	device, err := c.persistence.Create(context.Background(), cdata.RequestContextV1{OrgId: "org_1001"}, *c.DEVICE1)
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.DeviceV1{}, device)
 	assert.Equal(t, c.DEVICE1.Name, device.Name)
@@ -68,7 +69,7 @@ func (c *DevicePersistenceFixture) testCreateDevices(t *testing.T) {
 	assert.Equal(t, c.DEVICE1.MacAddress, device.MacAddress)
 
 	// Create the second device
-	device, err = c.persistence.Create(context.Background(), *c.DEVICE2)
+	device, err = c.persistence.Create(context.Background(), cdata.RequestContextV1{OrgId: "org_1001"}, *c.DEVICE2)
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.DeviceV1{}, device)
 	assert.Equal(t, c.DEVICE2.Name, device.Name)
@@ -77,7 +78,7 @@ func (c *DevicePersistenceFixture) testCreateDevices(t *testing.T) {
 	assert.Equal(t, c.DEVICE2.MacAddress, device.MacAddress)
 
 	// Create the third device
-	device, err = c.persistence.Create(context.Background(), *c.DEVICE3)
+	device, err = c.persistence.Create(context.Background(), cdata.RequestContextV1{OrgId: "org_1002"}, *c.DEVICE3)
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.DeviceV1{}, device)
 	assert.Equal(t, c.DEVICE3.Name, device.Name)
@@ -93,7 +94,7 @@ func (c *DevicePersistenceFixture) TestCrudOperations(t *testing.T) {
 	c.testCreateDevices(t)
 
 	// Get all beacons
-	page, err := c.persistence.GetPageByFilter(context.Background(),
+	page, err := c.persistence.GetPageByFilter(context.Background(), cdata.RequestContextV1{},
 		*cquery.NewEmptyFilterParams(), *cquery.NewEmptyPagingParams())
 	assert.Nil(t, err)
 	assert.NotNil(t, page)
@@ -103,20 +104,20 @@ func (c *DevicePersistenceFixture) TestCrudOperations(t *testing.T) {
 
 	// Update the device
 	device1.Name = "ABC"
-	device, err := c.persistence.Update(context.Background(), device1)
+	device, err := c.persistence.Update(context.Background(), cdata.RequestContextV1{OrgId: "org_1001"}, device1)
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.DeviceV1{}, device)
 	assert.Equal(t, device1.Id, device.Id)
 	assert.Equal(t, "ABC", device.Name)
 
 	// Delete the device
-	device, err = c.persistence.DeleteById(context.Background(), device1.Id)
+	device, err = c.persistence.DeleteById(context.Background(), cdata.RequestContextV1{OrgId: "org_1001"}, device1.Id)
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.DeviceV1{}, device)
 	assert.Equal(t, device1.Id, device.Id)
 
 	// Try to get deleted device
-	device, err = c.persistence.GetOneById(context.Background(), device1.Id)
+	device, err = c.persistence.GetOneById(context.Background(), cdata.RequestContextV1{OrgId: "org_1001"}, device1.Id)
 	assert.Nil(t, err)
 	assert.Equal(t, data.DeviceV1{}, device)
 }
@@ -129,7 +130,7 @@ func (c *DevicePersistenceFixture) TestGetWithFilters(t *testing.T) {
 		"id", "1",
 	)
 	// Filter by id
-	page, err := c.persistence.GetPageByFilter(context.Background(),
+	page, err := c.persistence.GetPageByFilter(context.Background(), cdata.RequestContextV1{},
 		filter,
 		*cquery.NewEmptyPagingParams())
 	assert.Nil(t, err)
@@ -141,7 +142,7 @@ func (c *DevicePersistenceFixture) TestGetWithFilters(t *testing.T) {
 		"mac_address", "00:00:00:00:00:02",
 	)
 	page, err = c.persistence.GetPageByFilter(
-		context.Background(),
+		context.Background(), cdata.RequestContextV1{},
 		filter,
 		*cquery.NewEmptyPagingParams())
 	assert.Nil(t, err)
@@ -153,7 +154,7 @@ func (c *DevicePersistenceFixture) TestGetWithFilters(t *testing.T) {
 		"org_id", "org_1001",
 	)
 	page, err = c.persistence.GetPageByFilter(
-		context.Background(),
+		context.Background(), cdata.RequestContextV1{OrgId: "org_1001"},
 		filter,
 		*cquery.NewEmptyPagingParams())
 

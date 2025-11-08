@@ -4,12 +4,13 @@ import (
 	"context"
 	"testing"
 
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	data "github.com/Shuv1Wolf/subterra-locate/services/device-admin/data/version1"
+	controllers "github.com/Shuv1Wolf/subterra-locate/services/device-admin/controllers/version1"
 	"github.com/Shuv1Wolf/subterra-locate/services/device-admin/persistence"
 	logic "github.com/Shuv1Wolf/subterra-locate/services/device-admin/service"
-	controllers "github.com/Shuv1Wolf/subterra-locate/services/device-admin/controllers/version1"
-	cref "github.com/pip-services4/pip-services4-go/pip-services4-components-go/refer"
 	cexec "github.com/pip-services4/pip-services4-go/pip-services4-components-go/exec"
+	cref "github.com/pip-services4/pip-services4-go/pip-services4-components-go/refer"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -83,7 +84,7 @@ func (c *DeviceGrpcControllerV1Test) teardown(t *testing.T) {
 
 func (c *DeviceGrpcControllerV1Test) testCrudOperations(t *testing.T) {
 	// Create one device
-	params := cexec.NewParametersFromTuples("device", c.DEVICE1)
+	params := cexec.NewParametersFromTuples("device", c.DEVICE1, "reqctx", cdata.RequestContextV1{OrgId: "org_1001"})
 	res, err := c.service.GetCommandSet().Execute(context.Background(), "create_device", params)
 	assert.Nil(t, err)
 	device := res.(data.DeviceV1)
@@ -92,7 +93,7 @@ func (c *DeviceGrpcControllerV1Test) testCrudOperations(t *testing.T) {
 	assert.Equal(t, c.DEVICE1.OrgId, device.OrgId)
 
 	// Create another device
-	params = cexec.NewParametersFromTuples("device", c.DEVICE2)
+	params = cexec.NewParametersFromTuples("device", c.DEVICE2, "reqctx", cdata.RequestContextV1{OrgId: "org_1001"})
 	res, err = c.service.GetCommandSet().Execute(context.Background(), "create_device", params)
 	assert.Nil(t, err)
 	device = res.(data.DeviceV1)
@@ -101,7 +102,8 @@ func (c *DeviceGrpcControllerV1Test) testCrudOperations(t *testing.T) {
 	assert.Equal(t, c.DEVICE2.OrgId, device.OrgId)
 
 	// Get all devices
-	res, err = c.service.GetCommandSet().Execute(context.Background(), "get_devices", cexec.NewEmptyParameters())
+	params = cexec.NewParametersFromTuples("reqctx", cdata.RequestContextV1{OrgId: "org_1001"})
+	res, err = c.service.GetCommandSet().Execute(context.Background(), "get_devices", params)
 	assert.Nil(t, err)
 	page := res.(map[string]any)
 	assert.NotNil(t, page)
@@ -109,7 +111,7 @@ func (c *DeviceGrpcControllerV1Test) testCrudOperations(t *testing.T) {
 
 	// Update the device
 	device.Name = "Updated Name"
-	params = cexec.NewParametersFromTuples("device", device)
+	params = cexec.NewParametersFromTuples("device", device, "reqctx", cdata.RequestContextV1{OrgId: "org_1001"})
 	res, err = c.service.GetCommandSet().Execute(context.Background(), "update_device", params)
 	assert.Nil(t, err)
 	updatedDevice := res.(data.DeviceV1)
@@ -117,7 +119,7 @@ func (c *DeviceGrpcControllerV1Test) testCrudOperations(t *testing.T) {
 	assert.Equal(t, "Updated Name", updatedDevice.Name)
 
 	// Delete the device
-	params = cexec.NewParametersFromTuples("device_id", device.Id)
+	params = cexec.NewParametersFromTuples("device_id", device.Id, "reqctx", cdata.RequestContextV1{OrgId: "org_1001"})
 	res, err = c.service.GetCommandSet().Execute(context.Background(), "delete_device_by_id", params)
 	assert.Nil(t, err)
 	deletedDevice := res.(data.DeviceV1)
@@ -125,7 +127,7 @@ func (c *DeviceGrpcControllerV1Test) testCrudOperations(t *testing.T) {
 	assert.Equal(t, device.Id, deletedDevice.Id)
 
 	// Try to get deleted device
-	params = cexec.NewParametersFromTuples("device_id", device.Id)
+	params = cexec.NewParametersFromTuples("device_id", device.Id, "reqctx", cdata.RequestContextV1{OrgId: "org_1001"})
 	res, err = c.service.GetCommandSet().Execute(context.Background(), "get_device_by_id", params)
 	assert.Nil(t, err)
 	assert.Equal(t, data.DeviceV1{}, res)

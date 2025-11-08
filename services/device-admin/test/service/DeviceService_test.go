@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	data "github.com/Shuv1Wolf/subterra-locate/services/device-admin/data/version1"
 	persist "github.com/Shuv1Wolf/subterra-locate/services/device-admin/persistence"
 	logic "github.com/Shuv1Wolf/subterra-locate/services/device-admin/service"
@@ -88,7 +89,7 @@ func (c *DeviceServiceTest) testCrudOperations(t *testing.T) {
 	var device1 data.DeviceV1
 
 	// Create the first device
-	device, err := c.service.CreateDevice(context.Background(), c.DEVICE1.Clone())
+	device, err := c.service.CreateDevice(context.Background(), cdata.RequestContextV1{OrgId: "org_1001"}, c.DEVICE1.Clone())
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.DeviceV1{}, device)
 	assert.Equal(t, c.DEVICE1.Name, device.Name)
@@ -97,7 +98,7 @@ func (c *DeviceServiceTest) testCrudOperations(t *testing.T) {
 	assert.Equal(t, c.DEVICE1.MacAddress, device.MacAddress)
 
 	// Create the second device
-	device, err = c.service.CreateDevice(context.Background(), c.DEVICE2.Clone())
+	device, err = c.service.CreateDevice(context.Background(), cdata.RequestContextV1{OrgId: "org_1001"}, c.DEVICE2.Clone())
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.DeviceV1{}, device)
 	assert.Equal(t, c.DEVICE2.Name, device.Name)
@@ -106,7 +107,7 @@ func (c *DeviceServiceTest) testCrudOperations(t *testing.T) {
 	assert.Equal(t, c.DEVICE2.MacAddress, device.MacAddress)
 
 	// Get all beacons
-	page, err := c.service.GetDevices(context.Background(), *cquery.NewEmptyFilterParams(), *cquery.NewEmptyPagingParams())
+	page, err := c.service.GetDevices(context.Background(), cdata.RequestContextV1{OrgId: "org_1001"}, *cquery.NewEmptyFilterParams(), *cquery.NewEmptyPagingParams())
 	assert.Nil(t, err)
 	assert.NotNil(t, page)
 	assert.True(t, page.HasData())
@@ -115,20 +116,20 @@ func (c *DeviceServiceTest) testCrudOperations(t *testing.T) {
 
 	// Update the device
 	device1.Name = "ABC"
-	device, err = c.service.UpdateDevice(context.Background(), device1)
+	device, err = c.service.UpdateDevice(context.Background(), cdata.RequestContextV1{OrgId: "org_1001"}, device1)
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.DeviceV1{}, device)
 	assert.Equal(t, device1.Id, device.Id)
 	assert.Equal(t, "ABC", device.Name)
 
 	// Delete the device
-	device, err = c.service.DeleteDeviceById(context.Background(), device1.Id)
+	device, err = c.service.DeleteDeviceById(context.Background(), cdata.RequestContextV1{OrgId: "org_1001"}, device1.Id)
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.DeviceV1{}, device)
 	assert.Equal(t, device1.Id, device.Id)
 
 	// Try to get deleted device
-	device, err = c.service.GetDeviceById(context.Background(), device1.Id)
+	device, err = c.service.GetDeviceById(context.Background(), cdata.RequestContextV1{OrgId: "org_1001"}, device1.Id)
 	assert.Nil(t, err)
 	assert.Equal(t, data.DeviceV1{}, device)
 }
