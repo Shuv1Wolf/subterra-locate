@@ -8,12 +8,11 @@ require (
 	github.com/pip-services4/pip-services4-go/pip-services4-container-go v0.0.1-3
 	github.com/pip-services4/pip-services4-go/pip-services4-data-go v0.0.1-2
 	github.com/pip-services4/pip-services4-go/pip-services4-grpc-go v0.0.1-3
+	github.com/pip-services4/pip-services4-go/pip-services4-nats-go v0.0.1-2
 	github.com/pip-services4/pip-services4-go/pip-services4-persistence-go v0.0.0-20230718211601-c5e741d55d0e
 	github.com/pip-services4/pip-services4-go/pip-services4-postgres-go v0.0.1-2
 	github.com/pip-services4/pip-services4-go/pip-services4-rpc-go v0.0.1-3
 	github.com/stretchr/testify v1.8.4
-	google.golang.org/grpc v1.73.0
-	google.golang.org/protobuf v1.36.6
 )
 
 require (
@@ -21,11 +20,12 @@ require (
 	github.com/nats-io/nats.go v1.44.0 // indirect
 	github.com/nats-io/nkeys v0.4.11 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
-	github.com/pip-services4/pip-services4-go/pip-services4-nats-go v0.0.1-2 // indirect
+	google.golang.org/grpc v1.73.0 // indirect
+	google.golang.org/protobuf v1.36.6 // indirect
 )
 
 require (
-	github.com/Shuv1Wolf/subterra-locate/services/common v1.0.1 // indirect
+	github.com/Shuv1Wolf/subterra-locate/services/common v1.0.5
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect

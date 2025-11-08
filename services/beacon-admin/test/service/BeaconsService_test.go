@@ -7,6 +7,7 @@ import (
 	data "github.com/Shuv1Wolf/subterra-locate/services/beacon-admin/data/version1"
 	persist "github.com/Shuv1Wolf/subterra-locate/services/beacon-admin/persistence"
 	logic "github.com/Shuv1Wolf/subterra-locate/services/beacon-admin/service"
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	cconf "github.com/pip-services4/pip-services4-go/pip-services4-components-go/config"
 	cref "github.com/pip-services4/pip-services4-go/pip-services4-components-go/refer"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
@@ -88,7 +89,7 @@ func (c *BeaconsServiceTest) testCrudOperations(t *testing.T) {
 	var beacon1 data.BeaconV1
 
 	// Create the first beacon
-	beacon, err := c.service.CreateBeacon(context.Background(), c.BEACON1.Clone())
+	beacon, err := c.service.CreateBeacon(context.Background(), cdata.RequestContextV1{}, c.BEACON1.Clone())
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.BeaconV1{}, beacon)
 	assert.Equal(t, c.BEACON1.Udi, beacon.Udi)
@@ -97,7 +98,7 @@ func (c *BeaconsServiceTest) testCrudOperations(t *testing.T) {
 	assert.Equal(t, c.BEACON1.Label, beacon.Label)
 
 	// Create the second beacon
-	beacon, err = c.service.CreateBeacon(context.Background(), c.BEACON2.Clone())
+	beacon, err = c.service.CreateBeacon(context.Background(), cdata.RequestContextV1{}, c.BEACON2.Clone())
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.BeaconV1{}, beacon)
 	assert.Equal(t, c.BEACON2.Udi, beacon.Udi)
@@ -106,7 +107,7 @@ func (c *BeaconsServiceTest) testCrudOperations(t *testing.T) {
 	assert.Equal(t, c.BEACON2.Label, beacon.Label)
 
 	// Get all beacons
-	page, err := c.service.GetBeacons(context.Background(), *cquery.NewEmptyFilterParams(), *cquery.NewEmptyPagingParams())
+	page, err := c.service.GetBeacons(context.Background(), cdata.RequestContextV1{}, *cquery.NewEmptyFilterParams(), *cquery.NewEmptyPagingParams())
 	assert.Nil(t, err)
 	assert.NotNil(t, page)
 	assert.True(t, page.HasData())
@@ -115,26 +116,26 @@ func (c *BeaconsServiceTest) testCrudOperations(t *testing.T) {
 
 	// Update the beacon
 	beacon1.Label = "ABC"
-	beacon, err = c.service.UpdateBeacon(context.Background(), beacon1)
+	beacon, err = c.service.UpdateBeacon(context.Background(), cdata.RequestContextV1{}, beacon1)
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.BeaconV1{}, beacon)
 	assert.Equal(t, beacon1.Id, beacon.Id)
 	assert.Equal(t, "ABC", beacon.Label)
 
 	// Get beacon by udi
-	beacon, err = c.service.GetBeaconByUdi(context.Background(), beacon1.Udi)
+	beacon, err = c.service.GetBeaconByUdi(context.Background(), cdata.RequestContextV1{}, beacon1.Udi)
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.BeaconV1{}, beacon)
 	assert.Equal(t, beacon1.Id, beacon.Id)
 
 	// Delete the beacon
-	beacon, err = c.service.DeleteBeaconById(context.Background(), beacon1.Id)
+	beacon, err = c.service.DeleteBeaconById(context.Background(), cdata.RequestContextV1{}, beacon1.Id)
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.BeaconV1{}, beacon)
 	assert.Equal(t, beacon1.Id, beacon.Id)
 
 	// Try to get deleted beacon
-	beacon, err = c.service.GetBeaconById(context.Background(), beacon1.Id)
+	beacon, err = c.service.GetBeaconById(context.Background(), cdata.RequestContextV1{}, beacon1.Id)
 	assert.Nil(t, err)
 	assert.Equal(t, data.BeaconV1{}, beacon)
 }

@@ -6,6 +6,7 @@ import (
 
 	data "github.com/Shuv1Wolf/subterra-locate/services/beacon-admin/data/version1"
 	"github.com/Shuv1Wolf/subterra-locate/services/beacon-admin/persistence"
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
 	"github.com/stretchr/testify/assert"
 )
@@ -59,7 +60,7 @@ func NewBeaconsPersistenceFixture(persistence persistence.IBeaconsPersistence) *
 
 func (c *BeaconsPersistenceFixture) testCreateBeacons(t *testing.T) {
 	// Create the first beacon
-	beacon, err := c.persistence.Create(context.Background(), *c.BEACON1)
+	beacon, err := c.persistence.Create(context.Background(), cdata.RequestContextV1{}, *c.BEACON1)
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.BeaconV1{}, beacon)
 	assert.Equal(t, c.BEACON1.Udi, beacon.Udi)
@@ -68,7 +69,7 @@ func (c *BeaconsPersistenceFixture) testCreateBeacons(t *testing.T) {
 	assert.Equal(t, c.BEACON1.Label, beacon.Label)
 
 	// Create the second beacon
-	beacon, err = c.persistence.Create(context.Background(), *c.BEACON2)
+	beacon, err = c.persistence.Create(context.Background(), cdata.RequestContextV1{}, *c.BEACON2)
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.BeaconV1{}, beacon)
 	assert.Equal(t, c.BEACON2.Udi, beacon.Udi)
@@ -77,7 +78,7 @@ func (c *BeaconsPersistenceFixture) testCreateBeacons(t *testing.T) {
 	assert.Equal(t, c.BEACON2.Label, beacon.Label)
 
 	// Create the third beacon
-	beacon, err = c.persistence.Create(context.Background(), *c.BEACON3)
+	beacon, err = c.persistence.Create(context.Background(), cdata.RequestContextV1{}, *c.BEACON3)
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.BeaconV1{}, beacon)
 	assert.Equal(t, c.BEACON3.Udi, beacon.Udi)
@@ -93,7 +94,7 @@ func (c *BeaconsPersistenceFixture) TestCrudOperations(t *testing.T) {
 	c.testCreateBeacons(t)
 
 	// Get all beacons
-	page, err := c.persistence.GetPageByFilter(context.Background(),
+	page, err := c.persistence.GetPageByFilter(context.Background(), cdata.RequestContextV1{},
 		*cquery.NewEmptyFilterParams(), *cquery.NewEmptyPagingParams())
 	assert.Nil(t, err)
 	assert.NotNil(t, page)
@@ -103,26 +104,26 @@ func (c *BeaconsPersistenceFixture) TestCrudOperations(t *testing.T) {
 
 	// Update the beacon
 	beacon1.Label = "ABC"
-	beacon, err := c.persistence.Update(context.Background(), beacon1)
+	beacon, err := c.persistence.Update(context.Background(), cdata.RequestContextV1{}, beacon1)
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.BeaconV1{}, beacon)
 	assert.Equal(t, beacon1.Id, beacon.Id)
 	assert.Equal(t, "ABC", beacon.Label)
 
 	// Get beacon by udi
-	beacon, err = c.persistence.GetOneByUdi(context.Background(), beacon1.Udi)
+	beacon, err = c.persistence.GetOneByUdi(context.Background(), cdata.RequestContextV1{}, beacon1.Udi)
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.BeaconV1{}, beacon)
 	assert.Equal(t, beacon1.Id, beacon.Id)
 
 	// Delete the beacon
-	beacon, err = c.persistence.DeleteById(context.Background(), beacon1.Id)
+	beacon, err = c.persistence.DeleteById(context.Background(), cdata.RequestContextV1{}, beacon1.Id)
 	assert.Nil(t, err)
 	assert.NotEqual(t, data.BeaconV1{}, beacon)
 	assert.Equal(t, beacon1.Id, beacon.Id)
 
 	// Try to get deleted beacon
-	beacon, err = c.persistence.GetOneById(context.Background(), beacon1.Id)
+	beacon, err = c.persistence.GetOneById(context.Background(), cdata.RequestContextV1{}, beacon1.Id)
 	assert.Nil(t, err)
 	assert.Equal(t, data.BeaconV1{}, beacon)
 }
@@ -135,7 +136,7 @@ func (c *BeaconsPersistenceFixture) TestGetWithFilters(t *testing.T) {
 		"id", "1",
 	)
 	// Filter by id
-	page, err := c.persistence.GetPageByFilter(context.Background(),
+	page, err := c.persistence.GetPageByFilter(context.Background(), cdata.RequestContextV1{},
 		filter,
 		*cquery.NewEmptyPagingParams())
 	assert.Nil(t, err)
@@ -147,7 +148,7 @@ func (c *BeaconsPersistenceFixture) TestGetWithFilters(t *testing.T) {
 		"udi", "00002",
 	)
 	page, err = c.persistence.GetPageByFilter(
-		context.Background(),
+		context.Background(), cdata.RequestContextV1{},
 		filter,
 		*cquery.NewEmptyPagingParams())
 	assert.Nil(t, err)
@@ -159,7 +160,7 @@ func (c *BeaconsPersistenceFixture) TestGetWithFilters(t *testing.T) {
 		"udis", "00001,00003",
 	)
 	page, err = c.persistence.GetPageByFilter(
-		context.Background(),
+		context.Background(), cdata.RequestContextV1{},
 		filter,
 		*cquery.NewEmptyPagingParams())
 
@@ -167,15 +168,15 @@ func (c *BeaconsPersistenceFixture) TestGetWithFilters(t *testing.T) {
 	assert.True(t, page.HasData())
 	assert.Len(t, page.Data, 2)
 
-	// Filter by site_id
+	// Filter by org_id
 	filter = *cquery.NewFilterParamsFromTuples(
-		"site_id", "1",
+		"org_id", "org$1001",
 	)
 	page, err = c.persistence.GetPageByFilter(
-		context.Background(),
+		context.Background(), cdata.RequestContextV1{},
 		filter,
 		*cquery.NewEmptyPagingParams())
 
 	assert.Nil(t, err)
-	assert.Len(t, page.Data, 2)
+	assert.Len(t, page.Data, 3)
 }

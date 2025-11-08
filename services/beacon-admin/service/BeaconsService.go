@@ -6,6 +6,7 @@ import (
 	data "github.com/Shuv1Wolf/subterra-locate/services/beacon-admin/data/version1"
 	"github.com/Shuv1Wolf/subterra-locate/services/beacon-admin/persistence"
 	"github.com/Shuv1Wolf/subterra-locate/services/beacon-admin/publisher"
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 
 	cconf "github.com/pip-services4/pip-services4-go/pip-services4-components-go/config"
 	cref "github.com/pip-services4/pip-services4-go/pip-services4-components-go/refer"
@@ -50,31 +51,31 @@ func (c *BeaconsService) SetReferences(ctx context.Context, references cref.IRef
 	c.beaconsEvents = res.(publisher.IPublisher)
 }
 
-func (c *BeaconsService) GetBeacons(ctx context.Context,
+func (c *BeaconsService) GetBeacons(ctx context.Context, reqctx cdata.RequestContextV1,
 	filter cquery.FilterParams, paging cquery.PagingParams) (cquery.DataPage[data.BeaconV1], error) {
-	return c.persistence.GetPageByFilter(ctx, filter, paging)
+	return c.persistence.GetPageByFilter(ctx, reqctx, filter, paging)
 }
 
-func (c *BeaconsService) GetBeaconById(ctx context.Context,
+func (c *BeaconsService) GetBeaconById(ctx context.Context, reqctx cdata.RequestContextV1,
 	beaconId string) (data.BeaconV1, error) {
 
-	return c.persistence.GetOneById(ctx, beaconId)
+	return c.persistence.GetOneById(ctx, reqctx, beaconId)
 }
 
-func (c *BeaconsService) GetBeaconByUdi(ctx context.Context,
+func (c *BeaconsService) GetBeaconByUdi(ctx context.Context, reqctx cdata.RequestContextV1,
 	beaconId string) (data.BeaconV1, error) {
 
-	return c.persistence.GetOneByUdi(ctx, beaconId)
+	return c.persistence.GetOneByUdi(ctx, reqctx, beaconId)
 }
 
-func (c *BeaconsService) CreateBeacon(ctx context.Context,
+func (c *BeaconsService) CreateBeacon(ctx context.Context, reqctx cdata.RequestContextV1,
 	beacon data.BeaconV1) (data.BeaconV1, error) {
 
 	if beacon.Type == "" {
 		beacon.Type = data.Unknown
 	}
 
-	b, err := c.persistence.Create(ctx, beacon)
+	b, err := c.persistence.Create(ctx, reqctx, beacon)
 	if err != nil {
 		return b, err
 	}
@@ -89,14 +90,14 @@ func (c *BeaconsService) CreateBeacon(ctx context.Context,
 	return b, nil
 }
 
-func (c *BeaconsService) UpdateBeacon(ctx context.Context,
+func (c *BeaconsService) UpdateBeacon(ctx context.Context, reqctx cdata.RequestContextV1,
 	beacon data.BeaconV1) (data.BeaconV1, error) {
 
 	if beacon.Type == "" {
 		beacon.Type = data.Unknown
 	}
 
-	b, err := c.persistence.Update(ctx, beacon)
+	b, err := c.persistence.Update(ctx, reqctx, beacon)
 	if err != nil {
 		return b, err
 	}
@@ -111,10 +112,10 @@ func (c *BeaconsService) UpdateBeacon(ctx context.Context,
 	return b, err
 }
 
-func (c *BeaconsService) DeleteBeaconById(ctx context.Context,
+func (c *BeaconsService) DeleteBeaconById(ctx context.Context, reqctx cdata.RequestContextV1,
 	beaconId string) (data.BeaconV1, error) {
 
-	b, err := c.persistence.DeleteById(ctx, beaconId)
+	b, err := c.persistence.DeleteById(ctx, reqctx, beaconId)
 	if err != nil {
 		return b, err
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	data "github.com/Shuv1Wolf/subterra-locate/services/beacon-admin/data/version1"
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	cconv "github.com/pip-services4/pip-services4-go/pip-services4-commons-go/convert"
 	exec "github.com/pip-services4/pip-services4-go/pip-services4-components-go/exec"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
@@ -39,17 +40,22 @@ func (c *BeaconsCommandSet) makeGetBeaconsCommand() ccmd.ICommand {
 		"get_beacons",
 		cvalid.NewObjectSchema().
 			WithOptionalProperty("filter", cvalid.NewFilterParamsSchema()).
-			WithOptionalProperty("paging", cvalid.NewPagingParamsSchema()),
+			WithOptionalProperty("paging", cvalid.NewPagingParamsSchema()).
+			WithOptionalProperty("reqctx", cdata.NewRequestContextV1Schema()),
 		func(ctx context.Context, args *exec.Parameters) (result any, err error) {
 			filter := cquery.NewEmptyFilterParams()
 			paging := cquery.NewEmptyPagingParams()
+			reqctx := cdata.NewRequestContextV1()
 			if _val, ok := args.Get("filter"); ok {
 				filter = cquery.NewFilterParamsFromValue(_val)
 			}
 			if _val, ok := args.Get("paging"); ok {
 				paging = cquery.NewPagingParamsFromValue(_val)
 			}
-			return c.controller.GetBeacons(ctx, *filter, *paging)
+			if _val, ok := args.Get("reqctx"); ok {
+				reqctx = cdata.NewRequestContextV1FromValue(_val)
+			}
+			return c.controller.GetBeacons(ctx, *reqctx, *filter, *paging)
 		})
 }
 
@@ -57,9 +63,14 @@ func (c *BeaconsCommandSet) makeGetBeaconByIdCommand() ccmd.ICommand {
 	return ccmd.NewCommand(
 		"get_beacon_by_id",
 		cvalid.NewObjectSchema().
-			WithRequiredProperty("beacon_id", cconv.String),
+			WithRequiredProperty("beacon_id", cconv.String).
+			WithOptionalProperty("reqctx", cdata.NewRequestContextV1Schema()),
 		func(ctx context.Context, args *exec.Parameters) (result any, err error) {
-			return c.controller.GetBeaconById(ctx, args.GetAsString("beacon_id"))
+			reqctx := cdata.NewRequestContextV1()
+			if _val, ok := args.Get("reqctx"); ok {
+				reqctx = cdata.NewRequestContextV1FromValue(_val)
+			}
+			return c.controller.GetBeaconById(ctx, *reqctx, args.GetAsString("beacon_id"))
 		})
 }
 
@@ -67,9 +78,14 @@ func (c *BeaconsCommandSet) makeGetBeaconByUdiCommand() ccmd.ICommand {
 	return ccmd.NewCommand(
 		"get_beacon_by_udi",
 		cvalid.NewObjectSchema().
-			WithRequiredProperty("udi", cconv.String),
+			WithRequiredProperty("udi", cconv.String).
+			WithOptionalProperty("reqctx", cdata.NewRequestContextV1Schema()),
 		func(ctx context.Context, args *exec.Parameters) (result any, err error) {
-			return c.controller.GetBeaconByUdi(ctx, args.GetAsString("udi"))
+			reqctx := cdata.NewRequestContextV1()
+			if _val, ok := args.Get("reqctx"); ok {
+				reqctx = cdata.NewRequestContextV1FromValue(_val)
+			}
+			return c.controller.GetBeaconByUdi(ctx, *reqctx, args.GetAsString("udi"))
 		})
 }
 
@@ -77,7 +93,8 @@ func (c *BeaconsCommandSet) makeCreateBeaconCommand() ccmd.ICommand {
 	return ccmd.NewCommand(
 		"create_beacon",
 		cvalid.NewObjectSchema().
-			WithRequiredProperty("beacon", data.NewBeaconV1Schema()),
+			WithRequiredProperty("beacon", data.NewBeaconV1Schema()).
+			WithOptionalProperty("reqctx", cdata.NewRequestContextV1Schema()),
 		func(ctx context.Context, args *exec.Parameters) (result any, err error) {
 
 			var beacon data.BeaconV1
@@ -91,7 +108,11 @@ func (c *BeaconsCommandSet) makeCreateBeaconCommand() ccmd.ICommand {
 					return nil, err
 				}
 			}
-			return c.controller.CreateBeacon(ctx, beacon)
+			reqctx := cdata.NewRequestContextV1()
+			if _val, ok := args.Get("reqctx"); ok {
+				reqctx = cdata.NewRequestContextV1FromValue(_val)
+			}
+			return c.controller.CreateBeacon(ctx, *reqctx, beacon)
 		})
 }
 
@@ -99,7 +120,8 @@ func (c *BeaconsCommandSet) makeUpdateBeaconCommand() ccmd.ICommand {
 	return ccmd.NewCommand(
 		"update_beacon",
 		cvalid.NewObjectSchema().
-			WithRequiredProperty("beacon", data.NewBeaconV1Schema()),
+			WithRequiredProperty("beacon", data.NewBeaconV1Schema()).
+			WithOptionalProperty("reqctx", cdata.NewRequestContextV1Schema()),
 		func(ctx context.Context, args *exec.Parameters) (result any, err error) {
 			var beacon data.BeaconV1
 			if _beacon, ok := args.GetAsObject("beacon"); ok {
@@ -112,7 +134,12 @@ func (c *BeaconsCommandSet) makeUpdateBeaconCommand() ccmd.ICommand {
 					return nil, err
 				}
 			}
-			return c.controller.UpdateBeacon(ctx, beacon)
+
+			reqctx := cdata.NewRequestContextV1()
+			if _val, ok := args.Get("reqctx"); ok {
+				reqctx = cdata.NewRequestContextV1FromValue(_val)
+			}
+			return c.controller.UpdateBeacon(ctx, *reqctx, beacon)
 		})
 }
 
@@ -120,8 +147,13 @@ func (c *BeaconsCommandSet) makeDeleteBeaconByIdCommand() ccmd.ICommand {
 	return ccmd.NewCommand(
 		"delete_beacon_by_id",
 		cvalid.NewObjectSchema().
-			WithRequiredProperty("beacon_id", cconv.String),
+			WithRequiredProperty("beacon_id", cconv.String).
+			WithOptionalProperty("reqctx", cdata.NewRequestContextV1Schema()),
 		func(ctx context.Context, args *exec.Parameters) (result any, err error) {
-			return c.controller.DeleteBeaconById(ctx, args.GetAsString("beacon_id"))
+			reqctx := cdata.NewRequestContextV1()
+			if _val, ok := args.Get("reqctx"); ok {
+				reqctx = cdata.NewRequestContextV1FromValue(_val)
+			}
+			return c.controller.DeleteBeaconById(ctx, *reqctx, args.GetAsString("beacon_id"))
 		})
 }
