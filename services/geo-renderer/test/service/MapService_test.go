@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	data "github.com/Shuv1Wolf/subterra-locate/services/geo-renderer/data/version1"
 	"github.com/Shuv1Wolf/subterra-locate/services/geo-renderer/persistence"
 	logic "github.com/Shuv1Wolf/subterra-locate/services/geo-renderer/service"
@@ -60,43 +61,43 @@ func newMapServiceTest() *MapServiceTest {
 
 func (c *MapServiceTest) TestCrudOperations(t *testing.T) {
 	// Create one map
-	m, err := c.service.CreateMap(context.Background(), *c.MAP1)
+	m, err := c.service.CreateMap(context.Background(), cdata.RequestContextV1{OrgId: "org_1"}, *c.MAP1)
 	assert.Nil(t, err)
 	assert.NotNil(t, m)
 	assert.Equal(t, c.MAP1.Id, m.Id)
 	assert.Equal(t, c.MAP1.Name, m.Name)
 
 	// Create another map
-	m, err = c.service.CreateMap(context.Background(), *c.MAP2)
+	m, err = c.service.CreateMap(context.Background(), cdata.RequestContextV1{OrgId: "org_1"}, *c.MAP2)
 	assert.Nil(t, err)
 	assert.NotNil(t, m)
 	assert.Equal(t, c.MAP2.Id, m.Id)
 	assert.Equal(t, c.MAP2.Name, m.Name)
 
 	// Get all maps
-	page, err := c.service.GetMaps(context.Background(), *cquery.NewEmptyFilterParams(), *cquery.NewEmptyPagingParams())
+	page, err := c.service.GetMaps(context.Background(), cdata.RequestContextV1{OrgId: "org_1"}, *cquery.NewEmptyFilterParams(), *cquery.NewEmptyPagingParams())
 	assert.Nil(t, err)
 	assert.NotNil(t, page)
 	assert.Len(t, page.Data, 2)
 
 	// Update the map
 	m.Name = "Updated Map2"
-	updatedMap, err := c.service.UpdateMap(context.Background(), m)
+	updatedMap, err := c.service.UpdateMap(context.Background(), cdata.RequestContextV1{OrgId: "org_1"}, m)
 	assert.Nil(t, err)
 	assert.NotNil(t, updatedMap)
 	assert.Equal(t, m.Id, updatedMap.Id)
 	assert.Equal(t, "Updated Map2", updatedMap.Name)
 
 	// Delete map
-	deletedMap, err := c.service.DeleteMapById(context.Background(), m.Id)
+	deletedMap, err := c.service.DeleteMapById(context.Background(), cdata.RequestContextV1{OrgId: "org_1"}, m.Id)
 	assert.Nil(t, err)
 	assert.NotNil(t, deletedMap)
 	assert.Equal(t, m.Id, deletedMap.Id)
 
 	// Try to get deleted map
-	getMap, err := c.service.GetMapById(context.Background(), m.Id)
+	getMap, err := c.service.GetMapById(context.Background(), cdata.RequestContextV1{OrgId: "org_1"}, m.Id)
 	assert.Nil(t, err)
-	assert.Nil(t, getMap)
+	assert.Equal(t, data.Map2dV1{}, getMap)
 }
 
 func TestMapService(t *testing.T) {

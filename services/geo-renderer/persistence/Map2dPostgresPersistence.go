@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	data1 "github.com/Shuv1Wolf/subterra-locate/services/geo-renderer/data/version1"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
 	cpg "github.com/pip-services4/pip-services4-go/pip-services4-postgres-go/persistence"
@@ -59,7 +60,7 @@ func (c *Map2dPostgresPersistence) composeFilter(filter cquery.FilterParams) str
 	}
 }
 
-func (c *Map2dPostgresPersistence) Create(ctx context.Context, item data1.Map2dV1) (data1.Map2dV1, error) {
+func (c *Map2dPostgresPersistence) Create(ctx context.Context, reqctx cdata.RequestContextV1, item data1.Map2dV1) (data1.Map2dV1, error) {
 	if item.Id == "" {
 		var nextId int64
 		row := c.Client.QueryRow(ctx, "SELECT nextval('map_2d_id_seq')")
@@ -69,12 +70,68 @@ func (c *Map2dPostgresPersistence) Create(ctx context.Context, item data1.Map2dV
 		item.Id = fmt.Sprintf("map$%d", nextId)
 	}
 
+	if item.OrgId == "" {
+		item.OrgId = reqctx.OrgId
+	}
+
 	return c.IdentifiablePostgresPersistence.Create(ctx, item)
 }
 
-func (c *Map2dPostgresPersistence) GetPageByFilter(ctx context.Context, filter cquery.FilterParams, paging cquery.PagingParams) (cquery.DataPage[data1.Map2dV1], error) {
+func (c *Map2dPostgresPersistence) GetPageByFilter(ctx context.Context, reqctx cdata.RequestContextV1, filter cquery.FilterParams, paging cquery.PagingParams) (cquery.DataPage[data1.Map2dV1], error) {
+	if reqctx.OrgId != "" {
+		filter.Put("org_id", reqctx.OrgId)
+	}
 	return c.IdentifiablePostgresPersistence.GetPageByFilter(ctx,
 		c.composeFilter(filter), paging,
 		"", "",
 	)
+}
+
+func (c *Map2dPostgresPersistence) GetOneById(ctx context.Context, reqctx cdata.RequestContextV1, id string) (data1.Map2dV1, error) {
+	filter := cquery.NewFilterParamsFromTuples(
+		"id", id,
+	)
+
+	if reqctx.OrgId != "" {
+		filter.Put("org_id", reqctx.OrgId)
+	}
+
+	paging := *cquery.NewPagingParams(0, 1, false)
+	page, err := c.IdentifiablePostgresPersistence.GetPageByFilter(ctx,
+		c.composeFilter(*filter), paging,
+		"", "",
+	)
+	if err != nil {
+		return data1.Map2dV1{}, err
+	}
+	if page.HasData() {
+		return page.Data[0], nil
+	}
+	return data1.Map2dV1{}, nil
+}
+
+func (c *Map2dPostgresPersistence) Update(ctx context.Context, reqctx cdata.RequestContextV1, item data1.Map2dV1) (data1.Map2dV1, error) {
+	data, err := c.GetOneById(ctx, reqctx, item.Id)
+	if err != nil {
+		return data, err
+	}
+
+	if data.Id == "" {
+		return data, fmt.Errorf("map not found: %s", item.Id)
+	}
+
+	return c.IdentifiablePostgresPersistence.Update(ctx, item)
+}
+
+func (c *Map2dPostgresPersistence) DeleteById(ctx context.Context, reqctx cdata.RequestContextV1, id string) (data1.Map2dV1, error) {
+	data, err := c.GetOneById(ctx, reqctx, id)
+	if err != nil {
+		return data, err
+	}
+
+	if data.Id == "" {
+		return data, fmt.Errorf("map not found: %s", id)
+	}
+
+	return c.IdentifiablePostgresPersistence.DeleteById(ctx, id)
 }

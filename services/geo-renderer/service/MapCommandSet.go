@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	data "github.com/Shuv1Wolf/subterra-locate/services/geo-renderer/data/version1"
 	cconv "github.com/pip-services4/pip-services4-go/pip-services4-commons-go/convert"
 	exec "github.com/pip-services4/pip-services4-go/pip-services4-components-go/exec"
@@ -38,17 +39,22 @@ func (c *MapCommandSet) makeGetMapsCommand() ccmd.ICommand {
 		"get_maps",
 		cvalid.NewObjectSchema().
 			WithOptionalProperty("filter", cvalid.NewFilterParamsSchema()).
-			WithOptionalProperty("paging", cvalid.NewPagingParamsSchema()),
+			WithOptionalProperty("paging", cvalid.NewPagingParamsSchema()).
+			WithOptionalProperty("reqctx", cdata.NewRequestContextV1Schema()),
 		func(ctx context.Context, args *exec.Parameters) (result any, err error) {
 			filter := cquery.NewEmptyFilterParams()
 			paging := cquery.NewEmptyPagingParams()
+			reqctx := cdata.NewRequestContextV1()
 			if _val, ok := args.Get("filter"); ok {
 				filter = cquery.NewFilterParamsFromValue(_val)
 			}
 			if _val, ok := args.Get("paging"); ok {
 				paging = cquery.NewPagingParamsFromValue(_val)
 			}
-			return c.controller.GetMaps(ctx, *filter, *paging)
+			if _val, ok := args.Get("reqctx"); ok {
+				reqctx = cdata.NewRequestContextV1FromValue(_val)
+			}
+			return c.controller.GetMaps(ctx, *reqctx, *filter, *paging)
 		})
 }
 
@@ -56,9 +62,14 @@ func (c *MapCommandSet) makeGetMapByIdCommand() ccmd.ICommand {
 	return ccmd.NewCommand(
 		"get_map_by_id",
 		cvalid.NewObjectSchema().
-			WithRequiredProperty("map_id", cconv.String),
+			WithRequiredProperty("map_id", cconv.String).
+			WithOptionalProperty("reqctx", cdata.NewRequestContextV1Schema()),
 		func(ctx context.Context, args *exec.Parameters) (result any, err error) {
-			return c.controller.GetMapById(ctx, args.GetAsString("map_id"))
+			reqctx := cdata.NewRequestContextV1()
+			if _val, ok := args.Get("reqctx"); ok {
+				reqctx = cdata.NewRequestContextV1FromValue(_val)
+			}
+			return c.controller.GetMapById(ctx, *reqctx, args.GetAsString("map_id"))
 		})
 }
 
@@ -66,7 +77,8 @@ func (c *MapCommandSet) makeCreateMapCommand() ccmd.ICommand {
 	return ccmd.NewCommand(
 		"create_map",
 		cvalid.NewObjectSchema().
-			WithRequiredProperty("map", data.NewMap2dV1Schema()),
+			WithRequiredProperty("map", data.NewMap2dV1Schema()).
+			WithOptionalProperty("reqctx", cdata.NewRequestContextV1Schema()),
 		func(ctx context.Context, args *exec.Parameters) (result any, err error) {
 
 			var map2d data.Map2dV1
@@ -80,7 +92,11 @@ func (c *MapCommandSet) makeCreateMapCommand() ccmd.ICommand {
 					return nil, err
 				}
 			}
-			return c.controller.CreateMap(ctx, map2d)
+			reqctx := cdata.NewRequestContextV1()
+			if _val, ok := args.Get("reqctx"); ok {
+				reqctx = cdata.NewRequestContextV1FromValue(_val)
+			}
+			return c.controller.CreateMap(ctx, *reqctx, map2d)
 		})
 }
 
@@ -88,7 +104,8 @@ func (c *MapCommandSet) makeUpdateMapCommand() ccmd.ICommand {
 	return ccmd.NewCommand(
 		"update_map",
 		cvalid.NewObjectSchema().
-			WithRequiredProperty("map", data.NewMap2dV1Schema()),
+			WithRequiredProperty("map", data.NewMap2dV1Schema()).
+			WithOptionalProperty("reqctx", cdata.NewRequestContextV1Schema()),
 		func(ctx context.Context, args *exec.Parameters) (result any, err error) {
 			var map2d data.Map2dV1
 			if _map, ok := args.GetAsObject("map"); ok {
@@ -101,7 +118,11 @@ func (c *MapCommandSet) makeUpdateMapCommand() ccmd.ICommand {
 					return nil, err
 				}
 			}
-			return c.controller.UpdateMap(ctx, map2d)
+			reqctx := cdata.NewRequestContextV1()
+			if _val, ok := args.Get("reqctx"); ok {
+				reqctx = cdata.NewRequestContextV1FromValue(_val)
+			}
+			return c.controller.UpdateMap(ctx, *reqctx, map2d)
 		})
 }
 
@@ -109,8 +130,13 @@ func (c *MapCommandSet) makeDeleteMapByIdCommand() ccmd.ICommand {
 	return ccmd.NewCommand(
 		"delete_map_by_id",
 		cvalid.NewObjectSchema().
-			WithRequiredProperty("map_id", cconv.String),
+			WithRequiredProperty("map_id", cconv.String).
+			WithOptionalProperty("reqctx", cdata.NewRequestContextV1Schema()),
 		func(ctx context.Context, args *exec.Parameters) (result any, err error) {
-			return c.controller.DeleteMapById(ctx, args.GetAsString("map_id"))
+			reqctx := cdata.NewRequestContextV1()
+			if _val, ok := args.Get("reqctx"); ok {
+				reqctx = cdata.NewRequestContextV1FromValue(_val)
+			}
+			return c.controller.DeleteMapById(ctx, *reqctx, args.GetAsString("map_id"))
 		})
 }

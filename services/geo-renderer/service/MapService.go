@@ -3,10 +3,10 @@ package logic
 import (
 	"context"
 
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	data "github.com/Shuv1Wolf/subterra-locate/services/geo-renderer/data/version1"
 	"github.com/Shuv1Wolf/subterra-locate/services/geo-renderer/persistence"
 	"github.com/Shuv1Wolf/subterra-locate/services/geo-renderer/publisher"
-
 	cconf "github.com/pip-services4/pip-services4-go/pip-services4-components-go/config"
 	cref "github.com/pip-services4/pip-services4-go/pip-services4-components-go/refer"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
@@ -50,20 +50,20 @@ func (c *MapService) SetReferences(ctx context.Context, references cref.IReferen
 	c.map2dEvents = res.(publisher.IPublisher)
 }
 
-func (c *MapService) GetMaps(ctx context.Context,
+func (c *MapService) GetMaps(ctx context.Context, reqctx cdata.RequestContextV1,
 	filter cquery.FilterParams, paging cquery.PagingParams) (cquery.DataPage[data.Map2dV1], error) {
-	return c.persistence.GetPageByFilter(ctx, filter, paging)
+	return c.persistence.GetPageByFilter(ctx, reqctx, filter, paging)
 }
 
-func (c *MapService) GetMapById(ctx context.Context,
+func (c *MapService) GetMapById(ctx context.Context, reqctx cdata.RequestContextV1,
 	id string) (data.Map2dV1, error) {
 
-	return c.persistence.GetOneById(ctx, id)
+	return c.persistence.GetOneById(ctx, reqctx, id)
 }
 
-func (c *MapService) CreateMap(ctx context.Context,
+func (c *MapService) CreateMap(ctx context.Context, reqctx cdata.RequestContextV1,
 	map2d data.Map2dV1) (data.Map2dV1, error) {
-	b, err := c.persistence.Create(ctx, map2d)
+	b, err := c.persistence.Create(ctx, reqctx, map2d)
 	if err != nil {
 		return b, err
 	}
@@ -78,10 +78,10 @@ func (c *MapService) CreateMap(ctx context.Context,
 	return b, nil
 }
 
-func (c *MapService) UpdateMap(ctx context.Context,
+func (c *MapService) UpdateMap(ctx context.Context, reqctx cdata.RequestContextV1,
 	map2d data.Map2dV1) (data.Map2dV1, error) {
 
-	b, err := c.persistence.Update(ctx, map2d)
+	b, err := c.persistence.Update(ctx, reqctx, map2d)
 	if err != nil {
 		return b, err
 	}
@@ -96,10 +96,10 @@ func (c *MapService) UpdateMap(ctx context.Context,
 	return b, err
 }
 
-func (c *MapService) DeleteMapById(ctx context.Context,
+func (c *MapService) DeleteMapById(ctx context.Context, reqctx cdata.RequestContextV1,
 	id string) (data.Map2dV1, error) {
 
-	b, err := c.persistence.DeleteById(ctx, id)
+	b, err := c.persistence.DeleteById(ctx, reqctx, id)
 	if err != nil {
 		return b, err
 	}

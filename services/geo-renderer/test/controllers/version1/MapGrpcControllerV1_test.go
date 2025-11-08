@@ -13,7 +13,8 @@ import (
 	logic "github.com/Shuv1Wolf/subterra-locate/services/geo-renderer/service"
 	cconf "github.com/pip-services4/pip-services4-go/pip-services4-components-go/config"
 	cref "github.com/pip-services4/pip-services4-go/pip-services4-components-go/refer"
-	cdata "github.com/pip-services4/pip-services4-go/pip-services4-commons-go/data"
+	pipdata "github.com/pip-services4/pip-services4-go/pip-services4-commons-go/data"
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
 	tclients "github.com/pip-services4/pip-services4-go/pip-services4-grpc-go/test"
 	"github.com/stretchr/testify/assert"
@@ -137,8 +138,9 @@ func (c *mapsGrpcControllerV1Test) testCrudOperations(t *testing.T) {
 	var map1 data.Map2dV1
 
 	// Create the first map
-	params := cdata.NewAnyValueMapFromTuples(
+	params := pipdata.NewAnyValueMapFromTuples(
 		"map", c.MAP1,
+		"reqctx", cdata.RequestContextV1{OrgId: "org_1"},
 	)
 	response, err := c.client.CallCommand(context.Background(), "create_map", params)
 	assert.Nil(t, err)
@@ -151,8 +153,9 @@ func (c *mapsGrpcControllerV1Test) testCrudOperations(t *testing.T) {
 	assert.Equal(t, c.MAP1.OrgId, m.OrgId)
 
 	// Create the second map
-	params = cdata.NewAnyValueMapFromTuples(
+	params = pipdata.NewAnyValueMapFromTuples(
 		"map", c.MAP2,
+		"reqctx", cdata.RequestContextV1{OrgId: "org_1"},
 	)
 	response, err = c.client.CallCommand(context.Background(), "create_map", params)
 	assert.Nil(t, err)
@@ -165,9 +168,10 @@ func (c *mapsGrpcControllerV1Test) testCrudOperations(t *testing.T) {
 	assert.Equal(t, c.MAP2.OrgId, m.OrgId)
 
 	// Get all maps
-	params = cdata.NewAnyValueMapFromTuples(
+	params = pipdata.NewAnyValueMapFromTuples(
 		"filter", cquery.NewEmptyFilterParams(),
 		"paging", cquery.NewEmptyPagingParams(),
+		"reqctx", cdata.RequestContextV1{OrgId: "org_1"},
 	)
 	response, err = c.client.CallCommand(context.Background(), "get_maps", params)
 	assert.Nil(t, err)
@@ -181,8 +185,9 @@ func (c *mapsGrpcControllerV1Test) testCrudOperations(t *testing.T) {
 
 	// Update the map
 	map1.Name = "ABC"
-	params = cdata.NewAnyValueMapFromTuples(
+	params = pipdata.NewAnyValueMapFromTuples(
 		"map", map1,
+		"reqctx", cdata.RequestContextV1{OrgId: "org_1"},
 	)
 	response, err = c.client.CallCommand(context.Background(), "update_map", params)
 	assert.Nil(t, err)
@@ -195,8 +200,9 @@ func (c *mapsGrpcControllerV1Test) testCrudOperations(t *testing.T) {
 	assert.Equal(t, "ABC", m.Name)
 
 	// Delete the map
-	params = cdata.NewAnyValueMapFromTuples(
+	params = pipdata.NewAnyValueMapFromTuples(
 		"map_id", map1.Id,
+		"reqctx", cdata.RequestContextV1{OrgId: "org_1"},
 	)
 	response, err = c.client.CallCommand(context.Background(), "delete_map_by_id", params)
 	assert.Nil(t, err)
@@ -208,8 +214,9 @@ func (c *mapsGrpcControllerV1Test) testCrudOperations(t *testing.T) {
 	assert.Equal(t, map1.Id, m.Id)
 
 	// Try to get deleted map
-	params = cdata.NewAnyValueMapFromTuples(
+	params = pipdata.NewAnyValueMapFromTuples(
 		"map_id", map1.Id,
+		"reqctx", cdata.RequestContextV1{OrgId: "org_1"},
 	)
 	response, err = c.client.CallCommand(context.Background(), "get_map_by_id", params)
 	assert.Nil(t, err)
