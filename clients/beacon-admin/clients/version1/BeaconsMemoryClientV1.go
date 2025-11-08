@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	data1 "github.com/Shuv1Wolf/subterra-locate/services/beacon-admin/data/version1"
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
 	mdata "github.com/pip-services4/pip-services4-go/pip-services4-persistence-go/persistence"
 )
@@ -60,7 +61,7 @@ func (c *BeaconsMemoryClientV1) composeFilter(filter cquery.FilterParams) func(i
 	}
 }
 
-func (c *BeaconsMemoryClientV1) GetBeacons(ctx context.Context,
+func (c *BeaconsMemoryClientV1) GetBeacons(ctx context.Context, reqctx cdata.RequestContextV1,
 	filter *cquery.FilterParams, paging *cquery.PagingParams) (page *cquery.DataPage[data1.BeaconV1], err error) {
 	filterBeacons := c.composeFilter(*filter)
 
@@ -91,7 +92,7 @@ func (c *BeaconsMemoryClientV1) GetBeacons(ctx context.Context,
 	return cquery.NewDataPage(beacons, total), nil
 }
 
-func (c *BeaconsMemoryClientV1) GetBeaconById(ctx context.Context,
+func (c *BeaconsMemoryClientV1) GetBeaconById(ctx context.Context, reqctx cdata.RequestContextV1,
 	beaconId string) (beacon *data1.BeaconV1, err error) {
 
 	var item *data1.BeaconV1
@@ -105,7 +106,7 @@ func (c *BeaconsMemoryClientV1) GetBeaconById(ctx context.Context,
 	return item, nil
 }
 
-func (c *BeaconsMemoryClientV1) GetBeaconByUdi(ctx context.Context,
+func (c *BeaconsMemoryClientV1) GetBeaconByUdi(ctx context.Context, reqctx cdata.RequestContextV1,
 	udi string) (beacon *data1.BeaconV1, err error) {
 	var item *data1.BeaconV1
 	for _, v := range c.items {
@@ -118,7 +119,7 @@ func (c *BeaconsMemoryClientV1) GetBeaconByUdi(ctx context.Context,
 	return item, nil
 }
 
-func (c *BeaconsMemoryClientV1) CreateBeacon(ctx context.Context,
+func (c *BeaconsMemoryClientV1) CreateBeacon(ctx context.Context, reqctx cdata.RequestContextV1,
 	beacon data1.BeaconV1) (res *data1.BeaconV1, err error) {
 
 	newItem := mdata.CloneObject(beacon, c.proto)
@@ -129,7 +130,7 @@ func (c *BeaconsMemoryClientV1) CreateBeacon(ctx context.Context,
 	return &item, nil
 }
 
-func (c *BeaconsMemoryClientV1) UpdateBeacon(ctx context.Context,
+func (c *BeaconsMemoryClientV1) UpdateBeacon(ctx context.Context, reqctx cdata.RequestContextV1,
 	beacon data1.BeaconV1) (res *data1.BeaconV1, err error) {
 
 	var index = -1
@@ -150,7 +151,7 @@ func (c *BeaconsMemoryClientV1) UpdateBeacon(ctx context.Context,
 	return &item, nil
 }
 
-func (c *BeaconsMemoryClientV1) DeleteBeaconById(ctx context.Context,
+func (c *BeaconsMemoryClientV1) DeleteBeaconById(ctx context.Context, reqctx cdata.RequestContextV1,
 	beaconId string) (res *data1.BeaconV1, err error) {
 
 	var index = -1

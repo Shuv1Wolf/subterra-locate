@@ -6,6 +6,7 @@ import (
 
 	clients1 "github.com/Shuv1Wolf/subterra-locate/clients/beacon-admin/clients/version1"
 	data1 "github.com/Shuv1Wolf/subterra-locate/services/beacon-admin/data/version1"
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
 	"github.com/stretchr/testify/assert"
 )
@@ -50,7 +51,7 @@ func NewBeaconsClientV1Fixture(client clients1.IBeaconsClientV1) *BeaconsClientV
 
 func (c *BeaconsClientV1Fixture) testCreateBeacons(t *testing.T) {
 	// Create the first beacon
-	beacon, err := c.client.CreateBeacon(c.ctx, *c.BEACON1)
+	beacon, err := c.client.CreateBeacon(c.ctx, cdata.RequestContextV1{}, *c.BEACON1)
 	assert.Nil(t, err)
 	assert.NotNil(t, beacon)
 	assert.Equal(t, c.BEACON1.Udi, beacon.Udi)
@@ -59,7 +60,7 @@ func (c *BeaconsClientV1Fixture) testCreateBeacons(t *testing.T) {
 	assert.Equal(t, c.BEACON1.Label, beacon.Label)
 
 	// Create the second beacon
-	beacon, err = c.client.CreateBeacon(c.ctx, *c.BEACON2)
+	beacon, err = c.client.CreateBeacon(c.ctx, cdata.RequestContextV1{}, *c.BEACON2)
 	assert.Nil(t, err)
 	assert.NotNil(t, beacon)
 	assert.Equal(t, c.BEACON2.Udi, beacon.Udi)
@@ -75,7 +76,7 @@ func (c *BeaconsClientV1Fixture) TestCrudOperations(t *testing.T) {
 	c.testCreateBeacons(t)
 
 	// Get all beacons
-	page, err := c.client.GetBeacons(c.ctx, cquery.NewEmptyFilterParams(), cquery.NewEmptyPagingParams())
+	page, err := c.client.GetBeacons(c.ctx, cdata.RequestContextV1{}, cquery.NewEmptyFilterParams(), cquery.NewEmptyPagingParams())
 	assert.Nil(t, err)
 	assert.NotNil(t, page)
 	assert.Len(t, page.Data, 2)
@@ -83,26 +84,26 @@ func (c *BeaconsClientV1Fixture) TestCrudOperations(t *testing.T) {
 
 	// Update the beacon
 	beacon1.Label = "ABC"
-	beacon, err := c.client.UpdateBeacon(c.ctx, *beacon1)
+	beacon, err := c.client.UpdateBeacon(c.ctx, cdata.RequestContextV1{}, *beacon1)
 	assert.Nil(t, err)
 	assert.NotNil(t, beacon)
 	assert.Equal(t, beacon1.Id, beacon.Id)
 	assert.Equal(t, "ABC", beacon.Label)
 
 	// Get beacon by udi
-	beacon, err = c.client.GetBeaconByUdi(c.ctx, beacon1.Udi)
+	beacon, err = c.client.GetBeaconByUdi(c.ctx, cdata.RequestContextV1{}, beacon1.Udi)
 	assert.Nil(t, err)
 	assert.NotNil(t, beacon)
 	assert.Equal(t, beacon1.Id, beacon.Id)
 
 	// Delete the beacon
-	beacon, err = c.client.DeleteBeaconById(c.ctx, beacon1.Id)
+	beacon, err = c.client.DeleteBeaconById(c.ctx, cdata.RequestContextV1{}, beacon1.Id)
 	assert.Nil(t, err)
 	assert.NotNil(t, beacon)
 	assert.Equal(t, beacon1.Id, beacon.Id)
 
 	// Try to get deleted beacon
-	beacon, err = c.client.GetBeaconById(c.ctx, beacon1.Id)
+	beacon, err = c.client.GetBeaconById(c.ctx, cdata.RequestContextV1{}, beacon1.Id)
 	assert.Nil(t, err)
 	assert.Empty(t, beacon)
 }

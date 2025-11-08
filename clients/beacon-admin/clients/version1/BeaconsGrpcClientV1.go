@@ -4,6 +4,7 @@ import (
 	"context"
 
 	data1 "github.com/Shuv1Wolf/subterra-locate/services/beacon-admin/data/version1"
+	rdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	cdata "github.com/pip-services4/pip-services4-go/pip-services4-commons-go/data"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
 	cclients "github.com/pip-services4/pip-services4-go/pip-services4-grpc-go/clients"
@@ -21,11 +22,12 @@ func NewBeaconsGrpcClientV1() *BeaconsGrpcClientV1 {
 	return c
 }
 
-func (c *BeaconsGrpcClientV1) GetBeacons(ctx context.Context,
+func (c *BeaconsGrpcClientV1) GetBeacons(ctx context.Context, reqctx rdata.RequestContextV1,
 	filter *cquery.FilterParams,
 	paging *cquery.PagingParams) (*cquery.DataPage[data1.BeaconV1], error) {
 
 	var pagingMap map[string]interface{}
+	var reqctxMap map[string]interface{}
 
 	if paging != nil {
 		pagingMap = map[string]interface{}{
@@ -35,9 +37,15 @@ func (c *BeaconsGrpcClientV1) GetBeacons(ctx context.Context,
 		}
 	}
 
+	reqctxMap = map[string]interface{}{
+		"org_id":  reqctx.OrgId,
+		"user_id": reqctx.UserId,
+	}
+
 	params := cdata.NewAnyValueMapFromTuples(
 		"filter", filter.StringValueMap.Value(),
 		"paging", pagingMap,
+		"reqctx", reqctxMap,
 	)
 
 	response, err := c.CallCommand(ctx, "get_beacons", cdata.NewAnyValueMapFromValue(params.Value()))
@@ -49,10 +57,18 @@ func (c *BeaconsGrpcClientV1) GetBeacons(ctx context.Context,
 	return clients.HandleHttpResponse[*cquery.DataPage[data1.BeaconV1]](response)
 }
 
-func (c *BeaconsGrpcClientV1) GetBeaconById(ctx context.Context,
+func (c *BeaconsGrpcClientV1) GetBeaconById(ctx context.Context, reqctx rdata.RequestContextV1,
 	beaconId string) (*data1.BeaconV1, error) {
+
+	var reqctxMap map[string]interface{}
+	reqctxMap = map[string]interface{}{
+		"org_id":  reqctx.OrgId,
+		"user_id": reqctx.UserId,
+	}
+
 	params := cdata.NewAnyValueMapFromTuples(
 		"beacon_id", beaconId,
+		"reqctx", reqctxMap,
 	)
 
 	response, err := c.CallCommand(ctx, "get_beacon_by_id", params)
@@ -64,10 +80,18 @@ func (c *BeaconsGrpcClientV1) GetBeaconById(ctx context.Context,
 	return clients.HandleHttpResponse[*data1.BeaconV1](response)
 }
 
-func (c *BeaconsGrpcClientV1) GetBeaconByUdi(ctx context.Context,
+func (c *BeaconsGrpcClientV1) GetBeaconByUdi(ctx context.Context, reqctx rdata.RequestContextV1,
 	udi string) (*data1.BeaconV1, error) {
+
+	var reqctxMap map[string]interface{}
+	reqctxMap = map[string]interface{}{
+		"org_id":  reqctx.OrgId,
+		"user_id": reqctx.UserId,
+	}
+
 	params := cdata.NewAnyValueMapFromTuples(
 		"udi", udi,
+		"reqctx", reqctxMap,
 	)
 
 	response, err := c.CallCommand(ctx, "get_beacon_by_udi", params)
@@ -78,10 +102,18 @@ func (c *BeaconsGrpcClientV1) GetBeaconByUdi(ctx context.Context,
 	return clients.HandleHttpResponse[*data1.BeaconV1](response)
 }
 
-func (c *BeaconsGrpcClientV1) CreateBeacon(ctx context.Context,
+func (c *BeaconsGrpcClientV1) CreateBeacon(ctx context.Context, reqctx rdata.RequestContextV1,
 	beacon data1.BeaconV1) (*data1.BeaconV1, error) {
+
+	var reqctxMap map[string]interface{}
+	reqctxMap = map[string]interface{}{
+		"org_id":  reqctx.OrgId,
+		"user_id": reqctx.UserId,
+	}
+
 	params := cdata.NewAnyValueMapFromTuples(
 		"beacon", beacon,
+		"reqctx", reqctxMap,
 	)
 
 	response, err := c.CallCommand(ctx, "create_beacon", params)
@@ -92,10 +124,18 @@ func (c *BeaconsGrpcClientV1) CreateBeacon(ctx context.Context,
 	return clients.HandleHttpResponse[*data1.BeaconV1](response)
 }
 
-func (c *BeaconsGrpcClientV1) UpdateBeacon(ctx context.Context,
+func (c *BeaconsGrpcClientV1) UpdateBeacon(ctx context.Context, reqctx rdata.RequestContextV1,
 	beacon data1.BeaconV1) (*data1.BeaconV1, error) {
+
+	var reqctxMap map[string]interface{}
+	reqctxMap = map[string]interface{}{
+		"org_id":  reqctx.OrgId,
+		"user_id": reqctx.UserId,
+	}
+
 	params := cdata.NewAnyValueMapFromTuples(
 		"beacon", beacon,
+		"reqctx", reqctxMap,
 	)
 
 	response, err := c.CallCommand(ctx, "update_beacon", params)
@@ -106,10 +146,18 @@ func (c *BeaconsGrpcClientV1) UpdateBeacon(ctx context.Context,
 	return clients.HandleHttpResponse[*data1.BeaconV1](response)
 }
 
-func (c *BeaconsGrpcClientV1) DeleteBeaconById(ctx context.Context,
+func (c *BeaconsGrpcClientV1) DeleteBeaconById(ctx context.Context, reqctx rdata.RequestContextV1,
 	beaconId string) (*data1.BeaconV1, error) {
+
+	var reqctxMap map[string]interface{}
+	reqctxMap = map[string]interface{}{
+		"org_id":  reqctx.OrgId,
+		"user_id": reqctx.UserId,
+	}
+
 	params := cdata.NewAnyValueMapFromTuples(
 		"beacon_id", beaconId,
+		"reqctx", reqctxMap,
 	)
 
 	response, err := c.CallCommand(ctx, "delete_beacon_by_id", params)
