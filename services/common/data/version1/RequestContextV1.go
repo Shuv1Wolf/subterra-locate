@@ -11,6 +11,10 @@ type RequestContextV1 struct {
 	UserId string `json:"user_id"`
 }
 
+func NewRequestContextV1() *RequestContextV1 {
+	return &RequestContextV1{}
+}
+
 func NewRequestContextV1Schema() *cvalid.ObjectSchema {
 	return cvalid.NewObjectSchema().
 		WithOptionalProperty("org_id", cconv.String).
