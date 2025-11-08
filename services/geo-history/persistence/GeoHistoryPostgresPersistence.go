@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v4"
 
+	ccdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	cdata "github.com/pip-services4/pip-services4-go/pip-services4-commons-go/data"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
 	"github.com/pip-services4/pip-services4-go/pip-services4-postgres-go/persistence"
@@ -295,7 +296,7 @@ func (c *GeoHistoryPostgresPersistence) InsertBatch(ctx context.Context, items [
 	return results.Close()
 }
 
-func (c *GeoHistoryPostgresPersistence) GetHistory(ctx context.Context, filter cquery.FilterParams, paging cquery.PagingParams, sortField cquery.SortField) (cquery.DataPage[data1.HistoricalRecordV1], error) {
+func (c *GeoHistoryPostgresPersistence) GetHistory(ctx context.Context, reqctx ccdata.RequestContextV1, filter cquery.FilterParams, paging cquery.PagingParams, sortField cquery.SortField) (cquery.DataPage[data1.HistoricalRecordV1], error) {
 	sort := ""
 	if sortField.Name != "" {
 		sort += sortField.Name
@@ -305,6 +306,10 @@ func (c *GeoHistoryPostgresPersistence) GetHistory(ctx context.Context, filter c
 		sort += " ASC"
 	} else {
 		sort += " DESC"
+	}
+
+	if reqctx.OrgId != "" {
+		filter.Put("org_id", reqctx.OrgId)
 	}
 
 	return c.IdentifiablePostgresPersistence.GetPageByFilter(ctx,

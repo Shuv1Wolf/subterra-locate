@@ -18,6 +18,7 @@ import (
 	clog "github.com/pip-services4/pip-services4-go/pip-services4-observability-go/log"
 	ccmd "github.com/pip-services4/pip-services4-go/pip-services4-rpc-go/commands"
 
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	data1 "github.com/Shuv1Wolf/subterra-locate/services/geo-history/data/version1"
 	"github.com/Shuv1Wolf/subterra-locate/services/geo-history/listener"
 	pers "github.com/Shuv1Wolf/subterra-locate/services/geo-history/persistence"
@@ -112,15 +113,14 @@ func (c *GeoHistoryService) GetCommandSet() *ccmd.CommandSet {
 	return &c.commandSet.CommandSet
 }
 
-func (c *GeoHistoryService) GetHistory(ctx context.Context, orgId, mapId, from, to string, paging cquery.PagingParams, sortField cquery.SortField) (cquery.DataPage[data1.HistoricalRecordV1], error) {
+func (c *GeoHistoryService) GetHistory(ctx context.Context, reqctx cdata.RequestContextV1, mapId, from, to string, paging cquery.PagingParams, sortField cquery.SortField) (cquery.DataPage[data1.HistoricalRecordV1], error) {
 	filter := cquery.NewFilterParamsFromTuples(
-		"org_id", orgId,
 		"map_id", mapId,
 		"from", from,
 		"to", to,
 	)
 
-	return c.persistence.GetHistory(ctx, *filter, paging, sortField)
+	return c.persistence.GetHistory(ctx, reqctx, *filter, paging, sortField)
 }
 
 func (c *GeoHistoryService) ReceiveMessage(ctx context.Context, envelope *cqueues.MessageEnvelope, queue cqueues.IMessageQueue) error {
