@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	data1 "github.com/Shuv1Wolf/subterra-locate/services/geo-renderer/data/version1"
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
 	mdata "github.com/pip-services4/pip-services4-go/pip-services4-persistence-go/persistence"
 )
@@ -46,7 +47,7 @@ func (c *GeoRendererMemoryClientV1) composeFilter(filter cquery.FilterParams) fu
 	}
 }
 
-func (c *GeoRendererMemoryClientV1) GetMaps(ctx context.Context,
+func (c *GeoRendererMemoryClientV1) GetMaps(ctx context.Context, reqctx cdata.RequestContextV1,
 	filter *cquery.FilterParams, paging *cquery.PagingParams) (page *cquery.DataPage[data1.Map2dV1], err error) {
 	filterDevice := c.composeFilter(*filter)
 
@@ -77,7 +78,7 @@ func (c *GeoRendererMemoryClientV1) GetMaps(ctx context.Context,
 	return cquery.NewDataPage(map2d, total), nil
 }
 
-func (c *GeoRendererMemoryClientV1) GetMapById(ctx context.Context,
+func (c *GeoRendererMemoryClientV1) GetMapById(ctx context.Context, reqctx cdata.RequestContextV1,
 	id string) (device *data1.Map2dV1, err error) {
 
 	var item *data1.Map2dV1
@@ -91,7 +92,7 @@ func (c *GeoRendererMemoryClientV1) GetMapById(ctx context.Context,
 	return item, nil
 }
 
-func (c *GeoRendererMemoryClientV1) CreateMap(ctx context.Context,
+func (c *GeoRendererMemoryClientV1) CreateMap(ctx context.Context, reqctx cdata.RequestContextV1,
 	map2d data1.Map2dV1) (res *data1.Map2dV1, err error) {
 
 	newItem := mdata.CloneObject(map2d, c.proto)
@@ -102,7 +103,7 @@ func (c *GeoRendererMemoryClientV1) CreateMap(ctx context.Context,
 	return &item, nil
 }
 
-func (c *GeoRendererMemoryClientV1) UpdateMap(ctx context.Context,
+func (c *GeoRendererMemoryClientV1) UpdateMap(ctx context.Context, reqctx cdata.RequestContextV1,
 	map2d data1.Map2dV1) (res *data1.Map2dV1, err error) {
 
 	var index = -1
@@ -123,7 +124,7 @@ func (c *GeoRendererMemoryClientV1) UpdateMap(ctx context.Context,
 	return &item, nil
 }
 
-func (c *GeoRendererMemoryClientV1) DeleteMapById(ctx context.Context,
+func (c *GeoRendererMemoryClientV1) DeleteMapById(ctx context.Context, reqctx cdata.RequestContextV1,
 	id string) (res *data1.Map2dV1, err error) {
 
 	var index = -1

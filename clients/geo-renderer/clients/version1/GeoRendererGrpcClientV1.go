@@ -4,6 +4,7 @@ import (
 	"context"
 
 	data1 "github.com/Shuv1Wolf/subterra-locate/services/geo-renderer/data/version1"
+	rdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	cdata "github.com/pip-services4/pip-services4-go/pip-services4-commons-go/data"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
 	cclients "github.com/pip-services4/pip-services4-go/pip-services4-grpc-go/clients"
@@ -20,11 +21,12 @@ func NewGeoRendererGrpcClientV1() *GeoRendererGrpcClientV1 {
 	return c
 }
 
-func (c *GeoRendererGrpcClientV1) GetMaps(ctx context.Context,
+func (c *GeoRendererGrpcClientV1) GetMaps(ctx context.Context, reqctx rdata.RequestContextV1,
 	filter *cquery.FilterParams,
 	paging *cquery.PagingParams) (*cquery.DataPage[data1.Map2dV1], error) {
 
 	var pagingMap map[string]interface{}
+	var reqctxMap map[string]interface{}
 
 	if paging != nil {
 		pagingMap = map[string]interface{}{
@@ -34,9 +36,15 @@ func (c *GeoRendererGrpcClientV1) GetMaps(ctx context.Context,
 		}
 	}
 
+	reqctxMap = map[string]interface{}{
+		"org_id":  reqctx.OrgId,
+		"user_id": reqctx.UserId,
+	}
+
 	params := cdata.NewAnyValueMapFromTuples(
 		"filter", filter.StringValueMap.Value(),
 		"paging", pagingMap,
+		"reqctx", reqctxMap,
 	)
 
 	response, err := c.CallCommand(ctx, "get_maps", cdata.NewAnyValueMapFromValue(params.Value()))
@@ -48,10 +56,18 @@ func (c *GeoRendererGrpcClientV1) GetMaps(ctx context.Context,
 	return cclients.HandleHttpResponse[*cquery.DataPage[data1.Map2dV1]](response)
 }
 
-func (c *GeoRendererGrpcClientV1) GetMapById(ctx context.Context,
+func (c *GeoRendererGrpcClientV1) GetMapById(ctx context.Context, reqctx rdata.RequestContextV1,
 	id string) (*data1.Map2dV1, error) {
+
+	var reqctxMap map[string]interface{}
+	reqctxMap = map[string]interface{}{
+		"org_id":  reqctx.OrgId,
+		"user_id": reqctx.UserId,
+	}
+
 	params := cdata.NewAnyValueMapFromTuples(
 		"map_id", id,
+		"reqctx", reqctxMap,
 	)
 
 	response, err := c.CallCommand(ctx, "get_map_by_id", params)
@@ -63,10 +79,18 @@ func (c *GeoRendererGrpcClientV1) GetMapById(ctx context.Context,
 	return cclients.HandleHttpResponse[*data1.Map2dV1](response)
 }
 
-func (c *GeoRendererGrpcClientV1) CreateMap(ctx context.Context,
+func (c *GeoRendererGrpcClientV1) CreateMap(ctx context.Context, reqctx rdata.RequestContextV1,
 	map2d data1.Map2dV1) (*data1.Map2dV1, error) {
+
+	var reqctxMap map[string]interface{}
+	reqctxMap = map[string]interface{}{
+		"org_id":  reqctx.OrgId,
+		"user_id": reqctx.UserId,
+	}
+
 	params := cdata.NewAnyValueMapFromTuples(
 		"map", map2d,
+		"reqctx", reqctxMap,
 	)
 
 	response, err := c.CallCommand(ctx, "create_map", params)
@@ -77,10 +101,18 @@ func (c *GeoRendererGrpcClientV1) CreateMap(ctx context.Context,
 	return cclients.HandleHttpResponse[*data1.Map2dV1](response)
 }
 
-func (c *GeoRendererGrpcClientV1) UpdateMap(ctx context.Context,
+func (c *GeoRendererGrpcClientV1) UpdateMap(ctx context.Context, reqctx rdata.RequestContextV1,
 	map2d data1.Map2dV1) (*data1.Map2dV1, error) {
+
+	var reqctxMap map[string]interface{}
+	reqctxMap = map[string]interface{}{
+		"org_id":  reqctx.OrgId,
+		"user_id": reqctx.UserId,
+	}
+
 	params := cdata.NewAnyValueMapFromTuples(
 		"map", map2d,
+		"reqctx", reqctxMap,
 	)
 
 	response, err := c.CallCommand(ctx, "update_map", params)
@@ -91,10 +123,18 @@ func (c *GeoRendererGrpcClientV1) UpdateMap(ctx context.Context,
 	return cclients.HandleHttpResponse[*data1.Map2dV1](response)
 }
 
-func (c *GeoRendererGrpcClientV1) DeleteMapById(ctx context.Context,
+func (c *GeoRendererGrpcClientV1) DeleteMapById(ctx context.Context, reqctx rdata.RequestContextV1,
 	id string) (*data1.Map2dV1, error) {
+
+	var reqctxMap map[string]interface{}
+	reqctxMap = map[string]interface{}{
+		"org_id":  reqctx.OrgId,
+		"user_id": reqctx.UserId,
+	}
+
 	params := cdata.NewAnyValueMapFromTuples(
 		"map_id", id,
+		"reqctx", reqctxMap,
 	)
 
 	response, err := c.CallCommand(ctx, "delete_map_by_id", params)
