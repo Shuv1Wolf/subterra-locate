@@ -3,13 +3,17 @@ module github.com/Shuv1Wolf/subterra-locate/clients/geo-history
 go 1.24.4
 
 require (
-	github.com/Shuv1Wolf/subterra-locate/services/geo-history v1.0.0 // indirect
+	github.com/Shuv1Wolf/subterra-locate/services/common v1.0.8
+	github.com/Shuv1Wolf/subterra-locate/services/geo-history v1.0.1
+	github.com/pip-services4/pip-services4-go/pip-services4-commons-go v0.0.1-2
+	github.com/pip-services4/pip-services4-go/pip-services4-components-go v0.0.1-2
+	github.com/pip-services4/pip-services4-go/pip-services4-data-go v0.0.1-2
+	github.com/pip-services4/pip-services4-go/pip-services4-grpc-go v0.0.1-3
+)
+
+require (
 	github.com/golang/protobuf v1.5.3 // indirect
-	github.com/pip-services4/pip-services4-go/pip-services4-commons-go v0.0.1-2 // indirect
-	github.com/pip-services4/pip-services4-go/pip-services4-components-go v0.0.1-2 // indirect
 	github.com/pip-services4/pip-services4-go/pip-services4-config-go v0.0.1-3 // indirect
-	github.com/pip-services4/pip-services4-go/pip-services4-data-go v0.0.1-2 // indirect
-	github.com/pip-services4/pip-services4-go/pip-services4-grpc-go v0.0.1-3 // indirect
 	github.com/pip-services4/pip-services4-go/pip-services4-observability-go v0.0.1-3 // indirect
 	github.com/pip-services4/pip-services4-go/pip-services4-rpc-go v0.0.1-3 // indirect
 	golang.org/x/net v0.21.0 // indirect

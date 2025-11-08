@@ -4,6 +4,7 @@ import (
 	"context"
 
 	data1 "github.com/Shuv1Wolf/subterra-locate/services/geo-history/data/version1"
+	rdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	cdata "github.com/pip-services4/pip-services4-go/pip-services4-commons-go/data"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
 	cclients "github.com/pip-services4/pip-services4-go/pip-services4-grpc-go/clients"
@@ -20,7 +21,7 @@ func NewGeoHistoryGrpcClientV1() *GeoHistoryGrpcClientV1 {
 	return c
 }
 
-func (c *GeoHistoryGrpcClientV1) GetHistory(ctx context.Context, orgId, mapId, from, to string,
+func (c *GeoHistoryGrpcClientV1) GetHistory(ctx context.Context, reqctx rdata.RequestContextV1, mapId, from, to string,
 	paging *cquery.PagingParams, sortField *cquery.SortField) (cquery.DataPage[data1.HistoricalRecordV1], error) {
 
 	var pagingMap map[string]interface{}
@@ -40,13 +41,18 @@ func (c *GeoHistoryGrpcClientV1) GetHistory(ctx context.Context, orgId, mapId, f
 		}
 	}
 
+	reqctxMap := map[string]interface{}{
+		"org_id":  reqctx.OrgId,
+		"user_id": reqctx.UserId,
+	}
+
 	params := cdata.NewAnyValueMapFromTuples(
-		"org_id", orgId,
 		"map_id", mapId,
 		"from", from,
 		"to", to,
 		"sort", sortMap,
 		"paging", pagingMap,
+		"reqctx", reqctxMap,
 	)
 
 	response, err := c.CallCommand(ctx, "get_device_history", cdata.NewAnyValueMapFromValue(params.Value()))
