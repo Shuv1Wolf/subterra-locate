@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	data1 "github.com/Shuv1Wolf/subterra-locate/services/device-admin/data/version1"
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
 	mdata "github.com/pip-services4/pip-services4-go/pip-services4-persistence-go/persistence"
 )
@@ -46,7 +47,7 @@ func (c *DeviceMemoryClientV1) composeFilter(filter cquery.FilterParams) func(it
 	}
 }
 
-func (c *DeviceMemoryClientV1) GetDevices(ctx context.Context,
+func (c *DeviceMemoryClientV1) GetDevices(ctx context.Context, reqctx cdata.RequestContextV1,
 	filter *cquery.FilterParams, paging *cquery.PagingParams) (page *cquery.DataPage[data1.DeviceV1], err error) {
 	filterDevice := c.composeFilter(*filter)
 
@@ -77,7 +78,7 @@ func (c *DeviceMemoryClientV1) GetDevices(ctx context.Context,
 	return cquery.NewDataPage(Device, total), nil
 }
 
-func (c *DeviceMemoryClientV1) GetDEviceById(ctx context.Context,
+func (c *DeviceMemoryClientV1) GetDeviceById(ctx context.Context, reqctx cdata.RequestContextV1,
 	id string) (device *data1.DeviceV1, err error) {
 
 	var item *data1.DeviceV1
@@ -91,7 +92,7 @@ func (c *DeviceMemoryClientV1) GetDEviceById(ctx context.Context,
 	return item, nil
 }
 
-func (c *DeviceMemoryClientV1) CreateDevice(ctx context.Context,
+func (c *DeviceMemoryClientV1) CreateDevice(ctx context.Context, reqctx cdata.RequestContextV1,
 	device data1.DeviceV1) (res *data1.DeviceV1, err error) {
 
 	newItem := mdata.CloneObject(device, c.proto)
@@ -102,7 +103,7 @@ func (c *DeviceMemoryClientV1) CreateDevice(ctx context.Context,
 	return &item, nil
 }
 
-func (c *DeviceMemoryClientV1) UpdateDevice(ctx context.Context,
+func (c *DeviceMemoryClientV1) UpdateDevice(ctx context.Context, reqctx cdata.RequestContextV1,
 	device data1.DeviceV1) (res *data1.DeviceV1, err error) {
 
 	var index = -1
@@ -123,7 +124,7 @@ func (c *DeviceMemoryClientV1) UpdateDevice(ctx context.Context,
 	return &item, nil
 }
 
-func (c *DeviceMemoryClientV1) DeleteDeviceById(ctx context.Context,
+func (c *DeviceMemoryClientV1) DeleteDeviceById(ctx context.Context, reqctx cdata.RequestContextV1,
 	id string) (res *data1.DeviceV1, err error) {
 
 	var index = -1
