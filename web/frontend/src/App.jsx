@@ -14,15 +14,6 @@ import DevicesAdminPage from "./pages/DevicesAdminPage";
 import DeviceFormPage from "./pages/DeviceFormPage";
 
 const AppContent = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    if (location.pathname !== "/") {
-      navigate("/");
-    }
-  }, []); // The empty dependency array ensures this effect runs only once on mount
-
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />

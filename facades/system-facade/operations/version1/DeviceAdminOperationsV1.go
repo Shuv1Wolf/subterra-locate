@@ -9,6 +9,8 @@ import (
 
 	clients1 "github.com/Shuv1Wolf/subterra-locate/clients/device-admin/clients/version1"
 	services1 "github.com/Shuv1Wolf/subterra-locate/services/device-admin/data/version1"
+
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 )
 
 type DeviceAdminOperationsV1 struct {
@@ -38,9 +40,10 @@ func (c *DeviceAdminOperationsV1) SetReferences(ctx context.Context, references 
 func (c *DeviceAdminOperationsV1) GetDevices(res http.ResponseWriter, req *http.Request) {
 	var filter = c.GetFilterParams(req)
 	var paging = c.GetPagingParams(req)
+	reqctx := cdata.GetRequestContextParams(req)
 
 	page, err := c.deviceAdmin.GetDevices(
-		context.Background(), filter, paging)
+		context.Background(), *reqctx, filter, paging)
 
 	if err != nil {
 		c.SendError(res, req, err)
@@ -51,7 +54,9 @@ func (c *DeviceAdminOperationsV1) GetDevices(res http.ResponseWriter, req *http.
 
 func (c *DeviceAdminOperationsV1) GetDeviceById(res http.ResponseWriter, req *http.Request) {
 	id := c.GetParam(req, "id")
-	item, err := c.deviceAdmin.GetDeviceById(context.Background(), id)
+	reqctx := cdata.GetRequestContextParams(req)
+
+	item, err := c.deviceAdmin.GetDeviceById(context.Background(), *reqctx, id)
 	if err != nil {
 		c.SendError(res, req, err)
 	} else {
@@ -60,13 +65,14 @@ func (c *DeviceAdminOperationsV1) GetDeviceById(res http.ResponseWriter, req *ht
 }
 
 func (c *DeviceAdminOperationsV1) CreateDevice(res http.ResponseWriter, req *http.Request) {
+	reqctx := cdata.GetRequestContextParams(req)
 
 	data := services1.DeviceV1{}
 	err := c.DecodeBody(req, &data)
 	if err != nil {
 		c.SendError(res, req, err)
 	}
-	item, err := c.deviceAdmin.CreateDevice(context.Background(), data)
+	item, err := c.deviceAdmin.CreateDevice(context.Background(), *reqctx, data)
 	if err != nil {
 		c.SendError(res, req, err)
 	} else {
@@ -75,13 +81,15 @@ func (c *DeviceAdminOperationsV1) CreateDevice(res http.ResponseWriter, req *htt
 }
 
 func (c *DeviceAdminOperationsV1) UpdateDevice(res http.ResponseWriter, req *http.Request) {
+	reqctx := cdata.GetRequestContextParams(req)
+
 	data := services1.DeviceV1{}
 	err := c.DecodeBody(req, &data)
 	if err != nil {
 		c.SendError(res, req, err)
 	}
 
-	item, err := c.deviceAdmin.UpdateDevice(context.Background(), data)
+	item, err := c.deviceAdmin.UpdateDevice(context.Background(), *reqctx, data)
 	if err != nil {
 		c.SendError(res, req, err)
 	} else {
@@ -90,9 +98,11 @@ func (c *DeviceAdminOperationsV1) UpdateDevice(res http.ResponseWriter, req *htt
 }
 
 func (c *DeviceAdminOperationsV1) DeleteDeviceById(res http.ResponseWriter, req *http.Request) {
+	reqctx := cdata.GetRequestContextParams(req)
+
 	id := c.GetParam(req, "id")
 
-	item, err := c.deviceAdmin.DeleteDeviceById(context.Background(), id)
+	item, err := c.deviceAdmin.DeleteDeviceById(context.Background(), *reqctx, id)
 
 	if err != nil {
 		c.SendError(res, req, err)

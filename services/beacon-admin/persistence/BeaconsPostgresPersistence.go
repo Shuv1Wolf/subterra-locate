@@ -159,7 +159,7 @@ func (c *BeaconsPostgresPersistence) Update(ctx context.Context, reqctx cdata.Re
 		return data, err
 	}
 
-	if data.Id != "" {
+	if data.Id == "" {
 		return data, fmt.Errorf("beacon not found: %s", item.Id)
 	}
 
@@ -172,7 +172,7 @@ func (c *BeaconsPostgresPersistence) DeleteById(ctx context.Context, reqctx cdat
 		return data, err
 	}
 
-	if data.Id != "" {
+	if data.Id == "" {
 		return data, fmt.Errorf("beacon not found: %s", id)
 	}
 

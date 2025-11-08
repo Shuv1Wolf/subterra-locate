@@ -8,11 +8,11 @@ replace (
 )
 
 require (
-	github.com/Shuv1Wolf/subterra-locate/clients/beacon-admin v1.0.2
-	github.com/Shuv1Wolf/subterra-locate/clients/device-admin v1.0.1
-	github.com/Shuv1Wolf/subterra-locate/services/beacon-admin v1.0.1
-	github.com/Shuv1Wolf/subterra-locate/services/common v1.0.2
-	github.com/Shuv1Wolf/subterra-locate/services/device-admin v1.0.0
+	github.com/Shuv1Wolf/subterra-locate/clients/beacon-admin v1.0.6
+	github.com/Shuv1Wolf/subterra-locate/clients/device-admin v1.0.4
+	github.com/Shuv1Wolf/subterra-locate/services/beacon-admin v1.0.6
+	github.com/Shuv1Wolf/subterra-locate/services/common v1.0.8
+	github.com/Shuv1Wolf/subterra-locate/services/device-admin v1.0.3
 	github.com/nats-io/nats.go v1.44.0
 	github.com/pip-services4/pip-services4-go/pip-services4-components-go v0.0.1-2
 	github.com/pip-services4/pip-services4-go/pip-services4-container-go v0.0.1-3

@@ -3,12 +3,13 @@ module github.com/Shuv1Wolf/subterra-locate/facades/geo-facade
 go 1.24.4
 
 require (
-	github.com/Shuv1Wolf/subterra-locate/clients/beacon-admin v1.0.5
-	github.com/Shuv1Wolf/subterra-locate/clients/geo-history v1.0.4
-	github.com/Shuv1Wolf/subterra-locate/clients/geo-renderer v1.0.4
+	github.com/Shuv1Wolf/subterra-locate/clients/beacon-admin v1.0.6
+	github.com/Shuv1Wolf/subterra-locate/clients/geo-history v1.0.5
+	github.com/Shuv1Wolf/subterra-locate/clients/geo-renderer v1.0.5
 	github.com/Shuv1Wolf/subterra-locate/clients/location-engine v1.0.6
-	github.com/Shuv1Wolf/subterra-locate/services/beacon-admin v1.0.4
-	github.com/Shuv1Wolf/subterra-locate/services/geo-renderer v1.0.2
+	github.com/Shuv1Wolf/subterra-locate/services/beacon-admin v1.0.5
+	github.com/Shuv1Wolf/subterra-locate/services/common v1.0.8
+	github.com/Shuv1Wolf/subterra-locate/services/geo-renderer v1.0.3
 	github.com/gorilla/websocket v1.5.3
 	github.com/pip-services4/pip-services4-go/pip-services4-commons-go v0.0.1-2
 	github.com/pip-services4/pip-services4-go/pip-services4-components-go v0.0.1-2
@@ -18,8 +19,7 @@ require (
 )
 
 require (
-	github.com/Shuv1Wolf/subterra-locate/services/common v1.0.2 // indirect
-	github.com/Shuv1Wolf/subterra-locate/services/geo-history v1.0.0 // indirect
+	github.com/Shuv1Wolf/subterra-locate/services/geo-history v1.0.1 // indirect
 	github.com/Shuv1Wolf/subterra-locate/services/location-engine v1.0.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect

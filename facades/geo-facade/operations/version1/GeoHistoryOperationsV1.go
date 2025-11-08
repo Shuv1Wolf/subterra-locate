@@ -6,6 +6,7 @@ import (
 
 	clients1 "github.com/Shuv1Wolf/subterra-locate/clients/geo-history/clients/version1"
 	"github.com/Shuv1Wolf/subterra-locate/facades/geo-facade/utils"
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	cref "github.com/pip-services4/pip-services4-go/pip-services4-components-go/refer"
 	httpcontr "github.com/pip-services4/pip-services4-go/pip-services4-http-go/controllers"
 )
@@ -38,13 +39,13 @@ func (c *GeoHistoryOperationsV1) GetHistory(res http.ResponseWriter, req *http.R
 	var paging = c.GetPagingParams(req)
 	var sort = utils.GetSortFieldParams(req)
 
-	// org_id := c.GetParam(req, "org_id")
+	reqctx := cdata.GetRequestContextParams(req)
 	map_id := c.GetParam(req, "map_id")
 	from := c.GetParam(req, "from")
 	to := c.GetParam(req, "to")
 
 	page, err := c.beaconAdmin.GetHistory(
-		context.Background(), "", map_id, from, to, paging, sort,
+		context.Background(), *reqctx, map_id, from, to, paging, sort,
 	)
 
 	if err != nil {

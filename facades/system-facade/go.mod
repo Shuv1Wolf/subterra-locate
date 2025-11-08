@@ -3,14 +3,15 @@ module github.com/Shuv1Wolf/subterra-locate/facades/system-facade
 go 1.24.4
 
 require (
-	github.com/Shuv1Wolf/subterra-locate/clients/device-admin v1.0.3
-	github.com/Shuv1Wolf/subterra-locate/services/device-admin v1.0.2
+	github.com/Shuv1Wolf/subterra-locate/clients/device-admin v1.0.4
+	github.com/Shuv1Wolf/subterra-locate/services/device-admin v1.0.3
 	github.com/pip-services4/pip-services4-go/pip-services4-components-go v0.0.1-2
 	github.com/pip-services4/pip-services4-go/pip-services4-container-go v0.0.1-3
 	github.com/pip-services4/pip-services4-go/pip-services4-http-go v0.0.1-4
 )
 
 require (
+	github.com/Shuv1Wolf/subterra-locate/services/common v1.0.8 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jinzhu/copier v0.3.5 // indirect
 	github.com/kr/pretty v0.1.0 // indirect

@@ -1,6 +1,10 @@
 [
   {
-    "orgId": "org$100",
+    "orgId": "org$1",
     "name": "Дом"
+  },
+  {
+    "orgId": "org$2",
+    "name": "..."
   }
 ]

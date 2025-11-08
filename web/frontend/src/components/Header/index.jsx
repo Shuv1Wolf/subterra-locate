@@ -47,8 +47,12 @@ export default function Header({ variant = "home", title = "Subterra Locate" }) 
   };
 
   const handleOrgSelect = (org) => {
+    const currentOrgId = localStorage.getItem("selectedOrgId");
+    if (currentOrgId !== org.orgId) {
+      localStorage.setItem("selectedOrgId", org.orgId);
+      window.location.reload();
+    }
     setSelectedOrg(org);
-    localStorage.setItem("selectedOrgId", org.orgId);
     setIsOrgMenuOpen(false);
   };
 

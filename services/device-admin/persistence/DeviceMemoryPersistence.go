@@ -67,7 +67,7 @@ func (c *DeviceMemoryPersistence) GetOneById(ctx context.Context, reqctx cdata.R
 		return item, err
 	}
 
-	if item.Id != "" && item.OrgId != reqctx.OrgId {
+	if item.Id == "" && item.OrgId != reqctx.OrgId {
 		return data.DeviceV1{}, nil
 	}
 

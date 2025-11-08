@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	natsEvents "github.com/Shuv1Wolf/subterra-locate/services/common/nats/events"
 	"github.com/Shuv1Wolf/subterra-locate/services/location-engine/utils"
 	"github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
@@ -21,7 +22,7 @@ func (c *LocationEngineService) initBeaconsCache() {
 
 	for {
 		page := query.NewPagingParams(skip, limit, false)
-		res, err := c.beaconAdmin.GetBeacons(context.Background(), *filter, *page)
+		res, err := c.beaconAdmin.GetBeacons(context.Background(), cdata.RequestContextV1{}, filter, page)
 		if err != nil {
 			c.Logger.Error(context.Background(), err, "Failed to get beacons from beacon admin service")
 			return
@@ -66,7 +67,7 @@ func (c *LocationEngineService) beaconChangedEvent(ctx context.Context, msg stri
 		c.Logger.Error(ctx, err, "Failed to deserialize message")
 	}
 
-	b, err := c.beaconAdmin.GetBeaconById(context.Background(), event.Id)
+	b, err := c.beaconAdmin.GetBeaconById(context.Background(), cdata.RequestContextV1{}, event.Id)
 	if err != nil {
 		c.Logger.Error(context.Background(), err, "Failed to get beacon from beacon admin service")
 		return err
@@ -144,7 +145,7 @@ func (c *LocationEngineService) initDeviceCache() {
 
 	for {
 		page := query.NewPagingParams(skip, limit, false)
-		res, err := c.deviceAdmin.GetDevices(context.Background(), *filter, *page)
+		res, err := c.deviceAdmin.GetDevices(context.Background(), cdata.RequestContextV1{}, filter, page)
 		if err != nil {
 			c.Logger.Error(context.Background(), err, "Failed to get devices from device admin service")
 			return
@@ -175,7 +176,7 @@ func (c *LocationEngineService) deviceChangedEvent(ctx context.Context, msg stri
 		c.Logger.Error(ctx, err, "Failed to deserialize message")
 	}
 
-	d, err := c.deviceAdmin.GetDeviceById(context.Background(), event.Id)
+	d, err := c.deviceAdmin.GetDeviceById(context.Background(), cdata.RequestContextV1{}, event.Id)
 	if err != nil {
 		c.Logger.Error(context.Background(), err, "Failed to get device from device admin service")
 		return err

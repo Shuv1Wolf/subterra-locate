@@ -129,7 +129,7 @@ func (c *DevicePostgresPersistence) Update(ctx context.Context, reqctx cdata.Req
 		return data, err
 	}
 
-	if data.Id != "" {
+	if data.Id == "" {
 		return data, fmt.Errorf("device not found: %s", item.Id)
 	}
 
@@ -142,7 +142,7 @@ func (c *DevicePostgresPersistence) DeleteById(ctx context.Context, reqctx cdata
 		return data, err
 	}
 
-	if data.Id != "" {
+	if data.Id == "" {
 		return data, fmt.Errorf("device not found: %s", id)
 	}
 

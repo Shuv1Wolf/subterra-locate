@@ -9,6 +9,7 @@ import (
 
 	clients1 "github.com/Shuv1Wolf/subterra-locate/clients/beacon-admin/clients/version1"
 	services1 "github.com/Shuv1Wolf/subterra-locate/services/beacon-admin/data/version1"
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 )
 
 type BeaconAdminOperationsV1 struct {
@@ -38,9 +39,10 @@ func (c *BeaconAdminOperationsV1) SetReferences(ctx context.Context, references 
 func (c *BeaconAdminOperationsV1) GetBeacons(res http.ResponseWriter, req *http.Request) {
 	var filter = c.GetFilterParams(req)
 	var paging = c.GetPagingParams(req)
+	var reqctx = cdata.GetRequestContextParams(req)
 
 	page, err := c.beaconAdmin.GetBeacons(
-		context.Background(), filter, paging)
+		context.Background(), *reqctx, filter, paging)
 
 	if err != nil {
 		c.SendError(res, req, err)
@@ -51,7 +53,9 @@ func (c *BeaconAdminOperationsV1) GetBeacons(res http.ResponseWriter, req *http.
 
 func (c *BeaconAdminOperationsV1) GetBeaconById(res http.ResponseWriter, req *http.Request) {
 	id := c.GetParam(req, "id")
-	item, err := c.beaconAdmin.GetBeaconById(context.Background(), id)
+	reqctx := cdata.GetRequestContextParams(req)
+
+	item, err := c.beaconAdmin.GetBeaconById(context.Background(), *reqctx, id)
 	if err != nil {
 		c.SendError(res, req, err)
 	} else {
@@ -61,7 +65,9 @@ func (c *BeaconAdminOperationsV1) GetBeaconById(res http.ResponseWriter, req *ht
 
 func (c *BeaconAdminOperationsV1) GetBeaconByUdi(res http.ResponseWriter, req *http.Request) {
 	udi := c.GetParam(req, "udi")
-	item, err := c.beaconAdmin.GetBeaconByUdi(context.Background(), udi)
+	reqctx := cdata.GetRequestContextParams(req)
+
+	item, err := c.beaconAdmin.GetBeaconByUdi(context.Background(), *reqctx, udi)
 	if err != nil {
 		c.SendError(res, req, err)
 	} else {
@@ -70,13 +76,14 @@ func (c *BeaconAdminOperationsV1) GetBeaconByUdi(res http.ResponseWriter, req *h
 }
 
 func (c *BeaconAdminOperationsV1) CreateBeacon(res http.ResponseWriter, req *http.Request) {
+	reqctx := cdata.GetRequestContextParams(req)
 
 	data := services1.BeaconV1{}
 	err := c.DecodeBody(req, &data)
 	if err != nil {
 		c.SendError(res, req, err)
 	}
-	item, err := c.beaconAdmin.CreateBeacon(context.Background(), data)
+	item, err := c.beaconAdmin.CreateBeacon(context.Background(), *reqctx, data)
 	if err != nil {
 		c.SendError(res, req, err)
 	} else {
@@ -85,13 +92,15 @@ func (c *BeaconAdminOperationsV1) CreateBeacon(res http.ResponseWriter, req *htt
 }
 
 func (c *BeaconAdminOperationsV1) UpdateBeacon(res http.ResponseWriter, req *http.Request) {
+	reqctx := cdata.GetRequestContextParams(req)
+
 	data := services1.BeaconV1{}
 	err := c.DecodeBody(req, &data)
 	if err != nil {
 		c.SendError(res, req, err)
 	}
 
-	item, err := c.beaconAdmin.UpdateBeacon(context.Background(), data)
+	item, err := c.beaconAdmin.UpdateBeacon(context.Background(), *reqctx, data)
 	if err != nil {
 		c.SendError(res, req, err)
 	} else {
@@ -101,8 +110,9 @@ func (c *BeaconAdminOperationsV1) UpdateBeacon(res http.ResponseWriter, req *htt
 
 func (c *BeaconAdminOperationsV1) DeleteBeaconById(res http.ResponseWriter, req *http.Request) {
 	id := c.GetParam(req, "id")
+	reqctx := cdata.GetRequestContextParams(req)
 
-	item, err := c.beaconAdmin.DeleteBeaconById(context.Background(), id)
+	item, err := c.beaconAdmin.DeleteBeaconById(context.Background(), *reqctx, id)
 
 	if err != nil {
 		c.SendError(res, req, err)

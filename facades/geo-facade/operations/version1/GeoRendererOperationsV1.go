@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 
 	clients1 "github.com/Shuv1Wolf/subterra-locate/clients/geo-renderer/clients/version1"
+	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	services1 "github.com/Shuv1Wolf/subterra-locate/services/geo-renderer/data/version1"
 )
 
@@ -42,8 +43,10 @@ func (c *GeoRendererOperationsV1) GetMaps(res http.ResponseWriter, req *http.Req
 	var filter = c.GetFilterParams(req)
 	var paging = c.GetPagingParams(req)
 
+	reqctx := cdata.GetRequestContextParams(req)
+
 	page, err := c.geoRenderer.GetMaps(
-		context.Background(), filter, paging)
+		context.Background(), *reqctx, filter, paging)
 
 	if err != nil {
 		c.SendError(res, req, err)
@@ -54,7 +57,9 @@ func (c *GeoRendererOperationsV1) GetMaps(res http.ResponseWriter, req *http.Req
 
 func (c *GeoRendererOperationsV1) GetMapById(res http.ResponseWriter, req *http.Request) {
 	id := c.GetParam(req, "id")
-	item, err := c.geoRenderer.GetMapById(context.Background(), id)
+	reqctx := cdata.GetRequestContextParams(req)
+
+	item, err := c.geoRenderer.GetMapById(context.Background(), *reqctx, id)
 	if err != nil {
 		c.SendError(res, req, err)
 	} else {
@@ -64,6 +69,8 @@ func (c *GeoRendererOperationsV1) GetMapById(res http.ResponseWriter, req *http.
 
 func (c *GeoRendererOperationsV1) UploadMapSVG(res http.ResponseWriter, req *http.Request) {
 	id := c.GetParam(req, "id")
+	reqctx := cdata.GetRequestContextParams(req)
+
 	if err := req.ParseMultipartForm(10 << 20); err != nil {
 		c.SendError(res, req, err)
 		return
@@ -80,13 +87,13 @@ func (c *GeoRendererOperationsV1) UploadMapSVG(res http.ResponseWriter, req *htt
 		return
 	}
 	svgString := string(data)
-	item, err := c.geoRenderer.GetMapById(context.Background(), id)
+	item, err := c.geoRenderer.GetMapById(context.Background(), *reqctx, id)
 	if err != nil {
 		c.SendError(res, req, err)
 		return
 	}
 	item.SVG = svgString
-	updated, err := c.geoRenderer.UpdateMap(context.Background(), *item)
+	updated, err := c.geoRenderer.UpdateMap(context.Background(), *reqctx, *item)
 	if err != nil {
 		c.SendError(res, req, err)
 	} else {
@@ -95,6 +102,7 @@ func (c *GeoRendererOperationsV1) UploadMapSVG(res http.ResponseWriter, req *htt
 }
 
 func (c *GeoRendererOperationsV1) CreateMap(res http.ResponseWriter, req *http.Request) {
+	reqctx := cdata.GetRequestContextParams(req)
 
 	data := services1.Map2dV1{}
 	err := c.DecodeBody(req, &data)
@@ -102,7 +110,7 @@ func (c *GeoRendererOperationsV1) CreateMap(res http.ResponseWriter, req *http.R
 		c.SendError(res, req, err)
 	}
 	data.CreatedAt = time.Now()
-	item, err := c.geoRenderer.CreateMap(context.Background(), data)
+	item, err := c.geoRenderer.CreateMap(context.Background(), *reqctx, data)
 	if err != nil {
 		c.SendError(res, req, err)
 	} else {
@@ -111,13 +119,15 @@ func (c *GeoRendererOperationsV1) CreateMap(res http.ResponseWriter, req *http.R
 }
 
 func (c *GeoRendererOperationsV1) UpdateMap(res http.ResponseWriter, req *http.Request) {
+	reqctx := cdata.GetRequestContextParams(req)
+
 	data := services1.Map2dV1{}
 	err := c.DecodeBody(req, &data)
 	if err != nil {
 		c.SendError(res, req, err)
 	}
 
-	item, err := c.geoRenderer.UpdateMap(context.Background(), data)
+	item, err := c.geoRenderer.UpdateMap(context.Background(), *reqctx, data)
 	if err != nil {
 		c.SendError(res, req, err)
 	} else {
@@ -127,8 +137,9 @@ func (c *GeoRendererOperationsV1) UpdateMap(res http.ResponseWriter, req *http.R
 
 func (c *GeoRendererOperationsV1) DeleteMapById(res http.ResponseWriter, req *http.Request) {
 	id := c.GetParam(req, "id")
+	reqctx := cdata.GetRequestContextParams(req)
 
-	item, err := c.geoRenderer.DeleteMapById(context.Background(), id)
+	item, err := c.geoRenderer.DeleteMapById(context.Background(), *reqctx, id)
 
 	if err != nil {
 		c.SendError(res, req, err)
