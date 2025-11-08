@@ -37,7 +37,7 @@ func NewRequestContextV1FromMap(value *data.AnyValueMap) *RequestContextV1 {
 	}
 }
 
-func GetSortFieldParams(req *http.Request) *RequestContextV1 {
+func GetRequestContextParams(req *http.Request) *RequestContextV1 {
 
 	params := req.URL.Query()
 	reqParams := make(map[string]string, 0)
