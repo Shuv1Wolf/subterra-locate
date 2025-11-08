@@ -20,7 +20,7 @@ func NewRequestContextV1() *RequestContextV1 {
 func NewRequestContextV1Schema() *cvalid.ObjectSchema {
 	return cvalid.NewObjectSchema().
 		WithOptionalProperty("org_id", cconv.String).
-		WithOptionalProperty("user_id", cconv.Boolean)
+		WithOptionalProperty("user_id", cconv.String)
 }
 
 func NewRequestContextV1FromValue(value any) *RequestContextV1 {
