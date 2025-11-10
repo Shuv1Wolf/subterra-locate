@@ -37,6 +37,7 @@ func (c *GeoHistoryCommandSet) makeGetHistoryCommand() ccmd.ICommand {
 			WithRequiredProperty("map_id", cconv.String).
 			WithRequiredProperty("from", cconv.String).
 			WithRequiredProperty("to", cconv.String).
+			WithOptionalProperty("entity_id", cconv.String).
 			WithOptionalProperty("sort", data1.NewSortFieldSchema()).
 			WithOptionalProperty("reqctx", cdata.NewRequestContextV1Schema()).
 			WithOptionalProperty("paging", cvalid.NewPagingParamsSchema()),
@@ -57,6 +58,7 @@ func (c *GeoHistoryCommandSet) makeGetHistoryCommand() ccmd.ICommand {
 				ctx,
 				*reqctx,
 				args.GetAsString("map_id"),
+				args.GetAsString("entity_id"),
 				args.GetAsString("from"),
 				args.GetAsString("to"),
 				*paging,

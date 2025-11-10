@@ -113,12 +113,16 @@ func (c *GeoHistoryService) GetCommandSet() *ccmd.CommandSet {
 	return &c.commandSet.CommandSet
 }
 
-func (c *GeoHistoryService) GetHistory(ctx context.Context, reqctx cdata.RequestContextV1, mapId, from, to string, paging cquery.PagingParams, sortField cquery.SortField) (cquery.DataPage[data1.HistoricalRecordV1], error) {
+func (c *GeoHistoryService) GetHistory(ctx context.Context, reqctx cdata.RequestContextV1, mapId, entityId, from, to string, paging cquery.PagingParams, sortField cquery.SortField) (cquery.DataPage[data1.HistoricalRecordV1], error) {
 	filter := cquery.NewFilterParamsFromTuples(
 		"map_id", mapId,
 		"from", from,
 		"to", to,
 	)
+
+	if entityId != "" {
+		filter.Put("entity_id", entityId)
+	}
 
 	return c.persistence.GetHistory(ctx, reqctx, *filter, paging, sortField)
 }
