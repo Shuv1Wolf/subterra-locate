@@ -1,3 +1,5 @@
+import { GEO_HOST } from '../config';
+
 const withOrgId = (url) => {
   const orgId = localStorage.getItem("selectedOrgId");
   if (!orgId) {
@@ -62,4 +64,9 @@ export const apiClient = {
     }
     return response.json();
   },
+};
+
+export const getDeviceHistory = async (mapId, deviceId, from, to, take, skip) => {
+  const url = `${GEO_HOST}/api/v1/geo/history?map_id=${mapId}&from=${from}&to=${to}&take=${take}&total=true&skip=${skip}&entity_id=${deviceId}`;
+  return apiClient.get(url);
 };

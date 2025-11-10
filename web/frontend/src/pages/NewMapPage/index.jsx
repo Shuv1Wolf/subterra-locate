@@ -6,7 +6,7 @@ import Draggable from 'react-draggable';
 import UserIcon from '../../assets/user.svg';
 import BeaconIcon from '../../assets/bullseye-animated.gif';
 import { GEO_HOST, SYSTEM_HOST } from '../../config';
-import { apiClient } from '../../utils/api';
+import { apiClient, getDeviceHistory } from '../../utils/api';
 import Header from '../../components/Header';
 import {
   MapsPageContainer,
@@ -28,6 +28,13 @@ import {
   FilterHeader,
   CheckboxLabel,
   ToggleButton,
+  TileButton,
+  PaginationContainer,
+  HistoryControlsContainer,
+  ControlRow,
+  StyledInput,
+  HistoryHeader,
+  PopupButtonContainer,
 } from './styles.js';
 
 // Styles for React-Select
@@ -57,7 +64,7 @@ const BeaconSelectorModal = ({ beacons, onSelect, onClose }) => (
 );
 
 // Device Info Popup Component
-const DeviceInfoPopup = ({ device, onClose }) => (
+const DeviceInfoPopup = ({ device, onClose, onShowHistory }) => (
   <Draggable handle=".popup-header">
     <PopupContainer>
       <PopupHeader className="popup-header">
@@ -71,6 +78,9 @@ const DeviceInfoPopup = ({ device, onClose }) => (
         <p><strong>MAC Address:</strong> {device.mac_address}</p>
         <p><strong>IP Address:</strong> {device.ip_address}</p>
         <p><strong>Status:</strong> {device.enabled ? 'Enabled' : 'Disabled'}</p>
+        <PopupButtonContainer>
+          <TileButton onClick={() => onShowHistory(device)}>Show History</TileButton>
+        </PopupButtonContainer>
       </div>
     </PopupContainer>
   </Draggable>
@@ -119,6 +129,15 @@ export default function NewMapPage() {
   const [isPanningDisabled, setIsPanningDisabled] = useState(false);
   const [transformState, setTransformState] = useState({ scale: 1, positionX: 0, positionY: 0 });
   const mapContentRef = useRef(null);
+  const [deviceHistory, setDeviceHistory] = useState([]);
+  const [historyTotal, setHistoryTotal] = useState(0);
+  const [historyCurrentIndex, setHistoryCurrentIndex] = useState(0);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState(null);
+  const [deviceForHistory, setDeviceForHistory] = useState(null);
+  const [historyFrom, setHistoryFrom] = useState('2021-09-01T00:00');
+  const [historyTo, setHistoryTo] = useState('2025-12-01T23:59');
+  const [clickedPoint, setClickedPoint] = useState(null);
 
   const handleMouseDown = (e) => {
     if (e.button === 2) { // Right mouse button
@@ -196,6 +215,50 @@ export default function NewMapPage() {
       console.error(err);
     }
   };
+
+  const fetchHistoryBatch = async (device, skip = 0) => {
+    setHistoryLoading(true);
+    setHistoryError(null);
+    try {
+      const from = Math.floor(new Date(historyFrom).getTime() / 1000);
+      const to = Math.floor(new Date(historyTo).getTime() / 1000);
+      const historyData = await getDeviceHistory(selectedMapId, device.id, from, to, 100, skip);
+      
+      if (skip === 0) {
+        setDeviceHistory(historyData.data);
+        setHistoryTotal(historyData.total);
+        setHistoryCurrentIndex(0);
+      } else {
+        setDeviceHistory(prev => [...prev, ...historyData.data]);
+      }
+    } catch (err) {
+      setHistoryError(err.message);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const handleShowHistory = async (device) => {
+    if (!device) return;
+    setDeviceForHistory(device);
+    fetchHistoryBatch(device, 0);
+    setSelectedDevice(null); // Close the popup
+  };
+
+  const closeHistory = () => {
+    setDeviceForHistory(null);
+    setDeviceHistory([]);
+    setHistoryTotal(0);
+    setHistoryCurrentIndex(0);
+  };
+
+  // Effect for lazy loading history points
+  useEffect(() => {
+    const shouldLoadMore = historyCurrentIndex >= deviceHistory.length - 10 && deviceHistory.length < historyTotal;
+    if (shouldLoadMore && !historyLoading) {
+      fetchHistoryBatch(deviceForHistory, deviceHistory.length);
+    }
+  }, [historyCurrentIndex, deviceHistory, historyTotal, historyLoading, deviceForHistory]);
 
   const applyFilters = () => {
     setDevices([]);
@@ -360,7 +423,7 @@ export default function NewMapPage() {
             onClose={() => setIsBeaconModalOpen(false)}
           />
         )}
-        {selectedDevice && <DeviceInfoPopup device={selectedDevice} onClose={() => setSelectedDevice(null)} />}
+        {selectedDevice && <DeviceInfoPopup device={selectedDevice} onClose={() => setSelectedDevice(null)} onShowHistory={handleShowHistory} />}
         {selectedBeacon && <BeaconInfoPopup beacon={selectedBeacon} onClose={() => setSelectedBeacon(null)} />}
         <MapSelectorContainer className={isPanelVisible ? '' : 'hidden'}>
           <ToggleButton onClick={() => setIsPanelVisible(!isPanelVisible)}>
@@ -414,12 +477,61 @@ export default function NewMapPage() {
             <TransformComponent>
               <div ref={mapContentRef} style={{ position: 'relative', width: selectedMap.width, height: selectedMap.height }}>
                 <div style={{ width: '100%', height: '100%' }} dangerouslySetInnerHTML={{ __html: selectedMap.svg_content }} />
+                {deviceHistory.length > 0 && (
+                  <svg width={selectedMap.width} height={selectedMap.height} style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}>
+                    <defs>
+                      <marker
+                        id="arrowhead"
+                        markerWidth="5"
+                        markerHeight="3.5"
+                        refX="0"
+                        refY="1.75"
+                        orient="auto"
+                      >
+                        <polygon points="0 0, 5 1.75, 0 3.5" fill="#ff7f50" />
+                      </marker>
+                    </defs>
+                    <g style={{ pointerEvents: 'all' }}>
+                      <polyline
+                        points={deviceHistory.slice(0, historyCurrentIndex + 1).map(p => `${p.x},${p.y}`).join(' ')}
+                        fill="none"
+                        stroke="#ff7f50"
+                        strokeWidth={2 / transformState.scale}
+                        markerMid="url(#arrowhead)"
+                        markerEnd="url(#arrowhead)"
+                      />
+                      {deviceHistory.slice(0, historyCurrentIndex + 1).map((p, index) => (
+                        <circle
+                          key={p.id}
+                          cx={p.x}
+                          cy={p.y}
+                          r={index === historyCurrentIndex ? 8 / transformState.scale : 5 / transformState.scale}
+                          fill={index === historyCurrentIndex ? '#ff1111' : '#ff7f50'}
+                          onClick={(e) => { e.stopPropagation(); setClickedPoint(p); }}
+                          style={{ cursor: 'pointer', transition: 'r 0.3s ease' }}
+                        />
+                      ))}
+                      {clickedPoint && (
+                        <text
+                          x={clickedPoint.x > selectedMap.width - 150 ? clickedPoint.x - 130 / transformState.scale : clickedPoint.x + 10 / transformState.scale}
+                          y={clickedPoint.y}
+                          fontSize={12 / transformState.scale}
+                          fill="#ffffff"
+                          onClick={(e) => { e.stopPropagation(); setClickedPoint(null); }}
+                          style={{ cursor: 'pointer', textAnchor: clickedPoint.x > selectedMap.width - 150 ? 'end' : 'start' }}
+                        >
+                          {new Date(clickedPoint.timestamp).toLocaleString()}
+                        </text>
+                      )}
+                    </g>
+                  </svg>
+                )}
                 {contextMenu && (
                   <ContextMenu style={{ top: contextMenu.y, left: contextMenu.x }} onClick={(e) => e.stopPropagation()}>
                     <ContextMenuItem onClick={handlePlaceBeacon}>Place a beacon</ContextMenuItem>
                   </ContextMenu>
                 )}
-                {showDevices && devices.map((device) => (
+                {!deviceForHistory && showDevices && devices.map((device) => (
                   <UserIcon
                     key={device.device_id}
                     title={`${device.device_name} (x: ${device.x.toFixed(2)}, y: ${device.y.toFixed(2)})`}
@@ -435,7 +547,7 @@ export default function NewMapPage() {
                     }}
                   />
                 ))}
-                {showBeacons && beacons.map((beacon) => (
+                {!deviceForHistory && showBeacons && beacons.map((beacon) => (
                   <div
                     key={beacon.beacon_id}
                     title={`${beacon.beacon_name} (x: ${beacon.x.toFixed(2)}, y: ${beacon.y.toFixed(2)})`}
@@ -460,6 +572,46 @@ export default function NewMapPage() {
               </div>
             </TransformComponent>
           </TransformWrapper>
+        )}
+        {deviceForHistory && (
+          <Draggable handle=".history-header">
+            <HistoryControlsContainer>
+              <HistoryHeader className="history-header">History for {deviceForHistory.name}</HistoryHeader>
+              <ControlRow>
+                <label>From:</label>
+                <StyledInput type="datetime-local" value={historyFrom} onChange={e => setHistoryFrom(e.target.value)} />
+              </ControlRow>
+              <ControlRow>
+                <label>To:</label>
+                <StyledInput type="datetime-local" value={historyTo} onChange={e => setHistoryTo(e.target.value)} />
+              </ControlRow>
+              <TileButton onClick={() => handleShowHistory(deviceForHistory)}>Apply</TileButton>
+              {historyError && <p style={{ color: 'red' }}>{historyError}</p>}
+              <PaginationContainer>
+                <TileButton
+                  onClick={() => setHistoryCurrentIndex(i => Math.max(0, i - 1))}
+                  disabled={historyCurrentIndex === 0 || historyLoading}
+                >
+                  {'< Prev Point'}
+                </TileButton>
+                <span> {historyCurrentIndex + 1} / {historyTotal} </span>
+                <TileButton
+                  onClick={() => setHistoryCurrentIndex(i => Math.min(historyTotal - 1, i + 1))}
+                  disabled={historyCurrentIndex >= historyTotal - 1 || historyLoading}
+                >
+                  {'Next Point >'}
+                </TileButton>
+              </PaginationContainer>
+              {deviceHistory[historyCurrentIndex] && (
+                <div style={{ fontSize: '12px', textAlign: 'center' }}>
+                  <p>
+                    Current: {new Date(deviceHistory[historyCurrentIndex].timestamp).toLocaleString()}
+                  </p>
+                </div>
+              )}
+              <TileButton onClick={closeHistory}>Close</TileButton>
+            </HistoryControlsContainer>
+          </Draggable>
         )}
       </MapWrapper>
       </MapsPageContainer>

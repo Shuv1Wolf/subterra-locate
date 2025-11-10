@@ -151,6 +151,12 @@ export const PopupContainer = styled.div`
   }
 `;
 
+export const PopupButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  padding: 0 12px 12px;
+`;
+
 export const PopupHeader = styled.div`
   display: flex;
   justify-content: space-between;
@@ -254,4 +260,81 @@ export const BeaconListItem = styled.li`
   &:last-child {
     border-bottom: none;
   }
+`;
+
+export const TileButton = styled.button`
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 10px;
+
+  &:hover {
+    background: #1565c0;
+  }
+`;
+
+export const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  width: 100%;
+
+  span {
+    text-align: center;
+    min-width: 100px;
+  }
+`;
+
+export const HistoryControlsContainer = styled.div`
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(35, 41, 54, 0.9);
+  border-radius: 12px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center children horizontally */
+  gap: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  border: 1px solid #222a36;
+  color: #e3eafc;
+  width: 350px;
+  padding: 0 12px 12px; /* Adjust padding */
+`;
+
+export const HistoryHeader = styled.div`
+  padding: 10px;
+  cursor: move;
+  background: #181c24;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  text-align: center;
+  color: #90caf9;
+  font-weight: bold;
+  width: 100%;
+  margin-bottom: 10px;
+`;
+
+export const ControlRow = styled.div`
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 12px;
+  align-items: center;
+  width: 100%;
+`;
+
+export const StyledInput = styled.input`
+  background: #181c24;
+  color: #e3eafc;
+  border: 1px solid #222a36;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
 `;

@@ -41,11 +41,12 @@ func (c *GeoHistoryOperationsV1) GetHistory(res http.ResponseWriter, req *http.R
 
 	reqctx := cdata.GetRequestContextParams(req)
 	map_id := c.GetParam(req, "map_id")
+	entity_id := c.GetParam(req, "entity_id")
 	from := c.GetParam(req, "from")
 	to := c.GetParam(req, "to")
 
 	page, err := c.beaconAdmin.GetHistory(
-		context.Background(), *reqctx, map_id, from, to, paging, sort,
+		context.Background(), *reqctx, map_id, entity_id, from, to, paging, sort,
 	)
 
 	if err != nil {
