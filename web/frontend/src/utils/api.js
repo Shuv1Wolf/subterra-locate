@@ -67,6 +67,21 @@ export const apiClient = {
 };
 
 export const getDeviceHistory = async (mapId, deviceId, from, to, take, skip) => {
-  const url = `${GEO_HOST}/api/v1/geo/history?map_id=${mapId}&from=${from}&to=${to}&take=${take}&total=true&skip=${skip}&entity_id=${deviceId}`;
-  return apiClient.get(url);
+  const orgId = localStorage.getItem("selectedOrgId");
+  let url = `${GEO_HOST}/api/v1/geo/history?map_id=${mapId}&from=${from}&to=${to}&take=${take}&total=true&skip=${skip}&entity_id=${deviceId}`;
+  if (orgId) {
+    url += `&org_id=${orgId}`;
+  }
+  
+  // Using fetch directly to ensure org_id is correctly handled without side effects from apiClient wrapper
+  const response = await fetch(url, {
+    method: "GET",
+    headers: getHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ message: response.statusText }));
+    throw new Error(errorData.message || 'Request failed');
+  }
+  return response.json();
 };
