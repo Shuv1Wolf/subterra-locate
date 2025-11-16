@@ -44,6 +44,15 @@ export default function HomePage() {
               Open
             </TileButton>
           </Tile>
+          {/* Maps Admin tile */}
+          <Tile>
+            <TileIcon>✏️</TileIcon>
+            <TileTitle>Maps Admin</TileTitle>
+            <TileDescription>Manage maps</TileDescription>
+            <TileButton onClick={() => navigate("/maps-admin")}>
+              Open
+            </TileButton>
+          </Tile>
         </TilesContainer>
       </HomePageContainer>
     </>

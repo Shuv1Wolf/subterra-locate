@@ -62,7 +62,8 @@ export const apiClient = {
       const errorData = await response.json().catch(() => ({ message: response.statusText }));
       throw new Error(errorData.message || 'Request failed');
     }
-    return response.json();
+    const text = await response.text();
+    return text ? JSON.parse(text) : Promise.resolve();
   },
 };
 
@@ -83,5 +84,46 @@ export const getDeviceHistory = async (mapId, deviceId, from, to, take, skip) =>
     const errorData = await response.json().catch(() => ({ message: response.statusText }));
     throw new Error(errorData.message || 'Request failed');
   }
+  return response.json();
+};
+
+export const getMaps = async (orgId, skip = 0, take = 10) => {
+  return apiClient.get(
+    `${GEO_HOST}/api/v1/geo/map?org_id=${orgId}&total=true&skip=${skip}&take=${take}`
+  );
+};
+
+export const getMap = async (mapId) => {
+  return apiClient.get(`${GEO_HOST}/api/v1/geo/map/${mapId}`);
+};
+
+export const deleteMap = async (mapId) => {
+  return apiClient.delete(`${GEO_HOST}/api/v1/geo/map/${mapId}`);
+};
+
+export const createMap = async (mapData) => {
+  return apiClient.post(`${GEO_HOST}/api/v1/geo/map`, mapData);
+};
+
+export const updateMap = async (mapData) => {
+  return apiClient.put(`${GEO_HOST}/api/v1/geo/map`, mapData);
+};
+
+export const uploadMap = async (file, mapId) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const url = withOrgId(`${GEO_HOST}/api/v1/geo/map/upload?id=${mapId}`);
+
+  const response = await fetch(url, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ message: response.statusText }));
+    throw new Error(errorData.message || 'Request failed');
+  }
+
   return response.json();
 };

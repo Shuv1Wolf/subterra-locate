@@ -91,6 +91,9 @@ export default function Header({ variant = "home", title = "Subterra Locate" }) 
           <MenuItem onClick={() => handleNavigate("/beacons-admin")}>
             Beacons Admin
           </MenuItem>
+          <MenuItem onClick={() => handleNavigate("/maps-admin")}>
+            Maps Admin
+          </MenuItem>
         </DropdownMenu>
       )}
       {isOrgMenuOpen && (

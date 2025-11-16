@@ -8,10 +8,13 @@ import {
 } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import MapsPage from "./pages/NewMapPage";
+import CreateMapPage from "./pages/CreateMapPage";
+import MapFormPage from "./pages/MapFormPage";
 import BeaconsAdminPage from "./pages/BeaconsAdminPage/index.jsx";
 import BeaconFormPage from "./pages/BeaconFormPage";
 import DevicesAdminPage from "./pages/DevicesAdminPage";
 import DeviceFormPage from "./pages/DeviceFormPage";
+import MapsAdminPage from "./pages/MapsAdminPage";
 
 const AppContent = () => {
   return (
@@ -30,6 +33,9 @@ const AppContent = () => {
         path="/devices-admin/edit/:deviceId"
         element={<DeviceFormPage />}
       />
+      <Route path="/maps-admin" element={<MapsAdminPage />} />
+      <Route path="/new-map" element={<CreateMapPage />} />
+      <Route path="/edit-map/:mapId" element={<MapFormPage />} />
     </Routes>
   );
 };
