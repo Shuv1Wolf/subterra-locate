@@ -15,6 +15,7 @@ import {
   Input,
   TextArea,
   Footer,
+  PreviewContainer,
   SvgPreview,
   StepIndicator,
   Step,
@@ -37,6 +38,8 @@ export default function CreateMapPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
+  const previewRef = useRef(null);
+  const [transformState, setTransformState] = useState({ scale: 1, positionX: 0, positionY: 0 });
   const [calibrationMode, setCalibrationMode] = useState('none'); // 'none', 'horizontal', 'vertical'
   const [firstPoint, setFirstPoint] = useState(null);
   const [secondPoint, setSecondPoint] = useState(null);
@@ -98,15 +101,35 @@ export default function CreateMapPage() {
     }
   };
 
+  const getSVGCoordinates = (e) => {
+    if (!previewRef.current) return { x: 0, y: 0 };
+
+    const svgElements = previewRef.current.querySelectorAll('svg');
+    let mapSvg = null;
+    svgElements.forEach(svg => {
+      if (svg.hasAttribute('viewBox')) {
+        mapSvg = svg;
+      }
+    });
+
+    if (!mapSvg) return { x: 0, y: 0 };
+
+    const svgRect = mapSvg.getBoundingClientRect();
+    const { scale } = transformState;
+
+    const relativeX = e.clientX - svgRect.left;
+    const relativeY = e.clientY - svgRect.top;
+
+    const svgX = relativeX / scale;
+    const svgY = relativeY / scale;
+
+    return { x: svgX, y: svgY };
+  };
+
   const handlePreviewClick = (e) => {
     if (calibrationMode === 'none') return;
 
-    const svgElement = e.currentTarget.querySelector('svg');
-    if (!svgElement) return;
-
-    const rect = svgElement.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const { x, y } = getSVGCoordinates(e);
 
     if (!firstPoint) {
       setFirstPoint({ x, y });
@@ -129,14 +152,15 @@ export default function CreateMapPage() {
   const handleMouseMove = (e) => {
     if (calibrationMode === 'none' || !firstPoint) return;
 
-    const svgElement = e.currentTarget.querySelector('svg');
-    if (!svgElement) return;
+    const { x, y } = getSVGCoordinates(e);
 
-    const rect = svgElement.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    setSecondPoint({ x, y });
+    if (calibrationMode === 'horizontal') {
+      setSecondPoint({ x, y: firstPoint.y });
+    } else if (calibrationMode === 'vertical') {
+      setSecondPoint({ x: firstPoint.x, y });
+    } else {
+      setSecondPoint({ x, y });
+    }
   };
 
   const nextStep = async () => {
@@ -235,18 +259,30 @@ export default function CreateMapPage() {
                   <Input type="number" name="scale_y" id="scale_y" value={map.scale_y} onChange={handleChange} title="Calculated vertical scale (meters per pixel)." />
                 </FormGroup>
               </FormRow>
-              <TransformWrapper>
-                <TransformComponent>
-                  <SvgPreview onMouseMove={handleMouseMove} onClick={handlePreviewClick} style={{ cursor: calibrationMode !== 'none' ? 'crosshair' : 'default' }}>
-                    <div dangerouslySetInnerHTML={{ __html: map.svg_content }} />
-                    {firstPoint && secondPoint && (
-                      <svg width="100%" height="100%" style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}>
-                        <line x1={firstPoint.x} y1={firstPoint.y} x2={secondPoint.x} y2={secondPoint.y} stroke="red" strokeWidth="2" strokeDasharray="5,5" />
-                      </svg>
-                    )}
-                  </SvgPreview>
-                </TransformComponent>
-              </TransformWrapper>
+              <PreviewContainer ref={previewRef}>
+                <TransformWrapper onTransformed={(_ref, state) => setTransformState(state)}>
+                  <TransformComponent>
+                    <SvgPreview onMouseMove={handleMouseMove} onClick={handlePreviewClick} style={{ cursor: calibrationMode !== 'none' ? 'crosshair' : 'default' }}>
+                      <div style={{ position: 'relative' }}>
+                        <div dangerouslySetInnerHTML={{ __html: map.svg_content }} />
+                        {firstPoint && secondPoint && (
+                          <svg width={map.width} height={map.height} style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none', overflow: 'visible' }}>
+                            <line
+                              x1={firstPoint.x}
+                              y1={firstPoint.y}
+                              x2={calibrationMode === 'vertical' ? firstPoint.x : secondPoint.x}
+                              y2={calibrationMode === 'horizontal' ? firstPoint.y : secondPoint.y}
+                              stroke="red"
+                              strokeWidth={2 / transformState.scale}
+                              strokeDasharray="5,5"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                    </SvgPreview>
+                  </TransformComponent>
+                </TransformWrapper>
+              </PreviewContainer>
             </FormBlock>
           )}
 

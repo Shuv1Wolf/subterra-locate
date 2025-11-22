@@ -62,9 +62,21 @@ export const TextArea = styled.textarea`
   box-sizing: border-box;
 `;
 
+export const PreviewContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 15px;
+  padding: 10px;
+  background: #232936;
+  border: 1px solid #222a36;
+  border-radius: 6px;
+`;
+
 export const SvgPreview = styled.div`
+  position: relative;
   width: 100%;
-  height: 300px;
+  height: 400px;
   background: #232936;
   border: 1px solid #222a36;
   border-radius: 6px;
