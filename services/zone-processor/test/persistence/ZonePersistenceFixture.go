@@ -6,8 +6,8 @@ import (
 	"time"
 
 	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
-	data "github.com/Shuv1Wolf/subterra-locate/services/geo-renderer/data/version1"
-	"github.com/Shuv1Wolf/subterra-locate/services/geo-renderer/persistence"
+	data "github.com/Shuv1Wolf/subterra-locate/services/zone-processor/data/version1"
+	"github.com/Shuv1Wolf/subterra-locate/services/zone-processor/persistence"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
 	"github.com/stretchr/testify/assert"
 )
@@ -32,6 +32,7 @@ func NewZonePersistenceFixture(persistence persistence.IZonePersistence) *ZonePe
 		Width:     100,
 		Height:    100,
 		Type:      "type1",
+		MaxDevice: 10,
 		CreatedAt: time.Now(),
 	}
 
@@ -45,6 +46,7 @@ func NewZonePersistenceFixture(persistence persistence.IZonePersistence) *ZonePe
 		Width:     200,
 		Height:    200,
 		Type:      "type2",
+		MaxDevice: 5,
 		CreatedAt: time.Now(),
 	}
 
@@ -58,6 +60,7 @@ func NewZonePersistenceFixture(persistence persistence.IZonePersistence) *ZonePe
 		Width:     300,
 		Height:    300,
 		Type:      "type1",
+		MaxDevice: 20,
 		CreatedAt: time.Now(),
 	}
 

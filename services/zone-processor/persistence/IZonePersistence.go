@@ -4,7 +4,7 @@ import (
 	"context"
 
 	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
-	data1 "github.com/Shuv1Wolf/subterra-locate/services/geo-renderer/data/version1"
+	data1 "github.com/Shuv1Wolf/subterra-locate/services/zone-processor/data/version1"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
 )
 

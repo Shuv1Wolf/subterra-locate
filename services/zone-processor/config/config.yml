@@ -1,0 +1,52 @@
+---
+# Container descriptor
+- descriptor: "pip-services:context-info:default:default:1.0"
+  name: "zone-processor"
+  description: "zone-processor microservice"
+
+# Console logger
+- descriptor: "pip-services:logger:console:default:1.0"
+  level: "trace"
+
+# Tracer that posts records to log
+- descriptor: "pip-services:tracer:log:default:1.0"
+
+# Performance counters that post values to log
+- descriptor: "pip-services:counters:log:default:1.0"
+
+# PostgreSQL persistence
+- descriptor: "zone-processor:persistence:postgres:default:1.0"
+  connection:
+    uri: {{POSTGRES_SERVICE_URI}}
+    host: {{POSTGRES_SERVICE_HOST}}{{#unless POSTGRES_SERVICE_HOST}}"localhost"{{/unless}}
+    port: {{POSTGRES_SERVICE_PORT}}{{#unless POSTGRES_SERVICE_PORT}}5431{{/unless}}
+    database: {{POSTGRES_DB}}{{#unless POSTGRES_DB}}"subterra-locate"{{/unless}}
+  credential:
+    username: {{POSTGRES_USER}}{{#unless POSTGRES_USER}}"postgres"{{/unless}}
+    password: {{POSTGRES_PASSWORD}}{{#unless POSTGRES_PASSWORD}}"postgres"{{/unless}}
+
+# NATS zone event publisher
+- descriptor: "zone-processor:publisher:nats:zone-events:1.0"
+  subject: "zone.events"
+  connection:
+    uri:  {{NATS_SERVICE_URI}}
+    host: {{NATS_SERVICE_HOST}}{{#unless NATS_SERVICE_HOST}}"localhost"{{/unless}}
+    port: {{NATS_SERVICE_PORT}}{{#unless NATS_SERVICE_PORT}}4222{{/unless}}
+  credential:
+    username: {{NATS_USER}}
+    password: {{NATS_PASS}}
+  options:
+    autosubscribe: true
+
+# Service
+- descriptor: "zone-processor:service:default:default:1.0"
+
+# Shared HTTP Endpoint
+- descriptor: "pip-services:endpoint:grpc:default:1.0"
+  connection:
+    protocol: http
+    host: 0.0.0.0
+    port: {{ZONE_PROCESSOR_PORT}}{{#unless ZONE_PROCESSOR_PORT}}10060{{/unless}}
+
+# Commandable GRPC V1
+- descriptor: "zone-processor:controller:grpc:default:1.0"

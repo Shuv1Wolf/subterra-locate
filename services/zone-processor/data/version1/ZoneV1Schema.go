@@ -21,6 +21,7 @@ func NewZoneV1Schema() *ZoneV1Schema {
 	c.WithOptionalProperty("position_y", cconv.Float)
 	c.WithOptionalProperty("width", cconv.Float)
 	c.WithOptionalProperty("height", cconv.Float)
+	c.WithOptionalProperty("max_device", cconv.Integer)
 	c.WithOptionalProperty("type", cconv.String)
 	return &c
 }

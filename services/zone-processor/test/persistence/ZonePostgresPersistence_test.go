@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Shuv1Wolf/subterra-locate/services/geo-renderer/persistence"
+	"github.com/Shuv1Wolf/subterra-locate/services/zone-processor/persistence"
 	cconf "github.com/pip-services4/pip-services4-go/pip-services4-components-go/config"
 )
 
@@ -23,12 +23,12 @@ func newZonePostgresPersistenceTest() *ZonePostgresPersistenceTest {
 
 	postgresPort := os.Getenv("POSTGRES_PORT")
 	if postgresPort == "" {
-		postgresPort = "5432"
+		postgresPort = "5431"
 	}
 
 	postgresDatabase := os.Getenv("POSTGRES_DB")
 	if postgresDatabase == "" {
-		postgresDatabase = "postgres"
+		postgresDatabase = "subterra-locate"
 	}
 
 	postgresUser := os.Getenv("POSTGRES_USER")

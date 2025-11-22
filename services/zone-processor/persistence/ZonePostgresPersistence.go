@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
-	data1 "github.com/Shuv1Wolf/subterra-locate/services/geo-renderer/data/version1"
+	data1 "github.com/Shuv1Wolf/subterra-locate/services/zone-processor/data/version1"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
 	cpg "github.com/pip-services4/pip-services4-go/pip-services4-postgres-go/persistence"
 )
@@ -35,6 +35,7 @@ func (c *ZonePostgresPersistence) DefineSchema() {
 		"\"position_y\" FLOAT, " +
 		"\"width\" FLOAT, " +
 		"\"height\" FLOAT, " +
+		"\"max_device\" INTEGER, " +
 		"\"type\" VARCHAR(32), " +
 		"\"created_at\" TIMESTAMP)")
 
