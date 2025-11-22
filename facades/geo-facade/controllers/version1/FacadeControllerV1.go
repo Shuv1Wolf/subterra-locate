@@ -93,6 +93,17 @@ func (c *FacadeControllerV1) FacadeControllerV1() {
 	c.RegisterRoute("delete", "/map/:id", nil,
 		func(res http.ResponseWriter, req *http.Request) { c.geoRendererOperations.DeleteMapById(res, req) })
 
+	c.RegisterRoute("get", "/zones", nil,
+		func(res http.ResponseWriter, req *http.Request) { c.geoRendererOperations.GetZones(res, req) })
+	c.RegisterRoute("get", "/zones/:id", nil,
+		func(res http.ResponseWriter, req *http.Request) { c.geoRendererOperations.GetZoneById(res, req) })
+	c.RegisterRoute("post", "/zones", nil,
+		func(res http.ResponseWriter, req *http.Request) { c.geoRendererOperations.CreateZone(res, req) })
+	c.RegisterRoute("put", "/zones", nil,
+		func(res http.ResponseWriter, req *http.Request) { c.geoRendererOperations.UpdateZone(res, req) })
+	c.RegisterRoute("delete", "/zones/:id", nil,
+		func(res http.ResponseWriter, req *http.Request) { c.geoRendererOperations.DeleteZoneById(res, req) })
+
 	// Geo history routes
 	c.RegisterRoute("get", "/history", nil,
 		func(res http.ResponseWriter, req *http.Request) { c.geoHistoryOperations.GetHistory(res, req) })
