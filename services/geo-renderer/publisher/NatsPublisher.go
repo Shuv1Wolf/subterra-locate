@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"time"
 
-	natsConst "github.com/Shuv1Wolf/subterra-locate/services/common/nats/const"
-	natsEvents "github.com/Shuv1Wolf/subterra-locate/services/common/nats/events"
 	cctx "github.com/pip-services4/pip-services4-go/pip-services4-components-go/context"
 	"github.com/pip-services4/pip-services4-go/pip-services4-data-go/keys"
 	cqueues "github.com/pip-services4/pip-services4-go/pip-services4-messaging-go/queues"
@@ -23,23 +21,7 @@ func NewNatsPublisher() *NatsPublisher {
 	return c
 }
 
-func (c *NatsPublisher) SendMap2dDeletedEvent(ctx context.Context, id string) error {
-	return c.sendMap2dEvent(ctx, id, natsConst.NATS_MAP2D_EVENTS_DELETED_TYPE)
-}
-
-func (c *NatsPublisher) SendMap2dChangedEvent(ctx context.Context, id string) error {
-	return c.sendMap2dEvent(ctx, id, natsConst.NATS_MAP2D_EVENTS_CHANGED_TYPE)
-}
-
-func (c *NatsPublisher) SendMap2dCreatedEvent(ctx context.Context, id string) error {
-	return c.sendMap2dEvent(ctx, id, natsConst.NATS_MAP2D_EVENTS_CREATED_TYPE)
-}
-
-func (c *NatsPublisher) sendMap2dEvent(ctx context.Context, id string, msgType string) error {
-	event := &natsEvents.DeviceChangedEvent{
-		Id: id,
-	}
-
+func (c *NatsPublisher) SendEvent(ctx context.Context, event any, msgType string) error {
 	bytes, err := json.Marshal(event)
 	if err != nil {
 		c.Logger.Error(ctx, err, "Failed to serialize message")

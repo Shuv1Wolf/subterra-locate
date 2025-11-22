@@ -18,17 +18,25 @@ func NewMapServiceFactory() *MapServiceFactory {
 		Factory: *cbuild.NewFactory(),
 	}
 
-	// memoryPersistenceDescriptor := cref.NewDescriptor("geo-renderer", "persistence", "memory", "map-2d", "1.0")
 	postgresPersistenceDescriptor := cref.NewDescriptor("geo-renderer", "persistence", "postgres", "map-2d", "1.0")
+	zonePostgresPersistenceDescriptor := cref.NewDescriptor("geo-renderer", "persistence", "postgres", "zone", "1.0")
+
 	serviceDescriptor := cref.NewDescriptor("geo-renderer", "service", "default", "*", "1.0")
+
 	grpcControllerV1Descriptor := cref.NewDescriptor("geo-renderer", "controller", "grpc", "*", "1.0")
-	deviceEventsPuvlisher := cref.NewDescriptor("geo-renderer", "publisher", "nats", "map-2d-events", "1.0")
+
+	mapEventsPublisher := cref.NewDescriptor("geo-renderer", "publisher", "nats", "map-2d-events", "1.0")
+	zoneEventsPublisher := cref.NewDescriptor("geo-renderer", "publisher", "nats", "zone-events", "1.0")
 
 	c.RegisterType(postgresPersistenceDescriptor, persist.NewMap2dPostgresPersistence)
-	// c.RegisterType(memoryPersistenceDescriptor, persist.NewDeviceMemoryPersistence)
+	c.RegisterType(zonePostgresPersistenceDescriptor, persist.NewZonePostgresPersistence)
+
 	c.RegisterType(serviceDescriptor, logic.NewMapService)
+
 	c.RegisterType(grpcControllerV1Descriptor, controllers.NewMapCommandableGrpcControllerV1)
-	c.RegisterType(deviceEventsPuvlisher, publisher.NewNatsPublisher)
+
+	c.RegisterType(mapEventsPublisher, publisher.NewNatsPublisher)
+	c.RegisterType(zoneEventsPublisher, publisher.NewNatsPublisher)
 
 	return c
 }

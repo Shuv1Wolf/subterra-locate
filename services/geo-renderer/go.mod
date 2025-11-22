@@ -3,7 +3,7 @@ module github.com/Shuv1Wolf/subterra-locate/services/geo-renderer
 go 1.24.4
 
 require (
-	github.com/Shuv1Wolf/subterra-locate/services/common v1.0.8
+	github.com/Shuv1Wolf/subterra-locate/services/common v1.0.9
 	github.com/pip-services4/pip-services4-go/pip-services4-commons-go v0.0.1-2
 	github.com/pip-services4/pip-services4-go/pip-services4-components-go v0.0.1-2
 	github.com/pip-services4/pip-services4-go/pip-services4-container-go v0.0.1-3
@@ -11,6 +11,7 @@ require (
 	github.com/pip-services4/pip-services4-go/pip-services4-grpc-go v0.0.1-3
 	github.com/pip-services4/pip-services4-go/pip-services4-messaging-go v0.0.3-6
 	github.com/pip-services4/pip-services4-go/pip-services4-nats-go v0.0.1-2
+	github.com/pip-services4/pip-services4-go/pip-services4-persistence-go v0.0.0-20230718211601-c5e741d55d0e
 	github.com/pip-services4/pip-services4-go/pip-services4-postgres-go v0.0.1-2
 	github.com/pip-services4/pip-services4-go/pip-services4-rpc-go v0.0.1-3
 	github.com/stretchr/testify v1.11.1
@@ -38,7 +39,6 @@ require (
 	github.com/pip-services4/pip-services4-go/pip-services4-expressions-go v0.0.1-2 // indirect
 	github.com/pip-services4/pip-services4-go/pip-services4-logic-go v0.0.1-3 // indirect
 	github.com/pip-services4/pip-services4-go/pip-services4-observability-go v0.0.1-3 // indirect
-	github.com/pip-services4/pip-services4-go/pip-services4-persistence-go v0.0.0-20230718211601-c5e741d55d0e // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	golang.org/x/crypto v0.37.0 // indirect
 	golang.org/x/net v0.21.0 // indirect

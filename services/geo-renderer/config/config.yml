@@ -25,9 +25,33 @@
     username: {{POSTGRES_USER}}{{#unless POSTGRES_USER}}"postgres"{{/unless}}
     password: {{POSTGRES_PASSWORD}}{{#unless POSTGRES_PASSWORD}}"postgres"{{/unless}}
 
-# NATS device event publisher
+# PostgreSQL zone persistence
+- descriptor: "geo-renderer:persistence:postgres:zone:1.0"
+  connection:
+    uri: {{POSTGRES_SERVICE_URI}}
+    host: {{POSTGRES_SERVICE_HOST}}{{#unless POSTGRES_SERVICE_HOST}}"localhost"{{/unless}}
+    port: {{POSTGRES_SERVICE_PORT}}{{#unless POSTGRES_SERVICE_PORT}}5431{{/unless}}
+    database: {{POSTGRES_DB}}{{#unless POSTGRES_DB}}"subterra-locate"{{/unless}}
+  credential:
+    username: {{POSTGRES_USER}}{{#unless POSTGRES_USER}}"postgres"{{/unless}}
+    password: {{POSTGRES_PASSWORD}}{{#unless POSTGRES_PASSWORD}}"postgres"{{/unless}}
+
+# NATS map event publisher
 - descriptor: "geo-renderer:publisher:nats:map-2d-events:1.0"
   subject: "map2d.events"
+  connection:
+    uri:  {{NATS_SERVICE_URI}}
+    host: {{NATS_SERVICE_HOST}}{{#unless NATS_SERVICE_HOST}}"localhost"{{/unless}}
+    port: {{NATS_SERVICE_PORT}}{{#unless NATS_SERVICE_PORT}}4222{{/unless}}
+  credential:
+    username: {{NATS_USER}}
+    password: {{NATS_PASS}}
+  options:
+    autosubscribe: true
+
+# NATS zone event publisher
+- descriptor: "geo-renderer:publisher:nats:zone-events:1.0"
+  subject: "zone.events"
   connection:
     uri:  {{NATS_SERVICE_URI}}
     host: {{NATS_SERVICE_HOST}}{{#unless NATS_SERVICE_HOST}}"localhost"{{/unless}}

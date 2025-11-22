@@ -21,12 +21,15 @@ import (
 )
 
 type mapsGrpcControllerV1Test struct {
-	MAP1        *data.Map2dV1
-	MAP2        *data.Map2dV1
-	persistence *persistence.Map2dMemoryPersistence
-	service     *logic.MapService
-	controller  *controllers.MapCommandableGrpcControllerV1
-	client      *tclients.TestCommandableGrpcClient
+	MAP1            *data.Map2dV1
+	MAP2            *data.Map2dV1
+	ZONE1           *data.ZoneV1
+	ZONE2           *data.ZoneV1
+	mapPersistence  *persistence.Map2dMemoryPersistence
+	zonePersistence *persistence.ZoneMemoryPersistence
+	service         *logic.MapService
+	controller      *controllers.MapCommandableGrpcControllerV1
+	client          *tclients.TestCommandableGrpcClient
 }
 
 func newMapsGrpcControllerV1Test() *mapsGrpcControllerV1Test {
@@ -56,14 +59,43 @@ func newMapsGrpcControllerV1Test() *mapsGrpcControllerV1Test {
 		Level:     2,
 	}
 
+	ZONE1 := &data.ZoneV1{
+		Id:        "1",
+		MapId:     "map1",
+		OrgId:     "org_1",
+		Name:      "Zone 1",
+		PositionX: 10,
+		PositionY: 10,
+		Width:     100,
+		Height:    100,
+		Type:      "type1",
+		CreatedAt: time.Now(),
+	}
+
+	ZONE2 := &data.ZoneV1{
+		Id:        "2",
+		MapId:     "map1",
+		OrgId:     "org_1",
+		Name:      "Zone 2",
+		PositionX: 20,
+		PositionY: 20,
+		Width:     200,
+		Height:    200,
+		Type:      "type2",
+		CreatedAt: time.Now(),
+	}
+
 	restConfig := cconf.NewConfigParamsFromTuples(
 		"connection.protocol", "http",
 		"connection.port", "3000",
 		"connection.host", "localhost",
 	)
 
-	persistence := persistence.NewMap2dMemoryPersistence()
-	persistence.Configure(context.Background(), cconf.NewEmptyConfigParams())
+	mapPersistence := persistence.NewMap2dMemoryPersistence()
+	mapPersistence.Configure(context.Background(), cconf.NewEmptyConfigParams())
+
+	zonePersistence := persistence.NewZoneMemoryPersistence()
+	zonePersistence.Configure(context.Background(), cconf.NewEmptyConfigParams())
 
 	service := logic.NewMapService()
 	service.Configure(context.Background(), cconf.NewEmptyConfigParams())
@@ -71,12 +103,13 @@ func newMapsGrpcControllerV1Test() *mapsGrpcControllerV1Test {
 	controller := controllers.NewMapCommandableGrpcControllerV1()
 	controller.Configure(context.Background(), restConfig)
 
-	client := tclients.NewTestCommandableGrpcClient("map.v1")
+	client := tclients.NewTestCommandableGrpcClient("geo.renderer.v1")
 	client.Configure(context.Background(), restConfig)
 
 	references := cref.NewReferencesFromTuples(
 		context.Background(),
-		cref.NewDescriptor("geo-renderer", "persistence", "memory", "default", "1.0"), persistence,
+		cref.NewDescriptor("geo-renderer", "persistence", "memory", "map-2d", "1.0"), mapPersistence,
+		cref.NewDescriptor("geo-renderer", "persistence", "memory", "zone", "1.0"), zonePersistence,
 		cref.NewDescriptor("geo-renderer", "service", "default", "default", "1.0"), service,
 		cref.NewDescriptor("geo-renderer", "controller", "http", "default", "1.0"), controller,
 		cref.NewDescriptor("geo-renderer", "client", "http", "default", "1.0"), client,
@@ -86,19 +119,26 @@ func newMapsGrpcControllerV1Test() *mapsGrpcControllerV1Test {
 	controller.SetReferences(context.Background(), references)
 
 	return &mapsGrpcControllerV1Test{
-		MAP1:        MAP1,
-		MAP2:        MAP2,
-		persistence: persistence,
-		controller:  controller,
-		service:     service,
-		client:      client,
+		MAP1:            MAP1,
+		MAP2:            MAP2,
+		ZONE1:           ZONE1,
+		ZONE2:           ZONE2,
+		mapPersistence:  mapPersistence,
+		zonePersistence: zonePersistence,
+		controller:      controller,
+		service:         service,
+		client:          client,
 	}
 }
 
 func (c *mapsGrpcControllerV1Test) setup(t *testing.T) {
-	err := c.persistence.Open(context.Background())
+	err := c.mapPersistence.Open(context.Background())
 	if err != nil {
 		t.Error("Failed to open persistence", err)
+	}
+	err = c.zonePersistence.Open(context.Background())
+	if err != nil {
+		t.Error("Failed to open zone persistence", err)
 	}
 
 	err = c.controller.Open(context.Background())
@@ -111,9 +151,13 @@ func (c *mapsGrpcControllerV1Test) setup(t *testing.T) {
 		t.Error("Failed to open client", err)
 	}
 
-	err = c.persistence.Clear(context.Background())
+	err = c.mapPersistence.Clear(context.Background())
 	if err != nil {
 		t.Error("Failed to clear persistence", err)
+	}
+	err = c.zonePersistence.Clear(context.Background())
+	if err != nil {
+		t.Error("Failed to clear zone persistence", err)
 	}
 }
 
@@ -128,13 +172,17 @@ func (c *mapsGrpcControllerV1Test) teardown(t *testing.T) {
 		t.Error("Failed to close service", err)
 	}
 
-	err = c.persistence.Close(context.Background())
+	err = c.mapPersistence.Close(context.Background())
 	if err != nil {
 		t.Error("Failed to close persistence", err)
 	}
+	err = c.zonePersistence.Close(context.Background())
+	if err != nil {
+		t.Error("Failed to close zone persistence", err)
+	}
 }
 
-func (c *mapsGrpcControllerV1Test) testCrudOperations(t *testing.T) {
+func (c *mapsGrpcControllerV1Test) testMapCrudOperations(t *testing.T) {
 	var map1 data.Map2dV1
 
 	// Create the first map
@@ -226,10 +274,103 @@ func (c *mapsGrpcControllerV1Test) testCrudOperations(t *testing.T) {
 	assert.Equal(t, data.Map2dV1{}, m)
 }
 
+func (c *mapsGrpcControllerV1Test) testZoneCrudOperations(t *testing.T) {
+	var zone1 data.ZoneV1
+
+	// Create the first zone
+	params := pipdata.NewAnyValueMapFromTuples(
+		"zone", c.ZONE1,
+		"reqctx", cdata.RequestContextV1{OrgId: "org_1"},
+	)
+	response, err := c.client.CallCommand(context.Background(), "create_zone", params)
+	assert.Nil(t, err)
+	assert.NotNil(t, response)
+
+	z, err := cclients.HandleHttpResponse[data.ZoneV1](response)
+	assert.Nil(t, err)
+	assert.NotEqual(t, data.ZoneV1{}, z)
+	assert.Equal(t, c.ZONE1.Name, z.Name)
+	assert.Equal(t, c.ZONE1.OrgId, z.OrgId)
+
+	// Create the second zone
+	params = pipdata.NewAnyValueMapFromTuples(
+		"zone", c.ZONE2,
+		"reqctx", cdata.RequestContextV1{OrgId: "org_1"},
+	)
+	response, err = c.client.CallCommand(context.Background(), "create_zone", params)
+	assert.Nil(t, err)
+	assert.NotNil(t, response)
+
+	z, err = cclients.HandleHttpResponse[data.ZoneV1](response)
+	assert.Nil(t, err)
+	assert.NotEqual(t, data.ZoneV1{}, z)
+	assert.Equal(t, c.ZONE2.Name, z.Name)
+	assert.Equal(t, c.ZONE2.OrgId, z.OrgId)
+
+	// Get all zones
+	params = pipdata.NewAnyValueMapFromTuples(
+		"filter", cquery.NewEmptyFilterParams(),
+		"paging", cquery.NewEmptyPagingParams(),
+		"reqctx", cdata.RequestContextV1{OrgId: "org_1"},
+	)
+	response, err = c.client.CallCommand(context.Background(), "get_zones", params)
+	assert.Nil(t, err)
+	assert.NotNil(t, response)
+
+	page, err := cclients.HandleHttpResponse[cquery.DataPage[data.ZoneV1]](response)
+	assert.Nil(t, err)
+	assert.True(t, page.HasData())
+	assert.Len(t, page.Data, 2)
+	zone1 = page.Data[0]
+
+	// Update the zone
+	zone1.Name = "Updated Zone"
+	params = pipdata.NewAnyValueMapFromTuples(
+		"zone", zone1,
+		"reqctx", cdata.RequestContextV1{OrgId: "org_1"},
+	)
+	response, err = c.client.CallCommand(context.Background(), "update_zone", params)
+	assert.Nil(t, err)
+	assert.NotNil(t, response)
+
+	z, err = cclients.HandleHttpResponse[data.ZoneV1](response)
+	assert.Nil(t, err)
+	assert.NotEqual(t, data.ZoneV1{}, z)
+	assert.Equal(t, zone1.Id, z.Id)
+	assert.Equal(t, "Updated Zone", z.Name)
+
+	// Delete the zone
+	params = pipdata.NewAnyValueMapFromTuples(
+		"zone_id", zone1.Id,
+		"reqctx", cdata.RequestContextV1{OrgId: "org_1"},
+	)
+	response, err = c.client.CallCommand(context.Background(), "delete_zone_by_id", params)
+	assert.Nil(t, err)
+	assert.NotNil(t, response)
+
+	z, err = cclients.HandleHttpResponse[data.ZoneV1](response)
+	assert.Nil(t, err)
+	assert.NotEqual(t, data.ZoneV1{}, z)
+	assert.Equal(t, zone1.Id, z.Id)
+
+	// Try to get deleted zone
+	params = pipdata.NewAnyValueMapFromTuples(
+		"zone_id", zone1.Id,
+		"reqctx", cdata.RequestContextV1{OrgId: "org_1"},
+	)
+	response, err = c.client.CallCommand(context.Background(), "get_zone_by_id", params)
+	assert.Nil(t, err)
+	assert.NotNil(t, response)
+	z, err = cclients.HandleHttpResponse[data.ZoneV1](response)
+	assert.Nil(t, err)
+	assert.Equal(t, data.ZoneV1{}, z)
+}
+
 func TestMapsCommmandableGrpcServiceV1(t *testing.T) {
 	c := newMapsGrpcControllerV1Test()
 
 	c.setup(t)
-	t.Run("CRUD Operations", c.testCrudOperations)
+	t.Run("Map CRUD Operations", c.testMapCrudOperations)
+	t.Run("Zone CRUD Operations", c.testZoneCrudOperations)
 	c.teardown(t)
 }

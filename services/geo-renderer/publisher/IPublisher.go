@@ -5,7 +5,5 @@ import (
 )
 
 type IPublisher interface {
-	SendMap2dCreatedEvent(ctx context.Context, id string) error
-	SendMap2dChangedEvent(ctx context.Context, id string) error
-	SendMap2dDeletedEvent(ctx context.Context, id string) error
+	SendEvent(ctx context.Context, event any, msgType string) error
 }
