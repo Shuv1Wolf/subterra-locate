@@ -17,6 +17,7 @@ type FacadeControllerV1 struct {
 	locationOperations    *operations1.LocationEngineOperationsV1
 	geoRendererOperations *operations1.GeoRendererOperationsV1
 	geoHistoryOperations  *operations1.GeoHistoryOperationsV1
+	zoneOperations        *operations1.ZoneProcessorOperationsV1
 }
 
 func NewFacadeControllerV1() *FacadeControllerV1 {
@@ -25,6 +26,7 @@ func NewFacadeControllerV1() *FacadeControllerV1 {
 		locationOperations:    operations1.NewLocationEngineOperationsV1(),
 		geoRendererOperations: operations1.NewGeoRendererOperationsV1(),
 		geoHistoryOperations:  operations1.NewGeoHistoryOperationsV1(),
+		zoneOperations:        operations1.NewZoneProcessorOperationsV1(),
 	}
 	c.RestController = httpcontr.InheritRestController(c)
 	c.BaseRoute = "api/v1/geo"
@@ -38,6 +40,7 @@ func (c *FacadeControllerV1) Configure(ctx context.Context, config *cconf.Config
 	c.locationOperations.Configure(ctx, config)
 	c.geoRendererOperations.Configure(ctx, config)
 	c.geoHistoryOperations.Configure(ctx, config)
+	c.zoneOperations.Configure(ctx, config)
 }
 
 func (c *FacadeControllerV1) SetReferences(ctx context.Context, references cref.IReferences) {
@@ -47,6 +50,7 @@ func (c *FacadeControllerV1) SetReferences(ctx context.Context, references cref.
 	c.locationOperations.SetReferences(ctx, references)
 	c.geoRendererOperations.SetReferences(ctx, references)
 	c.geoHistoryOperations.SetReferences(ctx, references)
+	c.zoneOperations.SetReferences(ctx, references)
 }
 
 func (c *FacadeControllerV1) Register() {
@@ -97,4 +101,15 @@ func (c *FacadeControllerV1) FacadeControllerV1() {
 	c.RegisterRoute("get", "/history", nil,
 		func(res http.ResponseWriter, req *http.Request) { c.geoHistoryOperations.GetHistory(res, req) })
 
+	// Zone routes
+	c.RegisterRoute("get", "/zones", nil,
+		func(res http.ResponseWriter, req *http.Request) { c.zoneOperations.GetZones(res, req) })
+	c.RegisterRoute("get", "/zones/:id", nil,
+		func(res http.ResponseWriter, req *http.Request) { c.zoneOperations.GetZoneById(res, req) })
+	c.RegisterRoute("post", "/zones", nil,
+		func(res http.ResponseWriter, req *http.Request) { c.zoneOperations.CreateZone(res, req) })
+	c.RegisterRoute("put", "/zones", nil,
+		func(res http.ResponseWriter, req *http.Request) { c.zoneOperations.UpdateZone(res, req) })
+	c.RegisterRoute("delete", "/zones/:id", nil,
+		func(res http.ResponseWriter, req *http.Request) { c.zoneOperations.DeleteZoneById(res, req) })
 }

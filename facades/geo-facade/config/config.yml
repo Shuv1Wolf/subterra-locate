@@ -44,6 +44,13 @@
     host: {{GEO_HISTORY_SERVICE_HOST}}{{^GEO_HISTORY_SERVICE_HOST}}"localhost"{{/GEO_HISTORY_SERVICE_HOST}}
     port: {{GEO_HISTORY_SERVICE_PORT}}{{^GEO_HISTORY_SERVICE_PORT}}10050{{/GEO_HISTORY_SERVICE_PORT}}
 
+# zone-processor client
+- descriptor: "zone-processor:client:grpc:default:1.0"
+  connection:
+    protocol: "http"
+    host: {{ZONE_PROCESSOR_SERVICE_HOST}}{{^ZONE_PROCESSOR_SERVICE_HOST}}"localhost"{{/ZONE_PROCESSOR_SERVICE_HOST}}
+    port: {{ZONE_PROCESSOR_SERVICE_PORT}}{{^ZONE_PROCESSOR_SERVICE_PORT}}10060{{/ZONE_PROCESSOR_SERVICE_PORT}}
+
 # Main facade service
 - descriptor: "pip-services:endpoint:http:default:*"
   root_path: ""
