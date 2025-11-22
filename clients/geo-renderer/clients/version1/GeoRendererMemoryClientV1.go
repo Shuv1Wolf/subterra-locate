@@ -14,8 +14,6 @@ type GeoRendererMemoryClientV1 struct {
 	maxPageSize int
 	items       []data1.Map2dV1
 	proto       reflect.Type
-	zones       []data1.ZoneV1
-	protoZone   reflect.Type
 }
 
 func NewGeoRendererMemoryClientV1(items []data1.Map2dV1) *GeoRendererMemoryClientV1 {
@@ -23,8 +21,6 @@ func NewGeoRendererMemoryClientV1(items []data1.Map2dV1) *GeoRendererMemoryClien
 		maxPageSize: 100,
 		items:       make([]data1.Map2dV1, 0),
 		proto:       reflect.TypeOf(data1.Map2dV1{}),
-		zones:       make([]data1.ZoneV1, 0),
-		protoZone:   reflect.TypeOf(data1.ZoneV1{}),
 	}
 	c.items = append(c.items, items...)
 	return c
@@ -45,29 +41,6 @@ func (c *GeoRendererMemoryClientV1) composeFilter(filter cquery.FilterParams) fu
 			return false
 		}
 		if name != "" && item.Name != name {
-			return false
-		}
-		return true
-	}
-}
-
-func (c *GeoRendererMemoryClientV1) composeZoneFilter(filter cquery.FilterParams) func(item data1.ZoneV1) bool {
-	id := filter.GetAsString("id")
-	orgId := filter.GetAsString("org_id")
-	name := filter.GetAsString("name")
-	mapId := filter.GetAsString("map_id")
-
-	return func(item data1.ZoneV1) bool {
-		if id != "" && item.Id != id {
-			return false
-		}
-		if orgId != "" && item.OrgId != orgId {
-			return false
-		}
-		if name != "" && item.Name != name {
-			return false
-		}
-		if mapId != "" && item.MapId != mapId {
 			return false
 		}
 		return true
@@ -172,108 +145,6 @@ func (c *GeoRendererMemoryClientV1) DeleteMapById(ctx context.Context, reqctx cd
 		c.items = c.items[:index-1]
 	} else {
 		c.items = append(c.items[:index], c.items[index+1:]...)
-	}
-	return &item, nil
-}
-
-func (c *GeoRendererMemoryClientV1) GetZones(ctx context.Context, reqctx cdata.RequestContextV1,
-	filter *cquery.FilterParams, paging *cquery.PagingParams) (page *cquery.DataPage[data1.ZoneV1], err error) {
-	filterZone := c.composeZoneFilter(*filter)
-
-	zones := make([]data1.ZoneV1, 0)
-	for _, v := range c.zones {
-		if filterZone(v) {
-			item := v
-			zones = append(zones, item)
-		}
-	}
-
-	skip := paging.GetSkip(-1)
-	take := paging.GetTake((int64)(c.maxPageSize))
-	var total int = 0
-
-	if paging.Total {
-		total = (len(zones))
-	}
-
-	if skip > 0 {
-		zones = zones[skip:]
-	}
-
-	if (int64)(len(zones)) >= take {
-		zones = zones[:take]
-	}
-
-	return cquery.NewDataPage(zones, total), nil
-}
-
-func (c *GeoRendererMemoryClientV1) GetZoneById(ctx context.Context, reqctx cdata.RequestContextV1,
-	id string) (zone *data1.ZoneV1, err error) {
-
-	var item *data1.ZoneV1
-	for _, v := range c.zones {
-		if v.Id == id {
-			item = &v
-			break
-		}
-	}
-
-	return item, nil
-}
-
-func (c *GeoRendererMemoryClientV1) CreateZone(ctx context.Context, reqctx cdata.RequestContextV1,
-	zone data1.ZoneV1) (res *data1.ZoneV1, err error) {
-
-	newItem := mdata.CloneObject(zone, c.protoZone)
-	item, _ := newItem.(data1.ZoneV1)
-	mdata.GenerateObjectId(&newItem)
-
-	c.zones = append(c.zones, item)
-	return &item, nil
-}
-
-func (c *GeoRendererMemoryClientV1) UpdateZone(ctx context.Context, reqctx cdata.RequestContextV1,
-	zone data1.ZoneV1) (res *data1.ZoneV1, err error) {
-
-	var index = -1
-	for i, v := range c.zones {
-		if v.Id == zone.Id {
-			index = i
-			break
-		}
-	}
-
-	if index < 0 {
-		return nil, nil
-	}
-
-	newItem := mdata.CloneObject(zone, c.protoZone)
-	item, _ := newItem.(data1.ZoneV1)
-	c.zones[index] = item
-	return &item, nil
-}
-
-func (c *GeoRendererMemoryClientV1) DeleteZoneById(ctx context.Context, reqctx cdata.RequestContextV1,
-	id string) (res *data1.ZoneV1, err error) {
-
-	var index = -1
-	for i, v := range c.zones {
-		if v.Id == id {
-			index = i
-			break
-		}
-	}
-
-	if index < 0 {
-		return nil, nil
-	}
-
-	var item = c.zones[index]
-
-	if index == len(c.zones) {
-		c.zones = c.zones[:index-1]
-	} else {
-		c.zones = append(c.zones[:index], c.zones[index+1:]...)
 	}
 	return &item, nil
 }

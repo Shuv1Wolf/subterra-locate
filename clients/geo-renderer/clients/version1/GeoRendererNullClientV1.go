@@ -40,29 +40,3 @@ func (c *GeoRendererNullClientV1) DeleteMapById(ctx context.Context, reqctx cdat
 	id string) (*data1.Map2dV1, error) {
 	return nil, nil
 }
-
-func (c *GeoRendererNullClientV1) GetZones(ctx context.Context, reqctx cdata.RequestContextV1,
-	filter *cquery.FilterParams,
-	paging *cquery.PagingParams) (*cquery.DataPage[data1.ZoneV1], error) {
-	return cquery.NewEmptyDataPage[data1.ZoneV1](), nil
-}
-
-func (c *GeoRendererNullClientV1) GetZoneById(ctx context.Context, reqctx cdata.RequestContextV1,
-	id string) (*data1.ZoneV1, error) {
-	return nil, nil
-}
-
-func (c *GeoRendererNullClientV1) CreateZone(ctx context.Context, reqctx cdata.RequestContextV1,
-	zone data1.ZoneV1) (*data1.ZoneV1, error) {
-	return nil, nil
-}
-
-func (c *GeoRendererNullClientV1) UpdateZone(ctx context.Context, reqctx cdata.RequestContextV1,
-	zone data1.ZoneV1) (*data1.ZoneV1, error) {
-	return nil, nil
-}
-
-func (c *GeoRendererNullClientV1) DeleteZoneById(ctx context.Context, reqctx cdata.RequestContextV1,
-	id string) (*data1.ZoneV1, error) {
-	return nil, nil
-}
