@@ -15,16 +15,14 @@ import (
 type MapCommandSet struct {
 	ccmd.CommandSet
 	controller    IMapService
-	mapConvertor  cconv.IJSONEngine[data.Map2dV1]
-	zoneConvertor cconv.IJSONEngine[data.ZoneV1]
+	mapConvertor cconv.IJSONEngine[data.Map2dV1]
 }
 
 func NewMapCommandSet(controller IMapService) *MapCommandSet {
 	c := &MapCommandSet{
-		CommandSet:    *ccmd.NewCommandSet(),
-		controller:    controller,
-		mapConvertor:  cconv.NewDefaultCustomTypeJsonConvertor[data.Map2dV1](),
-		zoneConvertor: cconv.NewDefaultCustomTypeJsonConvertor[data.ZoneV1](),
+		CommandSet:   *ccmd.NewCommandSet(),
+		controller:   controller,
+		mapConvertor: cconv.NewDefaultCustomTypeJsonConvertor[data.Map2dV1](),
 	}
 
 	c.AddCommand(c.makeGetMapsCommand())
@@ -32,13 +30,6 @@ func NewMapCommandSet(controller IMapService) *MapCommandSet {
 	c.AddCommand(c.makeCreateMapCommand())
 	c.AddCommand(c.makeUpdateMapCommand())
 	c.AddCommand(c.makeDeleteMapByIdCommand())
-
-	c.AddCommand(c.makeGetZonesCommand())
-	c.AddCommand(c.makeGetZoneByIdCommand())
-	c.AddCommand(c.makeCreateZoneCommand())
-	c.AddCommand(c.makeUpdateZoneCommand())
-	c.AddCommand(c.makeDeleteZoneByIdCommand())
-
 	return c
 }
 
@@ -146,112 +137,5 @@ func (c *MapCommandSet) makeDeleteMapByIdCommand() ccmd.ICommand {
 				reqctx = cdata.NewRequestContextV1FromValue(_val)
 			}
 			return c.controller.DeleteMapById(ctx, *reqctx, args.GetAsString("map_id"))
-		})
-}
-
-func (c *MapCommandSet) makeGetZonesCommand() ccmd.ICommand {
-	return ccmd.NewCommand(
-		"get_zones",
-		cvalid.NewObjectSchema().
-			WithOptionalProperty("filter", cvalid.NewFilterParamsSchema()).
-			WithOptionalProperty("paging", cvalid.NewPagingParamsSchema()).
-			WithOptionalProperty("reqctx", cdata.NewRequestContextV1Schema()),
-		func(ctx context.Context, args *exec.Parameters) (result any, err error) {
-			filter := cquery.NewEmptyFilterParams()
-			paging := cquery.NewEmptyPagingParams()
-			reqctx := cdata.NewRequestContextV1()
-			if _val, ok := args.Get("filter"); ok {
-				filter = cquery.NewFilterParamsFromValue(_val)
-			}
-			if _val, ok := args.Get("paging"); ok {
-				paging = cquery.NewPagingParamsFromValue(_val)
-			}
-			if _val, ok := args.Get("reqctx"); ok {
-				reqctx = cdata.NewRequestContextV1FromValue(_val)
-			}
-			return c.controller.GetZones(ctx, *reqctx, *filter, *paging)
-		})
-}
-
-func (c *MapCommandSet) makeGetZoneByIdCommand() ccmd.ICommand {
-	return ccmd.NewCommand(
-		"get_zone_by_id",
-		cvalid.NewObjectSchema().
-			WithRequiredProperty("zone_id", cconv.String).
-			WithOptionalProperty("reqctx", cdata.NewRequestContextV1Schema()),
-		func(ctx context.Context, args *exec.Parameters) (result any, err error) {
-			reqctx := cdata.NewRequestContextV1()
-			if _val, ok := args.Get("reqctx"); ok {
-				reqctx = cdata.NewRequestContextV1FromValue(_val)
-			}
-			return c.controller.GetZoneById(ctx, *reqctx, args.GetAsString("zone_id"))
-		})
-}
-
-func (c *MapCommandSet) makeCreateZoneCommand() ccmd.ICommand {
-	return ccmd.NewCommand(
-		"create_zone",
-		cvalid.NewObjectSchema().
-			WithRequiredProperty("zone", data.NewZoneV1Schema()).
-			WithOptionalProperty("reqctx", cdata.NewRequestContextV1Schema()),
-		func(ctx context.Context, args *exec.Parameters) (result any, err error) {
-
-			var zone data.ZoneV1
-			if _zone, ok := args.GetAsObject("zone"); ok {
-				buf, err := cconv.JsonConverter.ToJson(_zone)
-				if err != nil {
-					return nil, err
-				}
-				zone, err = c.zoneConvertor.FromJson(buf)
-				if err != nil {
-					return nil, err
-				}
-			}
-			reqctx := cdata.NewRequestContextV1()
-			if _val, ok := args.Get("reqctx"); ok {
-				reqctx = cdata.NewRequestContextV1FromValue(_val)
-			}
-			return c.controller.CreateZone(ctx, *reqctx, zone)
-		})
-}
-
-func (c *MapCommandSet) makeUpdateZoneCommand() ccmd.ICommand {
-	return ccmd.NewCommand(
-		"update_zone",
-		cvalid.NewObjectSchema().
-			WithRequiredProperty("zone", data.NewZoneV1Schema()).
-			WithOptionalProperty("reqctx", cdata.NewRequestContextV1Schema()),
-		func(ctx context.Context, args *exec.Parameters) (result any, err error) {
-			var zone data.ZoneV1
-			if _zone, ok := args.GetAsObject("zone"); ok {
-				buf, err := cconv.JsonConverter.ToJson(_zone)
-				if err != nil {
-					return nil, err
-				}
-				zone, err = c.zoneConvertor.FromJson(buf)
-				if err != nil {
-					return nil, err
-				}
-			}
-			reqctx := cdata.NewRequestContextV1()
-			if _val, ok := args.Get("reqctx"); ok {
-				reqctx = cdata.NewRequestContextV1FromValue(_val)
-			}
-			return c.controller.UpdateZone(ctx, *reqctx, zone)
-		})
-}
-
-func (c *MapCommandSet) makeDeleteZoneByIdCommand() ccmd.ICommand {
-	return ccmd.NewCommand(
-		"delete_zone_by_id",
-		cvalid.NewObjectSchema().
-			WithRequiredProperty("zone_id", cconv.String).
-			WithOptionalProperty("reqctx", cdata.NewRequestContextV1Schema()),
-		func(ctx context.Context, args *exec.Parameters) (result any, err error) {
-			reqctx := cdata.NewRequestContextV1()
-			if _val, ok := args.Get("reqctx"); ok {
-				reqctx = cdata.NewRequestContextV1FromValue(_val)
-			}
-			return c.controller.DeleteZoneById(ctx, *reqctx, args.GetAsString("zone_id"))
 		})
 }

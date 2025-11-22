@@ -16,13 +16,9 @@ import (
 )
 
 type MapService struct {
-	mapPersistence  persistence.IMap2dPersistence
-	zonePersistence persistence.IZonePersistence
-
-	commandSet *MapCommandSet
-
-	map2dEvents publisher.IPublisher
-	zoneEvents  publisher.IPublisher
+	mapPersistence persistence.IMap2dPersistence
+	commandSet     *MapCommandSet
+	map2dEvents    publisher.IPublisher
 }
 
 func NewMapService() *MapService {
@@ -50,26 +46,11 @@ func (c *MapService) SetReferences(ctx context.Context, references cref.IReferen
 	}
 	c.mapPersistence = res.(persistence.IMap2dPersistence)
 
-	res, err = references.GetOneRequired(
-		cref.NewDescriptor("geo-renderer", "persistence", "*", "zone", "1.0"),
-	)
-	if err != nil {
-		panic(err)
-	}
-	c.zonePersistence = res.(persistence.IZonePersistence)
-
 	res = references.GetOneOptional(
 		cref.NewDescriptor("geo-renderer", "publisher", "nats", "map-2d-events", "1.0"),
 	)
 	if res != nil {
 		c.map2dEvents = res.(publisher.IPublisher)
-	}
-
-	res = references.GetOneOptional(
-		cref.NewDescriptor("geo-renderer", "publisher", "nats", "zone-events", "1.0"),
-	)
-	if res != nil {
-		c.zoneEvents = res.(publisher.IPublisher)
 	}
 }
 
@@ -141,82 +122,6 @@ func (c *MapService) DeleteMapById(ctx context.Context, reqctx cdata.RequestCont
 		}
 
 		err = c.map2dEvents.SendEvent(ctx, event, natsConst.NATS_MAP2D_EVENTS_DELETED_TYPE)
-		if err != nil {
-			return b, err
-		}
-	}
-
-	return b, err
-}
-
-func (c *MapService) GetZones(ctx context.Context, reqctx cdata.RequestContextV1,
-	filter cquery.FilterParams, paging cquery.PagingParams) (cquery.DataPage[data.ZoneV1], error) {
-	return c.zonePersistence.GetPageByFilter(ctx, reqctx, filter, paging)
-}
-
-func (c *MapService) GetZoneById(ctx context.Context, reqctx cdata.RequestContextV1,
-	id string) (data.ZoneV1, error) {
-
-	return c.zonePersistence.GetOneById(ctx, reqctx, id)
-}
-
-func (c *MapService) CreateZone(ctx context.Context, reqctx cdata.RequestContextV1,
-	zone data.ZoneV1) (data.ZoneV1, error) {
-	b, err := c.zonePersistence.Create(ctx, reqctx, zone)
-	if err != nil {
-		return b, err
-	}
-
-	if c.zoneEvents != nil {
-		event := natsEvents.ZoneChangedEvent{
-			Id: b.Id,
-		}
-
-		err = c.zoneEvents.SendEvent(ctx, event, natsConst.NATS_ZONE_EVENTS_CREATED_TYPE)
-		if err != nil {
-			return b, err
-		}
-	}
-
-	return b, nil
-}
-
-func (c *MapService) UpdateZone(ctx context.Context, reqctx cdata.RequestContextV1,
-	zone data.ZoneV1) (data.ZoneV1, error) {
-
-	b, err := c.zonePersistence.Update(ctx, reqctx, zone)
-	if err != nil {
-		return b, err
-	}
-
-	if c.zoneEvents != nil {
-		event := natsEvents.ZoneChangedEvent{
-			Id: b.Id,
-		}
-
-		err = c.zoneEvents.SendEvent(ctx, event, natsConst.NATS_ZONE_EVENTS_CHANGED_TYPE)
-		if err != nil {
-			return b, err
-		}
-	}
-
-	return b, err
-}
-
-func (c *MapService) DeleteZoneById(ctx context.Context, reqctx cdata.RequestContextV1,
-	id string) (data.ZoneV1, error) {
-
-	b, err := c.zonePersistence.DeleteById(ctx, reqctx, id)
-	if err != nil {
-		return b, err
-	}
-
-	if c.zoneEvents != nil {
-		event := natsEvents.ZoneChangedEvent{
-			Id: b.Id,
-		}
-
-		err = c.zoneEvents.SendEvent(ctx, event, natsConst.NATS_ZONE_EVENTS_DELETED_TYPE)
 		if err != nil {
 			return b, err
 		}
