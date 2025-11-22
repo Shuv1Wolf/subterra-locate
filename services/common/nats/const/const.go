@@ -25,3 +25,10 @@ const (
 	NATS_MAP2D_EVENTS_DELETED_TYPE = "map2d.events.deleted"
 	NATS_MAP2D_EVENTS_CHANGED_TYPE = "map2d.events.changed"
 )
+
+const (
+	NATS_ZONE_EVENTS_TOPIC        = "zone.events"
+	NATS_ZONE_EVENTS_CREATED_TYPE = "zone.events.created"
+	NATS_ZONE_EVENTS_DELETED_TYPE = "zone.events.deleted"
+	NATS_ZONE_EVENTS_CHANGED_TYPE = "zone.events.changed"
+)
