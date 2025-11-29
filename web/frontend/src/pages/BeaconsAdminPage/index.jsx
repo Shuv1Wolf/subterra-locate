@@ -19,6 +19,7 @@ export default function BeaconsAdminPage() {
   const [page, setPage] = useState(1);
   const [take] = useState(10); // Items per page
   const [total, setTotal] = useState(0);
+  const [maps, setMaps] = useState([]);
 
   const fetchBeacons = async () => {
     try {
@@ -48,6 +49,16 @@ export default function BeaconsAdminPage() {
   };
 
   useEffect(() => {
+    const fetchMaps = async () => {
+      try {
+        const mapsData = await apiClient.get(`${GEO_HOST}/api/v1/geo/map`);
+        setMaps(mapsData.data || []);
+      } catch (e) {
+        console.error('Failed to load maps', e);
+      }
+    };
+
+    fetchMaps();
     fetchBeacons();
   }, [page]);
 
@@ -65,18 +76,20 @@ export default function BeaconsAdminPage() {
           <thead>
           <tr>
             <th>Label</th>
-            <th>Map ID</th>
+            <th>Map</th>
             <th>UDI</th>
             <th>Enabled</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {beacons.map((beacon) => (
-            <tr key={beacon.id}>
-              <td>{beacon.label}</td>
-              <td>{beacon.map_id}</td>
-              <td>{beacon.udi}</td>
+          {beacons.map((beacon) => {
+            const mapName = maps.find((map) => map.id === beacon.map_id)?.name;
+            return (
+              <tr key={beacon.id}>
+                <td>{beacon.label}</td>
+                <td>{mapName || ''}</td>
+                <td>{beacon.udi}</td>
               <td>{beacon.enabled ? 'Yes' : 'No'}</td>
               <td>
                 <ActionsContainer>
@@ -85,7 +98,8 @@ export default function BeaconsAdminPage() {
                 </ActionsContainer>
               </td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
         </BeaconTable>
         <PaginationContainer>

@@ -53,6 +53,15 @@ export default function HomePage() {
               Open
             </TileButton>
           </Tile>
+          {/* Zones Admin tile */}
+          <Tile>
+            <TileIcon>🌐</TileIcon>
+            <TileTitle>Zones Admin</TileTitle>
+            <TileDescription>Manage zones</TileDescription>
+            <TileButton onClick={() => navigate("/zones-admin")}>
+              Open
+            </TileButton>
+          </Tile>
         </TilesContainer>
       </HomePageContainer>
     </>

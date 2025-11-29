@@ -15,6 +15,8 @@ import BeaconFormPage from "./pages/BeaconFormPage";
 import DevicesAdminPage from "./pages/DevicesAdminPage";
 import DeviceFormPage from "./pages/DeviceFormPage";
 import MapsAdminPage from "./pages/MapsAdminPage";
+import ZonesAdminPage from "./pages/ZonesAdminPage";
+import ZoneFormPage from "./pages/ZoneFormPage";
 
 const AppContent = () => {
   return (
@@ -36,6 +38,9 @@ const AppContent = () => {
       <Route path="/maps-admin" element={<MapsAdminPage />} />
       <Route path="/new-map" element={<CreateMapPage />} />
       <Route path="/edit-map/:mapId" element={<MapFormPage />} />
+      <Route path="/zones-admin" element={<ZonesAdminPage />} />
+      <Route path="/zones-admin/new" element={<ZoneFormPage />} />
+      <Route path="/zones-admin/edit/:zoneId" element={<ZoneFormPage />} />
     </Routes>
   );
 };

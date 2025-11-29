@@ -72,11 +72,7 @@ export default function Header({ variant = "home", title = "Subterra Locate" }) 
 
   return (
     <HeaderContainer ref={headerRef}>
-      {variant === "home" ? (
-        <MenuIcon onClick={() => setIsMenuOpen(!isMenuOpen)}>&#9776;</MenuIcon>
-      ) : (
-        <BackButton onClick={() => navigate(-1)}>&#8592;</BackButton>
-      )}
+      <MenuIcon onClick={() => setIsMenuOpen(!isMenuOpen)}>&#9776;</MenuIcon>
       <Title>{title}</Title>
       {variant === "home" && <AlarmsButton>Alarms</AlarmsButton>}
       <OrgName onClick={() => setIsOrgMenuOpen(!isOrgMenuOpen)}>
@@ -93,6 +89,9 @@ export default function Header({ variant = "home", title = "Subterra Locate" }) 
           </MenuItem>
           <MenuItem onClick={() => handleNavigate("/maps-admin")}>
             Maps Admin
+          </MenuItem>
+          <MenuItem onClick={() => handleNavigate("/zones-admin")}>
+            Zones Admin
           </MenuItem>
         </DropdownMenu>
       )}

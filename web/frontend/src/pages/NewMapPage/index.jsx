@@ -63,6 +63,21 @@ const BeaconSelectorModal = ({ beacons, onSelect, onClose }) => (
   </ModalBackdrop>
 );
 
+const ZoneSelectorModal = ({ zones, onSelect, onClose }) => (
+  <ModalBackdrop onClick={onClose}>
+    <ModalContent onClick={(e) => e.stopPropagation()}>
+      <h3>Select the zone to edit</h3>
+      <BeaconList>
+        {zones.map((zone) => (
+          <BeaconListItem key={zone.id} onClick={() => onSelect(zone)}>
+            {zone.name}
+          </BeaconListItem>
+        ))}
+      </BeaconList>
+    </ModalContent>
+  </ModalBackdrop>
+);
+
 // Device Info Popup Component
 const DeviceInfoPopup = ({ device, onClose, onShowHistory }) => (
   <Draggable handle=".popup-header">
@@ -104,12 +119,58 @@ const BeaconInfoPopup = ({ beacon, onClose }) => (
   </Draggable>
 );
 
+// Zone Info Popup Component
+const ZoneInfoPopup = ({ zone, onClose, onSave }) => {
+  const [name, setName] = useState(zone.name);
+  const [maxDevices, setMaxDevices] = useState(zone.max_device);
+  const [color, setColor] = useState(zone.color);
+
+  const handleSave = () => {
+    onSave({ ...zone, name, max_device: maxDevices, color });
+  };
+
+  return (
+    <Draggable handle=".popup-header">
+      <PopupContainer>
+        <PopupHeader className="popup-header">
+          <h2>Edit Zone</h2>
+          <CloseButton onClick={onClose}>&times;</CloseButton>
+        </PopupHeader>
+        <div style={{ display: 'grid', gridTemplateColumns: '120px auto', alignItems: 'center', gap: '10px', padding: '0 20px' }}>
+          <p style={{ margin: 0 }}><strong>ID:</strong></p> <p style={{ margin: 0 }}>{zone.id}</p>
+          
+          <label htmlFor="zoneName" style={{ margin: 0 }}><strong>Name:</strong></label>
+          <StyledInput id="zoneName" type="text" value={name} onChange={(e) => setName(e.target.value)} style={{ boxSizing: 'border-box' }} />
+
+          <label htmlFor="maxDevices" style={{ margin: 0 }}><strong>Max Devices:</strong></label>
+          <StyledInput id="maxDevices" type="number" value={maxDevices} onChange={(e) => setMaxDevices(parseInt(e.target.value, 10))} style={{ boxSizing: 'border-box' }} />
+
+          <label htmlFor="zoneColor" style={{ margin: 0 }}><strong>Color:</strong></label>
+          <input
+              type="color"
+              id="zoneColor"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+              style={{ padding: 0, border: 'none', background: 'transparent', height: '25px', width: '50px' }}
+            />
+          <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'center' }}>
+            <PopupButtonContainer>
+              <TileButton onClick={handleSave}>Save Changes</TileButton>
+            </PopupButtonContainer>
+          </div>
+        </div>
+      </PopupContainer>
+    </Draggable>
+  );
+};
+
 export default function NewMapPage() {
   const navigate = useNavigate();
   const [maps, setMaps] = useState([]);
   const [selectedMapId, setSelectedMapId] = useState('');
   const [devices, setDevices] = useState([]);
   const [beacons, setBeacons] = useState([]);
+  const [zones, setZones] = useState([]);
   const [allDevices, setAllDevices] = useState([]);
   const [stagedDeviceFilters, setStagedDeviceFilters] = useState([]);
   const [activeDeviceFilters, setActiveDeviceFilters] = useState([]);
@@ -117,10 +178,16 @@ export default function NewMapPage() {
   const [activeBeaconFilters, setActiveBeaconFilters] = useState([]);
   const [showDevices, setShowDevices] = useState(true);
   const [showBeacons, setShowBeacons] = useState(true);
+  const [showZones, setShowZones] = useState(true);
+  const [showZoneNames, setShowZoneNames] = useState(true);
   const [isPanelVisible, setIsPanelVisible] = useState(true);
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [selectedBeacon, setSelectedBeacon] = useState(null);
+  const [selectedZone, setSelectedZone] = useState(null);
   const [allBeacons, setAllBeacons] = useState([]);
+  const [allZones, setAllZones] = useState([]);
+  const [editingZone, setEditingZone] = useState(null);
+  const [isZoneModalOpen, setIsZoneModalOpen] = useState(false);
   const [isBeaconModalOpen, setIsBeaconModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -138,6 +205,21 @@ export default function NewMapPage() {
   const [historyFrom, setHistoryFrom] = useState('2021-09-01T00:00');
   const [historyTo, setHistoryTo] = useState('2025-12-01T23:59');
   const [clickedPoint, setClickedPoint] = useState(null);
+
+  const handleZoneDragStop = (e, data) => {
+    const { scale, positionX, positionY } = transformState;
+
+    const worldX = (data.x - positionX) / scale;
+    const worldY = (data.y - positionY) / scale;
+
+    setEditingZone(prev => ({
+      ...prev,
+      position_x: worldX,
+      position_y: worldY
+    }));
+
+    setIsPanningDisabled(false);
+  };
 
   const handleMouseDown = (e) => {
     if (e.button === 2) { // Right mouse button
@@ -162,7 +244,15 @@ export default function NewMapPage() {
     const x = (e.clientX - contentRect.left) / scale;
     const y = (e.clientY - contentRect.top) / scale;
 
-    setContextMenu({ x, y });
+    const clickedZone = zones.find(
+      (zone) =>
+        x >= zone.position_x &&
+        x <= zone.position_x + zone.width &&
+        y >= zone.position_y &&
+        y <= zone.position_y + zone.height
+    );
+
+    setContextMenu({ x, y, zone: clickedZone });
   };
 
   const handleCloseContextMenu = () => {
@@ -172,6 +262,46 @@ export default function NewMapPage() {
   const handlePlaceBeacon = () => {
     if (!contextMenu) return;
     setIsBeaconModalOpen(true);
+  };
+
+  const handleEditZone = () => {
+    if (!contextMenu) return;
+
+    if (contextMenu.zone) {
+      setEditingZone(contextMenu.zone);
+      setContextMenu(null);
+    } else {
+      fetchZones();
+      setIsZoneModalOpen(true);
+    }
+  };
+
+  const handleZoneSelect = (zone) => {
+    setEditingZone({
+      ...zone,
+      position_x: contextMenu.x,
+      position_y: contextMenu.y,
+    });
+    setIsZoneModalOpen(false);
+    setContextMenu(null);
+  };
+
+  const handleShowZoneInfo = () => {
+    if (contextMenu?.zone) {
+      setSelectedZone(contextMenu.zone);
+      setContextMenu(null);
+    }
+  };
+
+  const handleZoneUpdate = async (updatedZone) => {
+    try {
+      await apiClient.put(`${GEO_HOST}/api/v1/geo/zones`, updatedZone);
+      setZones(prevZones => prevZones.map(z => z.id === updatedZone.id ? updatedZone : z));
+      setSelectedZone(null);
+    } catch (error) {
+      console.error('Failed to update zone:', error);
+      alert(`Error updating zone: ${error.message}`);
+    }
   };
 
   const handleBeaconSelect = async (beacon) => {
@@ -198,6 +328,24 @@ export default function NewMapPage() {
     }
   };
 
+  const handleSaveEditingZone = async () => {
+    if (!editingZone) return;
+
+    const zoneToUpdate = {
+      ...editingZone,
+      map_id: selectedMapId,
+    };
+
+    try {
+      await apiClient.put(`${GEO_HOST}/api/v1/geo/zones`, zoneToUpdate);
+      alert('Zone updated successfully!');
+      setEditingZone(null);
+    } catch (error) {
+      console.error('Failed to update zone:', error);
+      alert(`Error: ${error.message}`);
+    }
+  };
+
   const handleDeviceClick = async (deviceId) => {
     try {
       const data = await apiClient.get(`${SYSTEM_HOST}/api/v1/system/device/${deviceId}`);
@@ -213,6 +361,23 @@ export default function NewMapPage() {
       setSelectedBeacon(data);
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const fetchZones = async () => {
+    const orgId = localStorage.getItem("selectedOrgId");
+    if (!orgId) return;
+
+    try {
+      const response = await apiClient.get(`${GEO_HOST}/api/v1/geo/zones`, {
+        params: {
+          org_id: orgId,
+        },
+      });
+      const filteredZones = response.data.filter(zone => !zone.map_id);
+      setAllZones(filteredZones);
+    } catch (error) {
+      console.error("Failed to fetch zones:", error);
     }
   };
 
@@ -405,6 +570,59 @@ export default function NewMapPage() {
     };
   }, [selectedMapId, activeBeaconFilters, showBeacons]);
 
+  // WebSocket connection for zones
+  useEffect(() => {
+    if (!selectedMapId || !showZones) {
+      setZones([]);
+      return;
+    }
+
+    const orgId = localStorage.getItem("selectedOrgId");
+    const wsHost = GEO_HOST.replace('http://', 'ws://');
+    let wsUrl = `${wsHost}/api/v1/geo/zones/monitor?map_id=${selectedMapId}`;
+    if (orgId) {
+      wsUrl += `&org_id=${orgId}`;
+    }
+    
+    const zoneWs = new WebSocket(wsUrl);
+    
+    zoneWs.onmessage = (event) => {
+      const messages = event.data.split('\n');
+      messages.forEach(messageStr => {
+        if (messageStr.trim() === '') return;
+        try {
+          const message = JSON.parse(messageStr);
+          if (message.event) {
+            setZones(prev => {
+              const map = new Map(prev.map(z => [z.id, z]));
+              for (const zone of message.event) {
+                const normalizedZone = {
+                  ...zone,
+                  id: zone.zone_id,
+                  name: zone.zone_name,
+                  position_x: zone.positionX,
+                  position_y: zone.positionY,
+                };
+                if (zone.deleted || zone.positionX == null || zone.positionY == null) {
+                  map.delete(normalizedZone.id);
+                } else {
+                  map.set(normalizedZone.id, normalizedZone);
+                }
+              }
+              return Array.from(map.values());
+            });
+          }
+        } catch (e) {
+          console.error('Failed to parse WebSocket message for zones:', e);
+        }
+      });
+    };
+
+    return () => {
+      zoneWs.close();
+    };
+  }, [selectedMapId, showZones]);
+
   const deviceOptions = allDevices.map(d => ({ value: d.id, label: d.name }));
   const beaconOptions = allBeacons.map(b => ({ value: b.id, label: b.label }));
   const selectedMap = maps.find((map) => map.id === selectedMapId);
@@ -423,8 +641,16 @@ export default function NewMapPage() {
             onClose={() => setIsBeaconModalOpen(false)}
           />
         )}
+        {isZoneModalOpen && (
+          <ZoneSelectorModal
+            zones={allZones}
+            onSelect={handleZoneSelect}
+            onClose={() => setIsZoneModalOpen(false)}
+          />
+        )}
         {selectedDevice && <DeviceInfoPopup device={selectedDevice} onClose={() => setSelectedDevice(null)} onShowHistory={handleShowHistory} />}
         {selectedBeacon && <BeaconInfoPopup beacon={selectedBeacon} onClose={() => setSelectedBeacon(null)} />}
+        {selectedZone && <ZoneInfoPopup zone={selectedZone} onClose={() => setSelectedZone(null)} onSave={handleZoneUpdate} />}
         <MapSelectorContainer className={isPanelVisible ? '' : 'hidden'}>
           <ToggleButton onClick={() => setIsPanelVisible(!isPanelVisible)}>
           {isPanelVisible ? 'Hide' : 'Show'}
@@ -453,6 +679,19 @@ export default function NewMapPage() {
           <Select isMulti options={beaconOptions} value={stagedBeaconFilters} onChange={handleBeaconFilterChange} styles={selectStyles} placeholder="Filter by beacon..." />
         </FilterBlock>
 
+        <FilterBlock>
+          <FilterHeader>
+            <CheckboxLabel>
+              <input type="checkbox" checked={showZones} onChange={() => setShowZones(!showZones)} />
+              Zones
+            </CheckboxLabel>
+            <CheckboxLabel>
+              <input type="checkbox" checked={showZoneNames} onChange={() => setShowZoneNames(!showZoneNames)} />
+              Show Names
+            </CheckboxLabel>
+          </FilterHeader>
+        </FilterBlock>
+
         <FilterButton onClick={applyFilters}>Apply</FilterButton>
 
         {selectedMap && <MapInfo><span>Level: {selectedMap.level}</span><span>Size: {(selectedMap.width * selectedMap.scale_x).toFixed(2)}x{(selectedMap.height * selectedMap.scale_y).toFixed(2)} м</span></MapInfo>}
@@ -477,6 +716,31 @@ export default function NewMapPage() {
             <TransformComponent>
               <div ref={mapContentRef} style={{ position: 'relative', width: selectedMap.width, height: selectedMap.height }}>
                 <div style={{ width: '100%', height: '100%' }} dangerouslySetInnerHTML={{ __html: selectedMap.svg_content }} />
+                {showZones && zones.map((zone) => (
+                  <div
+                    key={zone.id}
+                    title={zone.name}
+                    style={{
+                      position: 'absolute',
+                      left: `${zone.position_x}px`,
+                      top: `${zone.position_y}px`,
+                      width: `${zone.width}px`,
+                      height: `${zone.height}px`,
+                      backgroundColor: zone.color ? `rgba(${parseInt(zone.color.slice(1, 3), 16)}, ${parseInt(zone.color.slice(3, 5), 16)}, ${parseInt(zone.color.slice(5, 7), 16)}, 0.3)` : 'rgba(0, 255, 0, 0.3)',
+                      border: `1px solid ${zone.color || 'rgba(0, 255, 0, 0.5)'}`,
+                      pointerEvents: 'all',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {showZoneNames && (
+                      <span style={{ color: '#fff', fontSize: 12 / transformState.scale, textShadow: '1px 1px 2px black' }}>
+                        {zone.name}
+                      </span>
+                    )}
+                  </div>
+                ))}
                 {deviceHistory.length > 0 && (
                   <svg width={selectedMap.width} height={selectedMap.height} style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}>
                     <defs>
@@ -529,7 +793,75 @@ export default function NewMapPage() {
                 {contextMenu && (
                   <ContextMenu style={{ top: contextMenu.y, left: contextMenu.x }} onClick={(e) => e.stopPropagation()}>
                     <ContextMenuItem onClick={handlePlaceBeacon}>Place a beacon</ContextMenuItem>
+                    <ContextMenuItem onClick={handleEditZone}>Edit Zone</ContextMenuItem>
+                    {contextMenu.zone && <ContextMenuItem onClick={handleShowZoneInfo}>Show Info</ContextMenuItem>}
                   </ContextMenu>
+                )}
+                {editingZone && (
+                  <Draggable
+                    position={{ x: editingZone.position_x, y: editingZone.position_y }}
+                    onStart={() => setIsPanningDisabled(true)}
+                    onStop={(e, data) => handleZoneDragStop(e, data)}
+                  >
+                    <div
+                      style={{
+                        position: 'absolute',
+                        width: editingZone.width,
+                        height: editingZone.height,
+                        border: '2px dashed #fff',
+                        cursor: 'move',
+                      }}
+                    >
+                      <div
+                        style={{
+                          position: 'absolute',
+                          bottom: '5px',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          display: 'flex',
+                          gap: '10px',
+                          zIndex: 1000,
+                        }}
+                      >
+                        <button onClick={handleSaveEditingZone}>Save</button>
+                        <button onClick={() => setEditingZone(null)}>Cancel</button>
+                      </div>
+                      <div
+                        style={{
+                          position: 'absolute',
+                          bottom: '-5px',
+                          right: '-5px',
+                          width: '10px',
+                          height: '10px',
+                          backgroundColor: '#fff',
+                          cursor: 'nwse-resize',
+                        }}
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          const startX = e.pageX;
+                          const startY = e.pageY;
+                          const startWidth = editingZone.width;
+                          const startHeight = editingZone.height;
+
+                          const doDrag = (e) => {
+                            setEditingZone((prev) => ({
+                              ...prev,
+                              width: startWidth + e.pageX - startX,
+                              height: startHeight + e.pageY - startY,
+                            }));
+                          };
+
+                          const stopDrag = () => {
+                            document.removeEventListener('mousemove', doDrag, false);
+                            document.removeEventListener('mouseup', stopDrag, false);
+                          };
+
+                          document.addEventListener('mousemove', doDrag, false);
+                          document.addEventListener('mouseup', stopDrag, false);
+                        }}
+                      />
+                    </div>
+                  </Draggable>
                 )}
                 {!deviceForHistory && showDevices && devices.map((device) => (
                   <UserIcon
