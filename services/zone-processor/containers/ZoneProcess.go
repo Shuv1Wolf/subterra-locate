@@ -2,6 +2,7 @@ package containers
 
 import (
 	"github.com/Shuv1Wolf/subterra-locate/services/zone-processor/build"
+	"github.com/Shuv1Wolf/subterra-locate/services/zone-processor/service"
 	cproc "github.com/pip-services4/pip-services4-go/pip-services4-container-go/container"
 	grpcbuild "github.com/pip-services4/pip-services4-go/pip-services4-grpc-go/build"
 	cpg "github.com/pip-services4/pip-services4-go/pip-services4-postgres-go/build"
@@ -9,6 +10,7 @@ import (
 
 type ZoneProcess struct {
 	*cproc.ProcessContainer
+	service service.IZoneService
 }
 
 func NewZoneProcess() *ZoneProcess {

@@ -2,31 +2,47 @@ package service
 
 import (
 	"context"
+	"net"
 
 	cdata "github.com/Shuv1Wolf/subterra-locate/services/common/data/version1"
 	natsConst "github.com/Shuv1Wolf/subterra-locate/services/common/nats/const"
 	natsEvents "github.com/Shuv1Wolf/subterra-locate/services/common/nats/events"
 	data1 "github.com/Shuv1Wolf/subterra-locate/services/zone-processor/data/version1"
 	"github.com/Shuv1Wolf/subterra-locate/services/zone-processor/persistence"
+	protos "github.com/Shuv1Wolf/subterra-locate/services/zone-processor/protos"
 	"github.com/Shuv1Wolf/subterra-locate/services/zone-processor/publisher"
+	"github.com/Shuv1Wolf/subterra-locate/services/zone-processor/utils"
 	cconf "github.com/pip-services4/pip-services4-go/pip-services4-components-go/config"
 	cref "github.com/pip-services4/pip-services4-go/pip-services4-components-go/refer"
 	cquery "github.com/pip-services4/pip-services4-go/pip-services4-data-go/query"
+	clog "github.com/pip-services4/pip-services4-go/pip-services4-observability-go/log"
 	ccmd "github.com/pip-services4/pip-services4-go/pip-services4-rpc-go/commands"
+	"google.golang.org/grpc"
 )
 
 type ZoneService struct {
 	persistence persistence.IZonePersistence
 	commandSet  *ZoneCommandSet
 	zoneEvents  publisher.IPublisher
+
+	logger *clog.CompositeLogger
+
+	stateStore  *utils.ZoneStateStore
+	monitorPort string
+	isOpen      bool
 }
 
 func NewZoneService() *ZoneService {
-	c := &ZoneService{}
+	c := &ZoneService{
+		logger:     clog.NewCompositeLogger(),
+		stateStore: utils.NewZoneStateStore(),
+	}
 	return c
 }
 
 func (c *ZoneService) Configure(ctx context.Context, config *cconf.ConfigParams) {
+	c.logger.Configure(ctx, config)
+	c.monitorPort = config.GetAsStringWithDefault("monitor.port", ":10070")
 }
 
 func (c *ZoneService) GetCommandSet() *ccmd.CommandSet {
@@ -51,6 +67,53 @@ func (c *ZoneService) SetReferences(ctx context.Context, references cref.IRefere
 	if res != nil {
 		c.zoneEvents = res.(publisher.IPublisher)
 	}
+	c.logger.SetReferences(ctx, references)
+}
+
+func (c *ZoneService) Open(ctx context.Context) error {
+	c.initCache(ctx)
+	c.runMonitorLocation()
+	c.isOpen = true
+	return nil
+}
+
+func (c *ZoneService) Close(ctx context.Context) error {
+	c.isOpen = false
+	return nil
+}
+
+func (c *ZoneService) IsOpen() bool {
+	return c.isOpen
+}
+
+func (c *ZoneService) initCache(ctx context.Context) {
+	limit := int64(100)
+	skip := int64(0)
+
+	for {
+		page := *cquery.NewPagingParams(skip, limit, false)
+		zones, err := c.persistence.GetPageByFilter(ctx, cdata.RequestContextV1{}, *cquery.NewEmptyFilterParams(), page)
+		if err != nil {
+			c.logger.Error(ctx, err, "Error getting zones")
+			return
+		}
+
+		if len(zones.Data) == 0 {
+			break
+		}
+
+		for _, zone := range zones.Data {
+			c.stateStore.Upsert(&zone)
+		}
+
+		if int64(len(zones.Data)) < limit {
+			break
+		}
+
+		skip += limit
+	}
+
+	c.logger.Info(context.Background(), "Zones stored in cache")
 }
 
 func (c *ZoneService) GetZones(ctx context.Context, reqctx cdata.RequestContextV1, filter cquery.FilterParams, paging cquery.PagingParams) (cquery.DataPage[data1.ZoneV1], error) {
@@ -66,6 +129,8 @@ func (c *ZoneService) CreateZone(ctx context.Context, reqctx cdata.RequestContex
 	if err != nil {
 		return b, err
 	}
+
+	c.stateStore.Upsert(&b)
 
 	if c.zoneEvents != nil {
 		event := natsEvents.ZoneChangedEvent{
@@ -87,6 +152,8 @@ func (c *ZoneService) UpdateZone(ctx context.Context, reqctx cdata.RequestContex
 		return b, err
 	}
 
+	c.stateStore.Upsert(&b)
+
 	if c.zoneEvents != nil {
 		event := natsEvents.ZoneChangedEvent{
 			Id: b.Id,
@@ -106,6 +173,7 @@ func (c *ZoneService) DeleteZoneById(ctx context.Context, reqctx cdata.RequestCo
 	if err != nil {
 		return b, err
 	}
+	c.stateStore.Delete(&b)
 
 	if c.zoneEvents != nil {
 		event := natsEvents.ZoneChangedEvent{
@@ -119,4 +187,25 @@ func (c *ZoneService) DeleteZoneById(ctx context.Context, reqctx cdata.RequestCo
 	}
 
 	return b, nil
+}
+
+func (s *ZoneService) runMonitorLocation() {
+	lis, err := net.Listen("tcp", s.monitorPort)
+	if err != nil {
+		s.logger.Error(context.Background(), err, "Failed to listen: %v", err)
+	}
+
+	opts := []grpc.ServerOption{}
+
+	grpcServer := grpc.NewServer(opts...)
+
+	monitorSvc := NewZoneMonitorService(s.stateStore, s.logger)
+	protos.RegisterZoneMonitorServer(grpcServer, monitorSvc)
+
+	go func() {
+		s.logger.Info(context.Background(), "Starting monitor service on port %s", s.monitorPort)
+		if err := grpcServer.Serve(lis); err != nil {
+			s.logger.Error(context.Background(), err, "Failed to serve: %v", err)
+		}
+	}()
 }

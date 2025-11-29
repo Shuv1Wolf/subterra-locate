@@ -40,6 +40,8 @@
 
 # Service
 - descriptor: "zone-processor:service:default:default:1.0"
+  monitor:
+    port: ":10070"
 
 # Shared HTTP Endpoint
 - descriptor: "pip-services:endpoint:grpc:default:1.0"
