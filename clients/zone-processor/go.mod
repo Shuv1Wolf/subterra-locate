@@ -4,7 +4,7 @@ go 1.24.4
 
 require (
 	github.com/Shuv1Wolf/subterra-locate/services/common v1.0.9
-	github.com/Shuv1Wolf/subterra-locate/services/zone-processor v1.0.3
+	github.com/Shuv1Wolf/subterra-locate/services/zone-processor v1.0.4
 	github.com/pip-services4/pip-services4-go/pip-services4-commons-go v0.0.1-2
 	github.com/pip-services4/pip-services4-go/pip-services4-components-go v0.0.1-2
 	github.com/pip-services4/pip-services4-go/pip-services4-data-go v0.0.1-2
