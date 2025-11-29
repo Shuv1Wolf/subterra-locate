@@ -31,7 +31,7 @@ func (c *NatsPublisher) SendPosition(ctx context.Context) error {
 	for i := 0; i < 3; i++ {
 		beacons[i] = natsEvents.BLEBeaconRawV1{
 			Id:      "beacon$10" + fmt.Sprintf("%d", i), // beacon$100, beacon$101, beacon$102
-			Rssi:    rand.Intn(201) - 100,               // RSSI -100 to 100
+			Rssi:    rand.Intn(101) - 100,               // RSSI 
 			Txpower: 0,
 		}
 	}

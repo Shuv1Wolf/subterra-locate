@@ -18,6 +18,7 @@ type FacadeControllerV1 struct {
 	geoRendererOperations *operations1.GeoRendererOperationsV1
 	geoHistoryOperations  *operations1.GeoHistoryOperationsV1
 	zoneOperations        *operations1.ZoneProcessorOperationsV1
+	zoneMonitor           *operations1.ZoneMonitorOperationsV1
 }
 
 func NewFacadeControllerV1() *FacadeControllerV1 {
@@ -27,6 +28,7 @@ func NewFacadeControllerV1() *FacadeControllerV1 {
 		geoRendererOperations: operations1.NewGeoRendererOperationsV1(),
 		geoHistoryOperations:  operations1.NewGeoHistoryOperationsV1(),
 		zoneOperations:        operations1.NewZoneProcessorOperationsV1(),
+		zoneMonitor:           operations1.NewZoneMonitorOperationsV1(),
 	}
 	c.RestController = httpcontr.InheritRestController(c)
 	c.BaseRoute = "api/v1/geo"
@@ -41,6 +43,7 @@ func (c *FacadeControllerV1) Configure(ctx context.Context, config *cconf.Config
 	c.geoRendererOperations.Configure(ctx, config)
 	c.geoHistoryOperations.Configure(ctx, config)
 	c.zoneOperations.Configure(ctx, config)
+	c.zoneMonitor.Configure(ctx, config)
 }
 
 func (c *FacadeControllerV1) SetReferences(ctx context.Context, references cref.IReferences) {
@@ -51,6 +54,7 @@ func (c *FacadeControllerV1) SetReferences(ctx context.Context, references cref.
 	c.geoRendererOperations.SetReferences(ctx, references)
 	c.geoHistoryOperations.SetReferences(ctx, references)
 	c.zoneOperations.SetReferences(ctx, references)
+	c.zoneMonitor.SetReferences(ctx, references)
 }
 
 func (c *FacadeControllerV1) Register() {
@@ -102,6 +106,10 @@ func (c *FacadeControllerV1) FacadeControllerV1() {
 		func(res http.ResponseWriter, req *http.Request) { c.geoHistoryOperations.GetHistory(res, req) })
 
 	// Zone routes
+	c.RegisterRoute("get", "/zones/monitor", nil,
+		func(res http.ResponseWriter, req *http.Request) {
+			c.zoneMonitor.MonitorZoneWS(res, req)
+		})
 	c.RegisterRoute("get", "/zones", nil,
 		func(res http.ResponseWriter, req *http.Request) { c.zoneOperations.GetZones(res, req) })
 	c.RegisterRoute("get", "/zones/:id", nil,

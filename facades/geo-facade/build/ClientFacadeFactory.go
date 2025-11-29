@@ -23,6 +23,7 @@ func NewClientFacadeFactory() *ClientFacadeFactory {
 	c.Add(gbuild.NewGeoRendererClientsFactory())
 	c.Add(ghbuild.NewGeoHistoryClientsFactory())
 	c.Add(zbuild.NewZoneProcessorClientsFactory())
+	
 
 	return c
 }

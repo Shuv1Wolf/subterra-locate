@@ -10,6 +10,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/bin/main.go",
+            "buildFlags": ["-ldflags", "-X google.golang.org/protobuf/reflect/protoregistry.conflictPolicy=warn"],
             "args": [
                 "--config", "../config/config.yml" 
             ],
