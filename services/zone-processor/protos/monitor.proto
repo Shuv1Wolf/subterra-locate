@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package location.engine.protos;
+option go_package = "github.com/Shuv1Wolf/subterra-locate/services/location-engine/protos";
+
+message MonitorZoneRequestV1 {
+    string org_id = 1;
+    string map_id = 2;
+}
+
+message MonitorZoneStreamEventV1 {
+    message ZoneEventV1 {
+        string zone_id = 1;
+        string zone_name = 2;
+        string map_id = 3;
+        string org_id = 4;
+        float positionX = 5;
+        float positionY = 6;
+        float width = 7;
+        float height = 8;
+        string type = 9; 
+        map<string, string> info = 10;
+    }
+
+    repeated ZoneEventV1 event = 1;
+}
+
+
+service ZoneMonitor {
+    rpc MonitorZoneV1(MonitorZoneRequestV1) returns (stream MonitorZoneStreamEventV1) {}
+}
