@@ -8,7 +8,8 @@ import (
 
 type ZoneProcessorClientsFactory struct {
 	cbuild.Factory
-	GrpcClientDescriptor *cref.Descriptor
+	GrpcClientDescriptor        *cref.Descriptor
+	GrpcMonitorClientDescriptor *cref.Descriptor
 }
 
 func NewZoneProcessorClientsFactory() *ZoneProcessorClientsFactory {
@@ -17,7 +18,10 @@ func NewZoneProcessorClientsFactory() *ZoneProcessorClientsFactory {
 	bcf.Factory = *cbuild.NewFactory()
 
 	bcf.GrpcClientDescriptor = cref.NewDescriptor("zone-processor", "client", "grpc", "*", "1.0")
+	bcf.GrpcMonitorClientDescriptor = cref.NewDescriptor("zone-monitor", "client", "grpc", "*", "1.0")
+
 	bcf.RegisterType(bcf.GrpcClientDescriptor, clients1.NewZoneGrpcClientV1)
+	bcf.RegisterType(bcf.GrpcMonitorClientDescriptor, clients1.NewZoneMonitorGrpcClientV1)
 
 	return &bcf
 }
