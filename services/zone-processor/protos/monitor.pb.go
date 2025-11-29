@@ -129,7 +129,8 @@ type MonitorZoneStreamEventV1_ZoneEventV1 struct {
 	Height        float32                `protobuf:"fixed32,8,opt,name=height,proto3" json:"height,omitempty"`
 	Type          string                 `protobuf:"bytes,9,opt,name=type,proto3" json:"type,omitempty"`
 	Deleted       bool                   `protobuf:"varint,10,opt,name=deleted,proto3" json:"deleted,omitempty"`
-	Info          map[string]string      `protobuf:"bytes,11,rep,name=info,proto3" json:"info,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Color         string                 `protobuf:"bytes,11,opt,name=color,proto3" json:"color,omitempty"`
+	Info          map[string]string      `protobuf:"bytes,12,rep,name=info,proto3" json:"info,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -234,6 +235,13 @@ func (x *MonitorZoneStreamEventV1_ZoneEventV1) GetDeleted() bool {
 	return false
 }
 
+func (x *MonitorZoneStreamEventV1_ZoneEventV1) GetColor() string {
+	if x != nil {
+		return x.Color
+	}
+	return ""
+}
+
 func (x *MonitorZoneStreamEventV1_ZoneEventV1) GetInfo() map[string]string {
 	if x != nil {
 		return x.Info
@@ -248,9 +256,9 @@ const file_protos_monitor_proto_rawDesc = "" +
 	"\x14protos/monitor.proto\x12\x15zone.processor.protos\"D\n" +
 	"\x14MonitorZoneRequestV1\x12\x15\n" +
 	"\x06org_id\x18\x01 \x01(\tR\x05orgId\x12\x15\n" +
-	"\x06map_id\x18\x02 \x01(\tR\x05mapId\"\x8d\x04\n" +
+	"\x06map_id\x18\x02 \x01(\tR\x05mapId\"\xa3\x04\n" +
 	"\x18MonitorZoneStreamEventV1\x12Q\n" +
-	"\x05event\x18\x01 \x03(\v2;.zone.processor.protos.MonitorZoneStreamEventV1.ZoneEventV1R\x05event\x1a\x9d\x03\n" +
+	"\x05event\x18\x01 \x03(\v2;.zone.processor.protos.MonitorZoneStreamEventV1.ZoneEventV1R\x05event\x1a\xb3\x03\n" +
 	"\vZoneEventV1\x12\x17\n" +
 	"\azone_id\x18\x01 \x01(\tR\x06zoneId\x12\x1b\n" +
 	"\tzone_name\x18\x02 \x01(\tR\bzoneName\x12\x15\n" +
@@ -262,8 +270,9 @@ const file_protos_monitor_proto_rawDesc = "" +
 	"\x06height\x18\b \x01(\x02R\x06height\x12\x12\n" +
 	"\x04type\x18\t \x01(\tR\x04type\x12\x18\n" +
 	"\adeleted\x18\n" +
-	" \x01(\bR\adeleted\x12Y\n" +
-	"\x04info\x18\v \x03(\v2E.zone.processor.protos.MonitorZoneStreamEventV1.ZoneEventV1.InfoEntryR\x04info\x1a7\n" +
+	" \x01(\bR\adeleted\x12\x14\n" +
+	"\x05color\x18\v \x01(\tR\x05color\x12Y\n" +
+	"\x04info\x18\f \x03(\v2E.zone.processor.protos.MonitorZoneStreamEventV1.ZoneEventV1.InfoEntryR\x04info\x1a7\n" +
 	"\tInfoEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x012\x80\x01\n" +

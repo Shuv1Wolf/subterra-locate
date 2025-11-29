@@ -106,6 +106,7 @@ func (s *ZoneStateStore) Upsert(zone *data1.ZoneV1) {
 			Height:    float32(zone.Height),
 			Type:      string(zone.Type),
 			Info:      map[string]string{},
+			Color:     zone.Color,
 			Deleted:   false,
 		},
 	})
@@ -130,6 +131,7 @@ func (s *ZoneStateStore) Delete(zone *data1.ZoneV1) {
 				Height:    float32(zone.Height),
 				Type:      string(zone.Type),
 				Info:      map[string]string{},
+				Color:     zone.Color,
 				Deleted:   true,
 			},
 		})
@@ -163,6 +165,7 @@ func (s *ZoneStateStore) Snapshot(orgID string) []*protos.MonitorZoneStreamEvent
 			Width:     float32(z.Width),
 			Height:    float32(z.Height),
 			Type:      string(z.Type),
+			Color:     z.Color,
 			Info:      map[string]string{},
 		})
 	}
