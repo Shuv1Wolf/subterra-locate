@@ -12,6 +12,7 @@ type ZoneV1 struct {
 	Width     float64   `json:"width"`
 	Height    float64   `json:"height"`
 	Type      string    `json:"type"`
+	Color     string    `json:"color"`
 	MaxDevice int       `json:"max_device"`
 	CreatedAt time.Time `json:"created_at"`
 }
@@ -27,6 +28,7 @@ func (m *ZoneV1) Clone() ZoneV1 {
 		Width:     m.Width,
 		Height:    m.Height,
 		Type:      m.Type,
+		Color:     m.Color,
 		MaxDevice: m.MaxDevice,
 		CreatedAt: m.CreatedAt,
 	}

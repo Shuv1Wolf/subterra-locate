@@ -37,6 +37,7 @@ func (c *ZonePostgresPersistence) DefineSchema() {
 		"\"height\" FLOAT, " +
 		"\"max_device\" INTEGER, " +
 		"\"type\" VARCHAR(32), " +
+		"\"color\" VARCHAR(32), " +
 		"\"created_at\" TIMESTAMP)")
 
 	c.EnsureIndex(c.TableName+"_org_id", map[string]string{"org_id": "1"}, nil)
