@@ -8,7 +8,6 @@ package protos
 
 import (
 	context "context"
-
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -20,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ZoneMonitor_MonitorZoneV1_FullMethodName = "/location.engine.protos.ZoneMonitor/MonitorZoneV1"
+	ZoneMonitor_MonitorZoneV1_FullMethodName = "/zone.processor.protos.ZoneMonitor/MonitorZoneV1"
 )
 
 // ZoneMonitorClient is the client API for ZoneMonitor service.
@@ -111,7 +110,7 @@ type ZoneMonitor_MonitorZoneV1Server = grpc.ServerStreamingServer[MonitorZoneStr
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ZoneMonitor_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "location.engine.protos.ZoneMonitor",
+	ServiceName: "zone.processor.protos.ZoneMonitor",
 	HandlerType: (*ZoneMonitorServer)(nil),
 	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{

@@ -3,7 +3,7 @@ package service
 import (
 	"time"
 
-	protos "github.com/Shuv1Wolf/subterra-locate/services/zone-processor/protos"
+	"github.com/Shuv1Wolf/subterra-locate/services/zone-processor/protos"
 	"github.com/Shuv1Wolf/subterra-locate/services/zone-processor/utils"
 	clog "github.com/pip-services4/pip-services4-go/pip-services4-observability-go/log"
 )

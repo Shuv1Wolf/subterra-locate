@@ -1,7 +1,7 @@
 syntax = "proto3";
 
-package location.engine.protos;
-option go_package = "github.com/Shuv1Wolf/subterra-locate/services/location-engine/protos";
+package zone.processor.protos;
+option go_package = "github.com/Shuv1Wolf/subterra-locate/services/zone-processor/protos";
 
 message MonitorZoneRequestV1 {
     string org_id = 1;

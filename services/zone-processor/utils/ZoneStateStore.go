@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	data1 "github.com/Shuv1Wolf/subterra-locate/services/zone-processor/data/version1"
-	protos "github.com/Shuv1Wolf/subterra-locate/services/zone-processor/protos"
+	"github.com/Shuv1Wolf/subterra-locate/services/zone-processor/protos"
 )
 
 type changeZone struct {
