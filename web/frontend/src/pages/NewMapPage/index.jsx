@@ -229,22 +229,66 @@ export default function NewMapPage() {
   const [deviceForHistory, setDeviceForHistory] = useState(null);
   const [historyFrom, setHistoryFrom] = useState('2021-09-01T00:00');
   const [historyTo, setHistoryTo] = useState('2025-12-01T23:59');
-  const [clickedPoint, setClickedPoint] = useState(null);
+const [clickedPoint, setClickedPoint] = useState(null);
 
-  const handleZoneDragStop = (e, data) => {
-    const { scale, positionX, positionY } = transformState;
+// Drag state for zone editing
+const zoneDragRef = useRef({
+  dragging: false,
+  startClientX: 0,
+  startClientY: 0,
+  startX: 0,
+  startY: 0,
+});
 
-    const worldX = (data.x - positionX) / scale;
-    const worldY = (data.y - positionY) / scale;
+const handleZoneDragStart = (e) => {
+  if (!editingZone) return;
+  if (e.button !== 0) return; // left mouse
 
-    setEditingZone(prev => ({
-      ...prev,
-      position_x: worldX,
-      position_y: worldY
-    }));
+  e.stopPropagation();
+  e.preventDefault();
 
-    setIsPanningDisabled(false);
+  setIsPanningDisabled(true);
+
+  zoneDragRef.current = {
+    dragging: true,
+    startClientX: e.clientX,
+    startClientY: e.clientY,
+    startX: editingZone.position_x,
+    startY: editingZone.position_y,
   };
+
+  window.addEventListener('mousemove', handleZoneDragMove);
+  window.addEventListener('mouseup', handleZoneDragEnd);
+};
+
+const handleZoneDragMove = (e) => {
+  if (!zoneDragRef.current.dragging) return;
+
+  e.preventDefault();
+
+  const { scale } = transformState;
+
+  const dxScreen = e.clientX - zoneDragRef.current.startClientX;
+  const dyScreen = e.clientY - zoneDragRef.current.startClientY;
+
+  const dxWorld = dxScreen / scale;
+  const dyWorld = dyScreen / scale;
+
+  setEditingZone(prev => ({
+    ...prev,
+    position_x: zoneDragRef.current.startX + dxWorld,
+    position_y: zoneDragRef.current.startY + dyWorld,
+  }));
+};
+
+const handleZoneDragEnd = () => {
+  zoneDragRef.current.dragging = false;
+
+  setIsPanningDisabled(false);
+
+  window.removeEventListener('mousemove', handleZoneDragMove);
+  window.removeEventListener('mouseup', handleZoneDragEnd);
+};
 
   const handleMouseDown = (e) => {
     if (e.button === 2) { // Right mouse button
@@ -741,31 +785,109 @@ export default function NewMapPage() {
             <TransformComponent>
               <div ref={mapContentRef} style={{ position: 'relative', width: selectedMap.width, height: selectedMap.height }}>
                 <div style={{ width: '100%', height: '100%' }} dangerouslySetInnerHTML={{ __html: selectedMap.svg_content }} />
-                {showZones && zones.map((zone) => (
-                  <div
-                    key={zone.id}
-                    title={zone.name}
-                    style={{
-                      position: 'absolute',
-                      left: `${zone.position_x}px`,
-                      top: `${zone.position_y}px`,
-                      width: `${zone.width}px`,
-                      height: `${zone.height}px`,
-                      backgroundColor: zone.color ? `rgba(${parseInt(zone.color.slice(1, 3), 16)}, ${parseInt(zone.color.slice(3, 5), 16)}, ${parseInt(zone.color.slice(5, 7), 16)}, 0.3)` : 'rgba(0, 255, 0, 0.3)',
-                      border: `1px solid ${zone.color || 'rgba(0, 255, 0, 0.5)'}`,
-                      pointerEvents: 'all',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    {showZoneNames && (
-                      <span style={{ color: '#fff', fontSize: 12 / transformState.scale, textShadow: '1px 1px 2px black' }}>
-                        {zone.name}
-                      </span>
-                    )}
-                  </div>
-                ))}
+{showZones && zones.map((zone) => (
+  <div
+    key={zone.id}
+    title={zone.name}
+    style={{
+      position: 'absolute',
+      left: `${zone.position_x}px`,
+      top: `${zone.position_y}px`,
+      width: `${zone.width}px`,
+      height: `${zone.height}px`,
+      backgroundColor: zone.color ? `rgba(${parseInt(zone.color.slice(1, 3), 16)}, ${parseInt(zone.color.slice(3, 5), 16)}, ${parseInt(zone.color.slice(5, 7), 16)}, 0.3)` : 'rgba(0, 255, 0, 0.3)',
+      border: `1px solid ${zone.color || 'rgba(0, 255, 0, 0.5)'}`,
+      pointerEvents: 'all',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}
+  >
+    {showZoneNames && (
+      <span style={{ color: '#fff', fontSize: 12 / transformState.scale, textShadow: '1px 1px 2px black' }}>
+        {zone.name}
+      </span>
+    )}
+  </div>
+))}
+
+{editingZone && (
+  <div
+    onMouseDown={handleZoneDragStart}
+    style={{
+      position: 'absolute',
+      left: `${editingZone.position_x}px`,
+      top: `${editingZone.position_y}px`,
+      width: `${editingZone.width}px`,
+      height: `${editingZone.height}px`,
+      border: '2px dashed #fff',
+      cursor: 'move',
+      zIndex: 1000,
+      pointerEvents: 'all',
+    }}
+  >
+    <div
+      style={{
+        position: 'absolute',
+        bottom: '5px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        display: 'flex',
+        gap: '10px',
+        zIndex: 1001,
+      }}
+    >
+      <button onClick={handleSaveEditingZone}>Save</button>
+      <button onClick={() => setEditingZone(null)}>Cancel</button>
+    </div>
+
+    <div
+      style={{
+        position: 'absolute',
+        bottom: '-5px',
+        right: '-5px',
+        width: '10px',
+        height: '10px',
+        backgroundColor: '#fff',
+        cursor: 'nwse-resize',
+        zIndex: 1001,
+      }}
+      onMouseDown={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startWidth = editingZone.width;
+        const startHeight = editingZone.height;
+        const { scale } = transformState;
+
+        const doDrag = (ev) => {
+          ev.preventDefault();
+          const dxScreen = ev.clientX - startX;
+          const dyScreen = ev.clientY - startY;
+
+          const dxWorld = dxScreen / scale;
+          const dyWorld = dyScreen / scale;
+
+          setEditingZone((prev) => ({
+            ...prev,
+            width: Math.max(1, startWidth + dxWorld),
+            height: Math.max(1, startHeight + dyWorld),
+          }));
+        };
+
+        const stopDrag = () => {
+          document.removeEventListener('mousemove', doDrag);
+          document.removeEventListener('mouseup', stopDrag);
+        };
+
+        document.addEventListener('mousemove', doDrag);
+        document.addEventListener('mouseup', stopDrag);
+      }}
+    />
+  </div>
+)}
                 {deviceHistory.length > 0 && (
                   <svg width={selectedMap.width} height={selectedMap.height} style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}>
                     <defs>
@@ -821,72 +943,6 @@ export default function NewMapPage() {
                     <ContextMenuItem onClick={handleEditZone}>Edit Zone</ContextMenuItem>
                     {contextMenu.zone && <ContextMenuItem onClick={handleShowZoneInfo}>Show Info</ContextMenuItem>}
                   </ContextMenu>
-                )}
-                {editingZone && (
-                  <Draggable
-                    position={{ x: editingZone.position_x, y: editingZone.position_y }}
-                    onStart={() => setIsPanningDisabled(true)}
-                    onStop={(e, data) => handleZoneDragStop(e, data)}
-                  >
-                    <div
-                      style={{
-                        position: 'absolute',
-                        width: editingZone.width,
-                        height: editingZone.height,
-                        border: '2px dashed #fff',
-                        cursor: 'move',
-                      }}
-                    >
-                      <div
-                        style={{
-                          position: 'absolute',
-                          bottom: '5px',
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          display: 'flex',
-                          gap: '10px',
-                          zIndex: 1000,
-                        }}
-                      >
-                        <button onClick={handleSaveEditingZone}>Save</button>
-                        <button onClick={() => setEditingZone(null)}>Cancel</button>
-                      </div>
-                      <div
-                        style={{
-                          position: 'absolute',
-                          bottom: '-5px',
-                          right: '-5px',
-                          width: '10px',
-                          height: '10px',
-                          backgroundColor: '#fff',
-                          cursor: 'nwse-resize',
-                        }}
-                        onMouseDown={(e) => {
-                          e.stopPropagation();
-                          const startX = e.pageX;
-                          const startY = e.pageY;
-                          const startWidth = editingZone.width;
-                          const startHeight = editingZone.height;
-
-                          const doDrag = (e) => {
-                            setEditingZone((prev) => ({
-                              ...prev,
-                              width: startWidth + e.pageX - startX,
-                              height: startHeight + e.pageY - startY,
-                            }));
-                          };
-
-                          const stopDrag = () => {
-                            document.removeEventListener('mousemove', doDrag, false);
-                            document.removeEventListener('mouseup', stopDrag, false);
-                          };
-
-                          document.addEventListener('mousemove', doDrag, false);
-                          document.addEventListener('mouseup', stopDrag, false);
-                        }}
-                      />
-                    </div>
-                  </Draggable>
                 )}
                 {!deviceForHistory && showDevices && devices.map((device) => (
                   <UserIcon
