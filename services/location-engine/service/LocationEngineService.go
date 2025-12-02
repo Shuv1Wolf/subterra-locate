@@ -220,6 +220,7 @@ func (c *LocationEngineService) checkStaleDevices(ctx context.Context) {
 	devices := c.deviceStateStore.GetAllDevices()
 	for _, device := range devices {
 		if device.Online && time.Since(device.UpdatedAt) > 15*time.Minute {
+			// TODO: добавить тревогу о том что девайс оффлайн
 			c.Logger.Info(ctx, "Device %s is offline", device.DeviceID)
 			device.X = 0
 			device.Y = 0

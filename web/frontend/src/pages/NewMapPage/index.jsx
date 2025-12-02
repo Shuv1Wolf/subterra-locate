@@ -136,23 +136,48 @@ const ZoneInfoPopup = ({ zone, onClose, onSave }) => {
           <h2>Edit Zone</h2>
           <CloseButton onClick={onClose}>&times;</CloseButton>
         </PopupHeader>
-        <div style={{ display: 'grid', gridTemplateColumns: '120px auto', alignItems: 'center', gap: '10px', padding: '0 20px' }}>
-          <p style={{ margin: 0 }}><strong>ID:</strong></p> <p style={{ margin: 0 }}>{zone.id}</p>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '120px auto',
+            alignItems: 'center',
+            gap: '10px',
+            padding: '0 12px',
+            width: '100%',
+            maxWidth: '100%',
+            boxSizing: 'border-box',
+            wordBreak: 'break-word'
+          }}
+        >
+          <p style={{ margin: 0, wordBreak: 'break-word' }}><strong>ID:</strong></p>
+          <p style={{ margin: 0, wordBreak: 'break-word' }}>{zone.id}</p>
           
           <label htmlFor="zoneName" style={{ margin: 0 }}><strong>Name:</strong></label>
-          <StyledInput id="zoneName" type="text" value={name} onChange={(e) => setName(e.target.value)} style={{ boxSizing: 'border-box' }} />
+          <StyledInput
+            id="zoneName"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            style={{ boxSizing: 'border-box', width: '100%', minWidth: 0, wordBreak: 'break-word' }}
+          />
 
           <label htmlFor="maxDevices" style={{ margin: 0 }}><strong>Max Devices:</strong></label>
-          <StyledInput id="maxDevices" type="number" value={maxDevices} onChange={(e) => setMaxDevices(parseInt(e.target.value, 10))} style={{ boxSizing: 'border-box' }} />
+          <StyledInput
+            id="maxDevices"
+            type="number"
+            value={maxDevices}
+            onChange={(e) => setMaxDevices(parseInt(e.target.value, 10))}
+            style={{ boxSizing: 'border-box', width: '100%', minWidth: 0, wordBreak: 'break-word' }}
+          />
 
           <label htmlFor="zoneColor" style={{ margin: 0 }}><strong>Color:</strong></label>
           <input
-              type="color"
-              id="zoneColor"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-              style={{ padding: 0, border: 'none', background: 'transparent', height: '25px', width: '50px' }}
-            />
+            type="color"
+            id="zoneColor"
+            value={color}
+            onChange={(e) => setColor(e.target.value)}
+            style={{ padding: 0, border: 'none', background: 'transparent', height: '25px', width: '50px' }}
+          />
           <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'center' }}>
             <PopupButtonContainer>
               <TileButton onClick={handleSave}>Save Changes</TileButton>

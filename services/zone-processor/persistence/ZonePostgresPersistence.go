@@ -62,6 +62,10 @@ func (c *ZonePostgresPersistence) composeFilter(filter cquery.FilterParams) stri
 		filters = append(filters, "type='"+typ+"'")
 	}
 
+	if without_map_id, ok := filter.GetAsNullableString("without_map_id"); ok && without_map_id != "" {
+		filters = append(filters, "(map_id IS NULL OR map_id = '')")
+	}
+
 	if len(filters) > 0 {
 		return strings.Join(filters, " AND ")
 	} else {
