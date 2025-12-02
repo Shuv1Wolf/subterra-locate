@@ -25,7 +25,7 @@
     username: {{POSTGRES_USER}}{{#unless POSTGRES_USER}}"postgres"{{/unless}}
     password: {{POSTGRES_PASSWORD}}{{#unless POSTGRES_PASSWORD}}"postgres"{{/unless}}
 
-# NATS device event publisher
+# NATS device event listener
 - descriptor: "geo-history:listener:nats:device-position:1.0"
   subject: "events.device.position"
   connection:

@@ -38,6 +38,19 @@
   options:
     autosubscribe: true
 
+# NATS device event listener
+- descriptor: "zone-processor:listener:nats:device-position:1.0"
+  subject: "events.device.position"
+  connection:
+    uri:  {{NATS_SERVICE_URI}}
+    host: {{NATS_SERVICE_HOST}}{{#unless NATS_SERVICE_HOST}}"localhost"{{/unless}}
+    port: {{NATS_SERVICE_PORT}}{{#unless NATS_SERVICE_PORT}}4222{{/unless}}
+  credential:
+    username: {{NATS_USER}}
+    password: {{NATS_PASS}}
+  options:
+    autosubscribe: true
+
 # Service
 - descriptor: "zone-processor:service:default:default:1.0"
   monitor:
