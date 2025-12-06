@@ -62,15 +62,20 @@ func (b *orgBusZones) publish(event changeZone) {
 	b.mu.RUnlock()
 }
 
+type ZoneStateEntry struct {
+	Zone *data1.ZoneV1
+	Info map[string]string
+}
+
 type ZoneStateStore struct {
 	mu   sync.RWMutex
-	data map[string]map[string]*data1.ZoneV1
+	data map[string]map[string]*ZoneStateEntry
 	bus  map[string]*orgBusZones
 }
 
 func NewZoneStateStore() *ZoneStateStore {
 	return &ZoneStateStore{
-		data: map[string]map[string]*data1.ZoneV1{},
+		data: map[string]map[string]*ZoneStateEntry{},
 		bus:  map[string]*orgBusZones{},
 	}
 }
@@ -86,9 +91,20 @@ func (s *ZoneStateStore) Upsert(zone *data1.ZoneV1) {
 	s.mu.Lock()
 
 	if _, ok := s.data[zone.OrgId]; !ok {
-		s.data[zone.OrgId] = map[string]*data1.ZoneV1{}
+		s.data[zone.OrgId] = map[string]*ZoneStateEntry{}
 	}
-	s.data[zone.OrgId][zone.Id] = zone
+
+	var info map[string]string
+	if entry, ok := s.data[zone.OrgId][zone.Id]; ok {
+		info = entry.Info
+	} else {
+		info = map[string]string{}
+	}
+
+	s.data[zone.OrgId][zone.Id] = &ZoneStateEntry{
+		Zone: zone,
+		Info: info,
+	}
 
 	b := s.ensureBus(zone.OrgId)
 	s.mu.Unlock()
@@ -105,7 +121,44 @@ func (s *ZoneStateStore) Upsert(zone *data1.ZoneV1) {
 			Width:     float32(zone.Width),
 			Height:    float32(zone.Height),
 			Type:      string(zone.Type),
-			Info:      map[string]string{},
+			Info:      info,
+			Color:     zone.Color,
+			Deleted:   false,
+		},
+	})
+}
+
+func (s *ZoneStateStore) UpdateState(orgID, zoneID string, info map[string]string) {
+	s.mu.Lock()
+	zones, ok := s.data[orgID]
+	if !ok {
+		s.mu.Unlock()
+		return
+	}
+	entry, ok := zones[zoneID]
+	if !ok {
+		s.mu.Unlock()
+		return
+	}
+
+	entry.Info = info
+	zone := entry.Zone
+	b := s.ensureBus(orgID)
+	s.mu.Unlock()
+
+	b.publish(changeZone{
+		orgID: zone.OrgId,
+		Ev: &protos.MonitorZoneStreamEventV1_ZoneEventV1{
+			ZoneId:    zone.Id,
+			ZoneName:  zone.Name,
+			MapId:     zone.MapId,
+			OrgId:     zone.OrgId,
+			PositionX: float32(zone.PositionX),
+			PositionY: float32(zone.PositionY),
+			Width:     float32(zone.Width),
+			Height:    float32(zone.Height),
+			Type:      string(zone.Type),
+			Info:      info,
 			Color:     zone.Color,
 			Deleted:   false,
 		},
@@ -156,18 +209,30 @@ func (s *ZoneStateStore) Snapshot(orgID string) []*protos.MonitorZoneStreamEvent
 	res := make([]*protos.MonitorZoneStreamEventV1_ZoneEventV1, 0, len(zs))
 	for _, z := range zs {
 		res = append(res, &protos.MonitorZoneStreamEventV1_ZoneEventV1{
-			ZoneId:    z.Id,
-			ZoneName:  z.Name,
-			MapId:     z.MapId,
-			OrgId:     z.OrgId,
-			PositionX: float32(z.PositionX),
-			PositionY: float32(z.PositionY),
-			Width:     float32(z.Width),
-			Height:    float32(z.Height),
-			Type:      string(z.Type),
-			Color:     z.Color,
-			Info:      map[string]string{},
+			ZoneId:    z.Zone.Id,
+			ZoneName:  z.Zone.Name,
+			MapId:     z.Zone.MapId,
+			OrgId:     z.Zone.OrgId,
+			PositionX: float32(z.Zone.PositionX),
+			PositionY: float32(z.Zone.PositionY),
+			Width:     float32(z.Zone.Width),
+			Height:    float32(z.Zone.Height),
+			Type:      string(z.Zone.Type),
+			Color:     z.Zone.Color,
+			Info:      z.Info,
 		})
+	}
+	return res
+}
+
+func (s *ZoneStateStore) GetZones(orgID string) []*data1.ZoneV1 {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	zones := s.data[orgID]
+	res := make([]*data1.ZoneV1, 0, len(zones))
+	for _, z := range zones {
+		res = append(res, z.Zone)
 	}
 	return res
 }

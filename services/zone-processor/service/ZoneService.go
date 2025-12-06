@@ -34,14 +34,17 @@ type ZoneService struct {
 	logger *clog.CompositeLogger
 
 	stateStore  *utils.ZoneStateStore
+	processor   *ZoneStateProcessor
 	monitorPort string
 	isOpen      bool
 }
 
 func NewZoneService() *ZoneService {
+	store := utils.NewZoneStateStore()
 	c := &ZoneService{
 		logger:     clog.NewCompositeLogger(),
-		stateStore: utils.NewZoneStateStore(),
+		stateStore: store,
+		processor:  NewZoneStateProcessor(store),
 	}
 	return c
 }
@@ -151,6 +154,7 @@ func (c *ZoneService) CreateZone(ctx context.Context, reqctx cdata.RequestContex
 	}
 
 	c.stateStore.Upsert(&b)
+	c.processor.HandleZoneAdd(&b)
 
 	if c.zoneEvents != nil {
 		event := natsEvents.ZoneChangedEvent{
@@ -173,6 +177,7 @@ func (c *ZoneService) UpdateZone(ctx context.Context, reqctx cdata.RequestContex
 	}
 
 	c.stateStore.Upsert(&b)
+	c.processor.HandleZoneUpdate(&b)
 
 	if c.zoneEvents != nil {
 		event := natsEvents.ZoneChangedEvent{
@@ -194,6 +199,7 @@ func (c *ZoneService) DeleteZoneById(ctx context.Context, reqctx cdata.RequestCo
 		return b, err
 	}
 	c.stateStore.Delete(&b)
+	c.processor.HandleZoneDelete(&b)
 
 	if c.zoneEvents != nil {
 		event := natsEvents.ZoneChangedEvent{
@@ -230,9 +236,10 @@ func (c *ZoneService) hendleDevicePosition(ctx context.Context, msg string) {
 	err := json.Unmarshal([]byte(msg), &event)
 	if err != nil {
 		c.logger.Error(ctx, err, "Failed to deserialize message")
+		return
 	}
 
-	// TODO:
+	c.processor.ProcessPosition(event)
 }
 
 func (s *ZoneService) runMonitorLocation() {
