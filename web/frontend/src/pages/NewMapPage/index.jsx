@@ -8,6 +8,7 @@ import BeaconIcon from '../../assets/bullseye-animated.gif';
 import { GEO_HOST, SYSTEM_HOST } from '../../config';
 import { apiClient, getDeviceHistory } from '../../utils/api';
 import Header from '../../components/Header';
+import ZoneDetailsPopup from './ZoneDetailsPopup.jsx';
 import {
   MapsPageContainer,
   MapSelectorContainer,
@@ -214,6 +215,7 @@ export default function NewMapPage() {
   const [editingZone, setEditingZone] = useState(null);
   const [isZoneModalOpen, setIsZoneModalOpen] = useState(false);
   const [isBeaconModalOpen, setIsBeaconModalOpen] = useState(false);
+  const [selectedZoneDetailsId, setSelectedZoneDetailsId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const ws = useRef(null);
@@ -357,7 +359,7 @@ const handleZoneDragEnd = () => {
 
   const handleShowZoneInfo = () => {
     if (contextMenu?.zone) {
-      setSelectedZone(contextMenu.zone);
+      setSelectedZoneDetailsId(contextMenu.zone.id);
       setContextMenu(null);
     }
   };
@@ -720,6 +722,20 @@ const handleZoneDragEnd = () => {
         {selectedDevice && <DeviceInfoPopup device={selectedDevice} onClose={() => setSelectedDevice(null)} onShowHistory={handleShowHistory} />}
         {selectedBeacon && <BeaconInfoPopup beacon={selectedBeacon} onClose={() => setSelectedBeacon(null)} />}
         {selectedZone && <ZoneInfoPopup zone={selectedZone} onClose={() => setSelectedZone(null)} onSave={handleZoneUpdate} />}
+        {selectedZoneDetailsId && (() => {
+          const zone = zones.find(z => z.id === selectedZoneDetailsId);
+          if (!zone) return null;
+          return (
+            <ZoneDetailsPopup
+              zone={zone}
+              onClose={() => setSelectedZoneDetailsId(null)}
+              onEdit={(zone) => {
+                setSelectedZoneDetailsId(null);
+                setEditingZone(zone);
+              }}
+            />
+          );
+        })()}
         <MapSelectorContainer className={isPanelVisible ? '' : 'hidden'}>
           <ToggleButton onClick={() => setIsPanelVisible(!isPanelVisible)}>
           {isPanelVisible ? 'Hide' : 'Show'}
